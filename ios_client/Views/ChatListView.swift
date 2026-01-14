@@ -145,20 +145,6 @@ struct ChatListView: View {
             .ignoresSafeArea(.keyboard, edges: .bottom)
         }
     }
-}
-
-extension View {
-    func hideToolbarStroke() -> some View {
-        self.onAppear {
-            let appearance = UINavigationBarAppearance()
-            appearance.configureWithTransparentBackground()
-            appearance.shadowColor = .clear
-            UINavigationBar.appearance().standardAppearance = appearance
-            UINavigationBar.appearance().scrollEdgeAppearance = appearance
-        }
-    }
-}
-
     var searchBar: some View {
         ZStack {
             // Фон поиска (Liquid Glass) - восстановил размер и убрал обводку
@@ -191,6 +177,18 @@ extension View {
                     .padding(.trailing, 12)
                 }
             }
+        }
+    }
+}
+
+extension View {
+    func hideToolbarStroke() -> some View {
+        self.onAppear {
+            let appearance = UINavigationBarAppearance()
+            appearance.configureWithTransparentBackground()
+            appearance.shadowColor = .clear
+            UINavigationBar.appearance().standardAppearance = appearance
+            UINavigationBar.appearance().scrollEdgeAppearance = appearance
         }
     }
 }
