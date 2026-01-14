@@ -4,17 +4,16 @@ import SwiftUI
 struct ChatListView: View {
     @State private var searchText = ""
     @State private var selectedTab: Tab = .chats
+    @Namespace private var animation
     
     enum Tab: String, CaseIterable {
         case feed = "Лента"
-        case calls = "Звонки"
         case chats = "Чаты"
         case settings = "Настройки"
         
         var icon: String {
             switch self {
             case .feed: return "person.2.fill"
-            case .calls: return "phone.fill"
             case .chats: return "message.fill"
             case .settings: return "gear"
             }
@@ -31,45 +30,80 @@ struct ChatListView: View {
 
     var body: some View {
         ZStack {
+            // Фон
             Color.black.edgesIgnoringSafeArea(.all)
             
-            // Основной контент в зависимости от вкладки
-            VStack(spacing: 0) {
-                if selectedTab == .chats {
-                    chatsView
-                } else {
-                    // Заглушка для других вкладок
-                    NavigationView {
-                        ZStack {
-                            Color.black.edgesIgnoringSafeArea(.all)
-                            Text(selectedTab.rawValue)
+            // Основной контент
+            NavigationView {
+                ZStack(alignment: .top) {
+                    Color.black.edgesIgnoringSafeArea(.all)
+                    
+                    VStack(spacing: 0) {
+                        // Поиск (Liquid Glass) - вынесен из ScrollView, чтобы не уезжал
+                        searchBar
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .zIndex(10)
+
+                        ScrollView {
+                            LazyVStack(spacing: 0) {
+                                ForEach(chats) { chat in
+                                    ChatRow(chat: chat)
+                                    Divider()
+                                        .background(Color.white.opacity(0.1))
+                                        .padding(.leading, 76)
+                                }
+                                // Отступ для нижней панели
+                                Color.clear.frame(height: 120)
+                            }
+                        }
+                    }
+                }
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .principal) {
+                        Text("Чаты")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(.white)
+                    }
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button(action: {}) {
+                            Text("Изм.")
+                                .font(.system(size: 17))
                                 .foregroundColor(.white)
                         }
-                        .navigationTitle(selectedTab.rawValue)
-                        .navigationBarTitleDisplayMode(.inline)
+                    }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: {}) {
+                            Image(systemName: "square.and.pencil")
+                                .font(.system(size: 17))
+                                .foregroundColor(.white)
+                        }
                     }
                 }
             }
             
-            // Кастомная нижняя навигация
+            // Кастомная навигация с морфингом капли
             VStack {
                 Spacer()
                 HStack(spacing: 12) {
-                    // Кнопка поиска слева (как в референсе)
+                    // Кнопка поиска слева (Отдельная капля)
                     Button(action: {}) {
                         Image(systemName: "magnifyingglass")
-                            .font(.system(size: 22))
+                            .font(.system(size: 20, weight: .medium))
                             .foregroundColor(.white)
-                            .frame(width: 54, height: 54)
+                            .frame(width: 56, height: 56)
                             .background(.ultraThinMaterial)
                             .clipShape(Circle())
+                            .overlay(Circle().stroke(Color.white.opacity(0.15), lineWidth: 0.5))
                     }
-                    
-                    // Основная панель вкладок
+                    .buttonStyle(PlainButtonStyle())
+
+                    // Основная панель
                     HStack(spacing: 0) {
                         ForEach(Tab.allCases, id: \.self) { tab in
                             Button(action: {
-                                withAnimation(.spring()) {
+                                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                                     selectedTab = tab
                                 }
                             }) {
@@ -79,91 +113,68 @@ struct ChatListView: View {
                                     Text(tab.rawValue)
                                         .font(.system(size: 10, weight: .medium))
                                 }
-                                .foregroundColor(selectedTab == tab ? .blue : .white)
                                 .frame(maxWidth: .infinity)
-                                .frame(height: 54)
+                                .frame(height: 56)
+                                .foregroundColor(selectedTab == tab ? .blue : .white)
+                                .background(
+                                    ZStack {
+                                        if selectedTab == tab {
+                                            // Та самая "перемещающаяся капля"
+                                            RoundedRectangle(cornerRadius: 16)
+                                                .fill(Color.blue.opacity(0.12))
+                                                .matchedGeometryEffect(id: "activeTab", in: animation)
+                                                .padding(6)
+                                        }
+                                    }
+                                )
                             }
+                            .buttonStyle(PlainButtonStyle())
                         }
                     }
                     .background(.ultraThinMaterial)
                     .clipShape(Capsule())
+                    .overlay(Capsule().stroke(Color.white.opacity(0.15), lineWidth: 0.5))
                 }
                 .padding(.horizontal, 16)
-                .padding(.bottom, 30)
+                .padding(.bottom, 34)
             }
         }
     }
 
-    var chatsView: some View {
-        NavigationView {
-            ZStack {
-                Color.black.edgesIgnoringSafeArea(.all)
-                
-                ScrollView {
-                    LazyVStack(spacing: 0) {
-                        // Поиск
-                        ZStack {
-                            // Фон поиска
-                            RoundedRectangle(cornerRadius: 18)
-                                .fill(.ultraThinMaterial)
-                                .brightness(-0.2) // Делаем материал темнее
-                                .frame(height: 48) // Увеличили высоту
-                            
-                            // Контент поиска (центрированный)
-                            HStack(spacing: 8) {
-                                if searchText.isEmpty {
-                                    Spacer()
-                                    Image(systemName: "magnifyingglass")
-                                        .foregroundColor(.gray)
-                                    Text("Поиск")
-                                        .foregroundColor(.gray)
-                                    Spacer()
-                                } else {
-                                    Image(systemName: "magnifyingglass")
-                                        .foregroundColor(.gray)
-                                        .padding(.leading, 12)
-                                    TextField("", text: $searchText)
-                                        .foregroundColor(.white)
-                                    if !searchText.isEmpty {
-                                        Button(action: { searchText = "" }) {
-                                            Image(systemName: "xmark.circle.fill")
-                                                .foregroundColor(.gray)
-                                        }
-                                        .padding(.trailing, 12)
-                                    }
-                                }
-                            }
-                        }
-                        .padding(.horizontal)
-                        .padding(.top, 10)
-                        .padding(.bottom, 10)
-
-                        // Список чатов
-                        ForEach(chats) { chat in
-                            ChatRow(chat: chat)
-                            Divider()
-                                .background(Color.white.opacity(0.1))
-                                .padding(.leading, 76)
-                        }
-                        
-                        // Отступ снизу для навигации
-                        Color.clear.frame(height: 100)
+    var searchBar: some View {
+        ZStack {
+            // Фон поиска (Liquid Glass) - убрал сильное затемнение
+            RoundedRectangle(cornerRadius: 18)
+                .fill(.ultraThinMaterial)
+                .frame(height: 44)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
+                )
+            
+            HStack {
+                if searchText.isEmpty {
+                    Spacer()
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 16))
+                        .foregroundColor(.gray)
+                    Text("Поиск")
+                        .font(.system(size: 16))
+                        .foregroundColor(.gray)
+                    Spacer()
+                } else {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 16))
+                        .foregroundColor(.gray)
+                        .padding(.leading, 12)
+                    TextField("", text: $searchText)
+                        .foregroundColor(.white)
+                        .font(.system(size: 16))
+                    Button(action: { searchText = "" }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.gray)
                     }
-                }
-            }
-            .navigationTitle("Чаты")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Изм.") { }
-                        .font(.system(size: 17))
-                        .foregroundColor(.white) // Белый шрифт
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {}) {
-                        Image(systemName: "square.and.pencil")
-                            .foregroundColor(.white) // Белая иконка
-                    }
+                    .padding(.trailing, 12)
                 }
             }
         }
