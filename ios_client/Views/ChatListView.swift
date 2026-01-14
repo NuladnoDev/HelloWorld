@@ -5,16 +5,33 @@ struct ChatListView: View {
     @State private var searchText = ""
     @State private var selectedTab: Tab = .chats
     
+    init() {
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+         appearance.backgroundColor = UIColor(red: 0.07, green: 0.07, blue: 0.07, alpha: 1.0) // Сделал чуть светлее для контраста
+         appearance.shadowColor = UIColor.white.withAlphaComponent(0.15) // Четкая обводка сверху
+         
+         // Настройка цвета иконок
+        appearance.stackedLayoutAppearance.normal.iconColor = .gray
+        appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.gray]
+        
+        appearance.stackedLayoutAppearance.selected.iconColor = .systemBlue
+        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.systemBlue]
+        
+        UITabBar.appearance().standardAppearance = appearance
+        if #available(iOS 15.0, *) {
+            UITabBar.appearance().scrollEdgeAppearance = appearance
+        }
+    }
+    
     enum Tab: String, CaseIterable {
         case posts = "посты"
-        case calls = "Звонки"
         case chats = "Чаты"
         case settings = "Настройки"
         
         var icon: String {
             switch self {
             case .posts: return "rectangle.grid.1x2.fill"
-            case .calls: return "phone.fill"
             case .chats: return "message.fill"
             case .settings: return "gear"
             }
@@ -38,25 +55,21 @@ struct ChatListView: View {
             .tag(Tab.posts)
 
             NavigationView {
-                Text("Звонки")
-                    .foregroundColor(.white)
-                    .navigationTitle("Звонки")
-            }
-            .tabItem {
-                Label("Звонки", systemImage: "phone.fill")
-            }
-            .tag(Tab.calls)
-
-            NavigationView {
                 ZStack {
                     Color.black.edgesIgnoringSafeArea(.all)
                     
                     VStack(spacing: 0) {
                         // Кастомный заголовок (как в ТГ)
                         HStack {
-                            Button("Изм.") { }
-                                .font(.system(size: 17))
-                                .foregroundColor(.blue)
+                            Button(action: {}) {
+                                Text("Изм.")
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.blue)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(.ultraThinMaterial)
+                                    .cornerRadius(10)
+                            }
                             
                             Spacer()
                             
@@ -68,8 +81,11 @@ struct ChatListView: View {
                             
                             Button(action: {}) {
                                 Image(systemName: "square.and.pencil")
-                                    .font(.system(size: 20))
+                                    .font(.system(size: 18))
                                     .foregroundColor(.blue)
+                                    .padding(8)
+                                    .background(.ultraThinMaterial)
+                                    .cornerRadius(10)
                             }
                         }
                         .padding(.horizontal)
