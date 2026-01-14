@@ -7,17 +7,10 @@ workflows:
       - name: Install dependencies
         script: |
           sudo gem install xcodeproj
-      - name: Build Rust Core
+      - name: Build C++ Core
         script: |
-          # Install Rust if not present
-          if ! command -v rustup &> /dev/null; then
-            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-          fi
-          source $HOME/.cargo/env
-          # Install Rust targets for iOS
-          rustup target add aarch64-apple-ios
-          # Build the core as a static library
-          cargo build --release --target aarch64-apple-ios
+          echo "Building C++ Core..."
+          # C++ core is compiled directly by Xcode via generate_project.rb
       - name: Generate Xcode Project
         script: |
           ruby generate_project.rb
