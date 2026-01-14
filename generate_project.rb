@@ -37,7 +37,8 @@ resources_group.new_file(info_plist_path)
 
 # Bridging Header
 bridging_header_path = 'ios_client/Core/CoreBridge-Bridging-Header.h'
-core_group.new_file(bridging_header_path)
+bridging_header_ref = core_group.new_file(bridging_header_path)
+target.add_file_references([bridging_header_ref])
 
 # Add Rust library
 lib_path = 'target/aarch64-apple-ios/release/libhelloworld_core.a'
@@ -60,8 +61,18 @@ target.build_configurations.each do |config|
   s['GENERATE_INFOPLIST_FILE'] = 'NO'
   s['INFOPLIST_FILE'] = 'ios_client/Resources/Info.plist'
   s['SWIFT_OBJC_BRIDGING_HEADER'] = 'ios_client/Core/CoreBridge-Bridging-Header.h'
+  s['HEADER_SEARCH_PATHS'] = '$(inherited) $(PROJECT_DIR)/ios_client/Core'
   s['LIBRARY_SEARCH_PATHS'] = '$(inherited) $(PROJECT_DIR)/target/aarch64-apple-ios/release'
-  s['OTHER_LDFLAGS'] = '$(inherited) -lhelloworld_core -framework Security -framework Foundation -framework UIKit'
+  s['OTHER_LDFLAGS'] = [
+    '$(inherited)',
+    '-force_load', '$(PROJECT_DIR)/target/aarch64-apple-ios/release/libhelloworld_core.a',
+    '-lresolv',
+    '-lc++',
+    '-framework', 'Security',
+    '-framework', 'Foundation',
+    '-framework', 'UIKit',
+    '-framework', 'CoreGraphics'
+  ]
   s['ENABLE_BITCODE'] = 'NO'
   s['LD_RUNPATH_SEARCH_PATHS'] = '$(inherited) @executable_path/Frameworks'
   s['SDKROOT'] = 'iphoneos'

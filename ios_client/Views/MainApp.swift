@@ -19,10 +19,22 @@ struct HelloWorldApp: App {
     }
 
     private func testCore() {
-        if let keys = CoreWrapper.shared.generateKeyPair() {
-            coreStatus = "Core initialized!\nPublic Key: \(keys.publicKey.prefix(10))..."
-        } else {
-            coreStatus = "Failed to initialize Core."
+        print("DEBUG: Starting Core test...")
+        coreStatus = "Calling Rust..."
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            print("DEBUG: Calling generateKeyPair from background thread")
+            if let keys = CoreWrapper.shared.generateKeyPair() {
+                print("DEBUG: Success! Public Key: \(keys.publicKey.prefix(10))")
+                DispatchQueue.main.async {
+                    coreStatus = "Core initialized!\nPublic Key: \(keys.publicKey.prefix(10))..."
+                }
+            } else {
+                print("DEBUG: Core returned nil")
+                DispatchQueue.main.async {
+                    coreStatus = "Failed to initialize Core (returned nil)."
+                }
+            }
         }
     }
 }
