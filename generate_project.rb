@@ -34,6 +34,13 @@ Dir.glob('ios_client/Core/*.{h,cpp}').each do |file_path|
   target.add_file_references([file_ref])
 end
 
+# Add Monocypher
+monocypher_group = core_group.find_subpath('monocypher', true)
+Dir.glob('ios_client/Core/monocypher/*.{h,c}').each do |file_path|
+  file_ref = monocypher_group.new_file(file_path)
+  target.add_file_references([file_ref])
+end
+
 # Add Resources
 launch_screen_path = 'ios_client/Resources/LaunchScreen.storyboard'
 launch_screen_ref = resources_group.new_file(launch_screen_path)

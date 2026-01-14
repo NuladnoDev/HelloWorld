@@ -2,18 +2,15 @@ import SwiftUI
 
 @main
 struct HelloWorldApp: App {
+    @State private var isAuthenticated = false
     @State private var coreStatus = "Initializing Core..."
 
     var body: some Scene {
         WindowGroup {
-            VStack {
-                Text(coreStatus)
-                    .foregroundColor(.white)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.black)
-            .onAppear {
-                testCore()
+            if isAuthenticated {
+                ChatListView()
+            } else {
+                LoginView(isAuthenticated: $isAuthenticated)
             }
         }
     }
@@ -32,8 +29,27 @@ struct HelloWorldApp: App {
                 DispatchQueue.global(qos: .userInitiated).async {
                     if let keys = CoreWrapper.shared.generateKeyPair() {
                         print("DEBUG: Success! Public Key: \(keys.publicKey)")
+                        
+                        // Тест шифрования
+                        let chatID = "test_chat_123"
+                        let senderID = "user_me"
+                        let secret = "shared_secret_123"
+                        let text = "Hello from C++!"
+                        
+                        if let encrypted = CoreWrapper.shared.encryptMessage(sharedSecret: secret, chatId: chatID, senderId: senderID, text: text) {
+                            print("DEBUG: Encrypted: \(encrypted)")
+                            if let decrypted = CoreWrapper.shared.decryptMessage(sharedSecret: secret, chatId: chatID, senderId: senderID, encryptedText: encrypted) {
+                                print("DEBUG: Decrypted: \(decrypted)")
+                                
+                                DispatchQueue.main.async {
+                                    coreStatus = "C++ Core Full Success!\nPK: \(keys.publicKey)\nDecrypted: \(decrypted)"
+                                }
+                                return
+                            }
+                        }
+                        
                         DispatchQueue.main.async {
-                            coreStatus = "C++ Core Success!\nPK: \(keys.publicKey)"
+                            coreStatus = "C++ Core Success!\nPK: \(keys.publicKey)\n(Crypto test failed)"
                         }
                     } else {
                         DispatchQueue.main.async {
