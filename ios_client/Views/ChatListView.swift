@@ -1,265 +1,212 @@
 import SwiftUI
 
-struct Chat: Identifiable {
-    let id = UUID()
-    let name: String
-    let lastMessage: String
-    let time: String
-    let unreadCount: Int
-    let isVerified: Bool
-}
-
-@available(iOS 26.0, *)
+@available(iOS 15.0, *)
 struct ChatListView: View {
     @State private var searchText = ""
     @State private var selectedTab: Tab = .chats
     
-    @State private var chats = [
-        Chat(name: "HelloWorld", lastMessage: "Добро пожаловать в HelloWorld! Это ваш первый чат.", time: "23:20", unreadCount: 1, isVerified: true)
-    ]
-    
     enum Tab: String, CaseIterable {
-        case feed = "Лента"
+        case contacts = "Контакты"
+        case calls = "Звонки"
         case chats = "Чаты"
         case settings = "Настройки"
         
         var icon: String {
             switch self {
-            case .feed: return "person.2.fill"
-            case .chats: return "bubble.left.and.bubble.right.fill"
-            case .settings: return "gearshape.fill"
+            case .contacts: return "person.circle.fill"
+            case .calls: return "phone.fill"
+            case .chats: return "message.fill"
+            case .settings: return "gear"
             }
         }
     }
-    
-    var body: some View {
-        ZStack {
-            Color.black.opacity(0.85).edgesIgnoringSafeArea(.all)
 
-            VStack(spacing: 0) {
-                // Header with Liquid Glass Buttons (SwiftUI glassEffect)
-                HStack {
-                    // Edit Button (Liquid Glass)
-                    Button(action: {}) {
-                        Text("Изм.")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 8)
-                    }
-                    .glassEffect(in: .capsule)
+    let chats = [
+        Chat(name: "HelloWorld", lastMessage: "Добро пожаловать в мессенджер будущего!", time: "12:00", unreadCount: 1, isVerified: true),
+        Chat(name: "Design Team", lastMessage: "Эффект жидкого стекла готов", time: "11:45", unreadCount: 5),
+        Chat(name: "Иван Иванов", lastMessage: "Привет, как дела?", time: "Вчера"),
+        Chat(name: "Колледж", lastMessage: "Расписание на завтра", time: "Пн", unreadCount: 12),
+        Chat(name: "Геймдев", lastMessage: "Новый билд доступен", time: "10.01.26")
+    ]
+
+    var body: some View {
+        TabView(selection: $selectedTab) {
+            NavigationView {
+                ZStack {
+                    Color.black.edgesIgnoringSafeArea(.all)
                     
-                    Spacer()
-                    
-                    Text("Чаты")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.white)
-                    
-                    Spacer()
-                    
-                    // Right Pill (Liquid Glass)
-                    HStack(spacing: 12) {
-                        Button(action: {}) {
-                            Image(systemName: "plus.circle")
-                                .font(.system(size: 18))
-                        }
-                        Button(action: {}) {
-                            Image(systemName: "square.and.pencil")
-                                .font(.system(size: 18))
-                        }
-                    }
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .glassEffect(in: .capsule)
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 50)
-                .padding(.bottom, 15)
-                
-                // Native-styled Search Bar with Liquid Glass (SwiftUI)
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.gray)
-                    TextField("Поиск", text: $searchText)
-                        .foregroundColor(.white)
-                }
-                .padding(10)
-                .glassEffect(in: .rect(cornerRadius: 12))
-                .padding(.horizontal, 16)
-                .padding(.bottom, 10)
-                
-                // Categories (from reference)
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 10) {
-                        CategoryPill(title: "Все", isSelected: true)
-                        CategoryPill(title: "channel", count: 4)
-                        CategoryPill(title: "колледж")
-                        CategoryPill(title: "геймдев")
-                    }
-                    .padding(.horizontal, 16)
-                }
-                .padding(.bottom, 15)
-                
-                // Chat List
-                ScrollView {
-                    LazyVStack(spacing: 0) {
-                        ForEach(chats) { chat in
-                            ChatRow(chat: chat)
-                        }
-                    }
-                }
-            }
-            
-            // Floating Liquid Glass Navigation Menu (SwiftUI glassEffect + container)
-            VStack {
-                Spacer()
-                GlassEffectContainer(spacing: 24) {
-                    HStack(spacing: 12) {
-                        // Separate Search Button on the LEFT
-                        Button(action: { }) {
-                            Image(systemName: "magnifyingglass")
-                                .font(.system(size: 22))
-                                .foregroundColor(.white)
-                                .frame(width: 60, height: 60)
-                        }
-                        .glassEffect(in: .circle)
-                        
-                        // Main Nav Pill
-                        HStack(spacing: 0) {
-                            ForEach(Tab.allCases, id: \.self) { tab in
-                                Button(action: {
-                                    withAnimation(.spring()) {
-                                        selectedTab = tab
-                                    }
-                                }) {
-                                    VStack(spacing: 4) {
-                                        Image(systemName: tab.icon)
-                                            .font(.system(size: 20))
-                                        Text(tab.rawValue)
-                                            .font(.system(size: 10, weight: .medium))
-                                    }
-                                    .foregroundColor(selectedTab == tab ? .blue : .white.opacity(0.7))
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 60)
-                                    .contentShape(Rectangle())
+                    ScrollView {
+                        LazyVStack(spacing: 0) {
+                            // Поиск
+                            HStack {
+                                Image(systemName: "magnifyingglass")
+                                    .foregroundColor(.gray)
+                                TextField("Поиск", text: $searchText)
+                                    .foregroundColor(.white)
+                            }
+                            .padding(10)
+                            .background(.ultraThinMaterial)
+                            .cornerRadius(10)
+                            .padding(.horizontal)
+                            .padding(.top, 10)
+
+                            // Категории
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 8) {
+                                    CategoryPill(title: "Все", isActive: true)
+                                    CategoryPill(title: "Личные", isActive: false)
+                                    CategoryPill(title: "Группы", isActive: false)
+                                    CategoryPill(title: "Каналы", isActive: false)
                                 }
-                                .buttonStyle(.plain)
+                                .padding(.horizontal)
+                                .padding(.vertical, 12)
+                            }
+
+                            // Список чатов
+                            ForEach(chats) { chat in
+                                ChatRow(chat: chat)
+                                Divider()
+                                    .background(Color.white.opacity(0.1))
+                                    .padding(.leading, 76)
                             }
                         }
-                        .padding(.horizontal, 8)
-                        .glassEffect(in: .rect(cornerRadius: 30))
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 40)
+                }
+                .navigationTitle("Чаты")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Изм.") { }
+                            .font(.system(size: 17))
+                            .foregroundColor(.blue)
+                    }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: {}) {
+                            Image(systemName: "square.and.pencil")
+                                .foregroundColor(.blue)
+                        }
+                    }
                 }
             }
+            .tabItem {
+                Label("Контакты", systemImage: "person.circle.fill")
+            }
+            .tag(Tab.contacts)
+
+            NavigationView {
+                Text("Звонки")
+                    .foregroundColor(.white)
+                    .navigationTitle("Звонки")
+            }
+            .tabItem {
+                Label("Звонки", systemImage: "phone.fill")
+            }
+            .tag(Tab.calls)
+
+            NavigationView {
+                Text("Настройки")
+                    .foregroundColor(.white)
+                    .navigationTitle("Настройки")
+            }
+            .tabItem {
+                Label("Настройки", systemImage: "gear")
+            }
+            .tag(Tab.settings)
         }
-        .edgesIgnoringSafeArea(.bottom)
+        .accentColor(.blue)
     }
-    
-    @Namespace private var tabAnimation
 }
 
+@available(iOS 15.0, *)
+struct CategoryPill: View {
+    let title: String
+    let isActive: Bool
+    
+    var body: some View {
+        Text(title).bold()
+            .font(.caption)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(isActive ? Color.blue.opacity(0.2) : Color.white.opacity(0.1))
+            .foregroundColor(isActive ? .blue : .white)
+            .clipShape(Capsule())
+    }
+}
+
+@available(iOS 15.0, *)
 struct ChatRow: View {
     let chat: Chat
     
     var body: some View {
-        HStack(spacing: 15) {
-            // Avatar
-             ZStack {
-                 Circle()
-                     .fill(LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.8), Color.blue]), startPoint: .topLeading, endPoint: .bottomTrailing))
-                     .frame(width: 54, height: 54)
-                 
-                 Text(chat.name.prefix(1))
-                     .font(.system(size: 20, weight: .bold))
-                     .foregroundColor(.white)
-             }
-             
-             VStack(alignment: .leading, spacing: 3) {
-                 HStack {
-                     Text(chat.name)
-                         .font(.system(size: 16, weight: .semibold))
-                         .foregroundColor(.white)
-                     
-                     if chat.isVerified {
-                         Image(systemName: "checkmark.seal.fill")
-                             .foregroundColor(.blue)
-                             .font(.system(size: 13))
-                     }
-                     
-                     Spacer()
-                     
-                     Text(chat.time)
-                         .font(.system(size: 13))
-                         .foregroundColor(.gray)
-                 }
-                 
-                 HStack {
-                     Text(chat.lastMessage)
-                         .font(.system(size: 14))
-                         .foregroundColor(.gray)
-                         .lineLimit(2)
-                     
-                     Spacer()
-                     
-                     if chat.unreadCount > 0 {
-                         Text("\(chat.unreadCount)")
-                             .font(.system(size: 11, weight: .bold))
-                             .foregroundColor(.white)
-                             .padding(.horizontal, 6)
-                             .padding(.vertical, 3)
-                             .background(Color.blue)
-                             .clipShape(Capsule())
-                     }
-                 }
-             }
-         }
-         .padding(.horizontal, 16)
-         .padding(.vertical, 8)
-         .contentShape(Rectangle())
-         .overlay(
-             VStack {
-                 Spacer()
-                 Divider()
-                     .background(Color.white.opacity(0.1))
-                     .padding(.leading, 85) // Offset divider to align with text
-             }
-         )
-     }
- }
- 
-struct CategoryPill: View {
-    let title: String
-    var isSelected: Bool = false
-    var count: Int? = nil
-    
-    var body: some View {
-        HStack(spacing: 6) {
-            Text(title)
-                .font(.system(size: 14, weight: isSelected ? .semibold : .medium))
+        HStack(spacing: 12) {
+            // Аватар
+            ZStack {
+                Circle()
+                    .fill(LinearGradient(colors: [.blue, .cyan], startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .frame(width: 54, height: 54)
+                
+                Text(String(chat.name.prefix(1)))
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(.white)
+            }
             
-            if let count = count {
-                Text("\(count)")
-                    .font(.system(size: 12, weight: .bold))
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.gray.opacity(0.3))
-                    .clipShape(Capsule())
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(chat.name).bold()
+                        .font(.system(size: 16))
+                        .foregroundColor(.white)
+                    
+                    if chat.isVerified {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.blue)
+                            .font(.system(size: 14))
+                    }
+                    
+                    Spacer()
+                    
+                    Text(chat.time)
+                        .font(.system(size: 14))
+                        .foregroundColor(.gray)
+                }
+                
+                HStack {
+                    Text(chat.lastMessage)
+                        .font(.system(size: 14))
+                        .foregroundColor(.gray)
+                        .lineLimit(2)
+                    
+                    Spacer()
+                    
+                    if chat.unreadCount > 0 {
+                        Text("\(chat.unreadCount)")
+                            .font(.system(size: 12, weight: .bold))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .clipShape(Capsule())
+                    }
+                }
             }
         }
-        .foregroundColor(isSelected ? .white : .gray)
-        .padding(.horizontal, 16)
+        .padding(.horizontal)
         .padding(.vertical, 8)
-        .background(isSelected ? Color.white.opacity(0.15) : Color.clear)
-        .cornerRadius(15)
     }
 }
 
-@available(iOS 26.0, *)
+struct Chat: Identifiable {
+    let id = UUID()
+    let name: String
+    let lastMessage: String
+    let time: String
+    var unreadCount: Int = 0
+    var isVerified: Bool = false
+}
+
+@available(iOS 15.0, *)
 struct ChatListView_Previews: PreviewProvider {
     static var previews: some View {
         ChatListView()
+            .preferredColorScheme(.dark)
     }
 }

@@ -1,6 +1,6 @@
 import SwiftUI
 
-@available(iOS 26.0, *)
+@available(iOS 15.0, *)
 struct LoginView: View {
     @Binding var isAuthenticated: Bool
     @State private var username = ""
@@ -110,7 +110,7 @@ struct LoginView: View {
     }
 }
 
-@available(iOS 26.0, *)
+@available(iOS 15.0, *)
 struct LoginView_Previews: PreviewProvider {
     static var previews: some View {
         LoginView(isAuthenticated: .constant(false))

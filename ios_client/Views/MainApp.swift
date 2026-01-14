@@ -1,6 +1,6 @@
 import SwiftUI
 
-@available(iOS 26.0, *)
+@available(iOS 15.0, *)
 @main
 struct HelloWorldApp: App {
     @State private var isAuthenticated = false

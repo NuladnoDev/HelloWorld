@@ -7,7 +7,7 @@ project_path = "#{project_name}.xcodeproj"
 project = Xcodeproj::Project.new(project_path)
 
 # Set the target
-target = project.new_target(:application, project_name, :ios, '26.0')
+target = project.new_target(:application, project_name, :ios, '15.0')
 
 # Create groups
 app_group = project.main_group.find_subpath('ios_client', true)
@@ -69,7 +69,7 @@ target.build_configurations.each do |config|
   s['PRODUCT_BUNDLE_IDENTIFIER'] = 'com.helloworld.messenger'
   s['PRODUCT_NAME'] = project_name
   s['ASSETCATALOG_COMPILER_APPICON_NAME'] = 'AppIcon'
-  s['IPHONEOS_DEPLOYMENT_TARGET'] = '26.0'
+  s['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
   s['SWIFT_VERSION'] = '5.0'
   s['GENERATE_INFOPLIST_FILE'] = 'NO'
   s['INFOPLIST_FILE'] = 'ios_client/Resources/Info.plist'
