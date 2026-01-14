@@ -34,7 +34,7 @@ target.build_configurations.each do |config|
   s['INFOPLIST_KEY_CFBundleExecutable'] = 'HelloWorld'
   s['SWIFT_OBJC_BRIDGING_HEADER'] = bridging_header
   s['LIBRARY_SEARCH_PATHS'] = '$(inherited) $(PROJECT_DIR)/target/aarch64-apple-ios/release'
-  s['OTHER_LDFLAGS'] = '$(inherited) -lhelloworld_core'
+  s['OTHER_LDFLAGS'] = '$(inherited) -lhelloworld_core -framework Security -framework Foundation'
 end
 
 # Create a scheme
