@@ -33,20 +33,20 @@ struct ChatListView: View {
     
     var body: some View {
         ZStack {
-            Color.black.edgesIgnoringSafeArea(.all)
-            
+            Color.black.opacity(0.85).edgesIgnoringSafeArea(.all)
+
             VStack(spacing: 0) {
-                // Header with Liquid Glass Buttons
+                // Header with Liquid Glass Buttons (SwiftUI glassEffect)
                 HStack {
                     // Edit Button (Liquid Glass)
                     Button(action: {}) {
                         Text("Изм.")
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.white)
-                            .frame(width: 50, height: 36)
-                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18))
-                            .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color.white.opacity(0.1), lineWidth: 0.5))
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
                     }
+                    .glassEffect(in: .capsule)
                     
                     Spacer()
                     
@@ -68,16 +68,15 @@ struct ChatListView: View {
                         }
                     }
                     .foregroundColor(.white)
-                    .padding(.horizontal, 12)
-                    .frame(height: 36)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18))
-                    .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color.white.opacity(0.1), lineWidth: 0.5))
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .glassEffect(in: .capsule)
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 50)
                 .padding(.bottom, 15)
                 
-                // Native-styled Search Bar with Liquid Glass
+                // Native-styled Search Bar with Liquid Glass (SwiftUI)
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.gray)
@@ -85,8 +84,7 @@ struct ChatListView: View {
                         .foregroundColor(.white)
                 }
                 .padding(10)
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.05), lineWidth: 0.5))
+                .glassEffect(in: .rect(cornerRadius: 12))
                 .padding(.horizontal, 16)
                 .padding(.bottom, 10)
                 
@@ -112,55 +110,48 @@ struct ChatListView: View {
                 }
             }
             
-            // Floating Liquid Glass Navigation Menu
+            // Floating Liquid Glass Navigation Menu (SwiftUI glassEffect + container)
             VStack {
                 Spacer()
-                HStack(spacing: 12) {
-                    // Separate Search Button on the LEFT
-                    Button(action: { }) {
-                        Image(systemName: "magnifyingglass")
-                            .font(.system(size: 22))
-                            .foregroundColor(.white)
-                            .frame(width: 60, height: 60)
-                            .background(.ultraThinMaterial, in: Circle())
-                            .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 0.5))
-                    }
-                    
-                    // Main Nav Pill
-                    HStack(spacing: 0) {
-                        ForEach(Tab.allCases, id: \.self) { tab in
-                            Button(action: {
-                                withAnimation(.spring()) {
-                                    selectedTab = tab
-                                }
-                            }) {
-                                VStack(spacing: 4) {
-                                    Image(systemName: tab.icon)
-                                        .font(.system(size: 20))
-                                    Text(tab.rawValue)
-                                        .font(.system(size: 10, weight: .medium))
-                                }
-                                .foregroundColor(selectedTab == tab ? .blue : .white.opacity(0.6))
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 60)
-                                .background(
-                                    ZStack {
-                                        if selectedTab == tab {
-                                            RoundedRectangle(cornerRadius: 20)
-                                                .fill(Color.white.opacity(0.1))
-                                                .matchedGeometryEffect(id: "tab_bg", in: tabAnimation)
-                                        }
+                GlassEffectContainer(spacing: 24) {
+                    HStack(spacing: 12) {
+                        // Separate Search Button on the LEFT
+                        Button(action: { }) {
+                            Image(systemName: "magnifyingglass")
+                                .font(.system(size: 22))
+                                .foregroundColor(.white)
+                                .frame(width: 60, height: 60)
+                        }
+                        .glassEffect(in: .circle)
+                        
+                        // Main Nav Pill
+                        HStack(spacing: 0) {
+                            ForEach(Tab.allCases, id: \.self) { tab in
+                                Button(action: {
+                                    withAnimation(.spring()) {
+                                        selectedTab = tab
                                     }
-                                )
+                                }) {
+                                    VStack(spacing: 4) {
+                                        Image(systemName: tab.icon)
+                                            .font(.system(size: 20))
+                                        Text(tab.rawValue)
+                                            .font(.system(size: 10, weight: .medium))
+                                    }
+                                    .foregroundColor(selectedTab == tab ? .blue : .white.opacity(0.7))
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 60)
+                                    .contentShape(Rectangle())
+                                }
+                                .buttonStyle(.plain)
                             }
                         }
+                        .padding(.horizontal, 8)
+                        .glassEffect(in: .rect(cornerRadius: 30))
                     }
-                    .padding(.horizontal, 8)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 30))
-                    .overlay(RoundedRectangle(cornerRadius: 30).stroke(Color.white.opacity(0.1), lineWidth: 0.5))
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 40)
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 40)
             }
         }
         .edgesIgnoringSafeArea(.bottom)
