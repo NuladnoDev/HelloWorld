@@ -231,15 +231,12 @@ struct ChatListView: View {
             }
             .tag(Tab.chats)
 
-            NavigationView {
-                Text("Настройки")
-                    .foregroundColor(.white)
-                    .navigationTitle("Настройки")
-            }
-            .tabItem {
-                Label("Настройки", systemImage: "gear")
-            }
-            .tag(Tab.settings)
+            // Вкладка Настройки
+            SettingsView()
+                .tabItem {
+                    Label("Настройки", systemImage: "gear")
+                }
+                .tag(Tab.settings)
         }
         .accentColor(.blue)
     }
