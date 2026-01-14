@@ -73,9 +73,9 @@ struct ChatListView: View {
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 6)
-                                .background(.ultraThinMaterial)
-                                .clipShape(Capsule())
+                                .background(.ultraThinMaterial, in: Capsule())
                         }
+                        .buttonStyle(PlainButtonStyle())
                     }
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: {}) {
@@ -83,9 +83,9 @@ struct ChatListView: View {
                                 .font(.system(size: 15, weight: .medium))
                                 .foregroundColor(.white)
                                 .padding(8)
-                                .background(.ultraThinMaterial)
-                                .clipShape(Circle())
+                                .background(.ultraThinMaterial, in: Circle())
                         }
+                        .buttonStyle(PlainButtonStyle())
                     }
                 }
             }
@@ -99,9 +99,8 @@ struct ChatListView: View {
                         Image(systemName: "magnifyingglass")
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.white)
-                            .frame(width: 52, height: 52)
-                            .background(.ultraThinMaterial)
-                            .clipShape(Circle())
+                            .frame(width: 60, height: 60) // Увеличил размер
+                            .background(.ultraThinMaterial, in: Circle())
                     }
                     .buttonStyle(PlainButtonStyle())
 
@@ -120,7 +119,7 @@ struct ChatListView: View {
                                         .font(.system(size: 10, weight: .medium))
                                 }
                                 .frame(maxWidth: .infinity)
-                                .frame(height: 52)
+                                .frame(height: 60) // Увеличил высоту
                                 .foregroundColor(selectedTab == tab ? .blue : .white)
                                 .background(
                                     ZStack {
@@ -129,7 +128,7 @@ struct ChatListView: View {
                                             Capsule()
                                                 .fill(Color.white.opacity(0.12))
                                                 .matchedGeometryEffect(id: "activeTab", in: animation)
-                                                .padding(4)
+                                                .padding(6)
                                         }
                                     }
                                 )
@@ -137,25 +136,21 @@ struct ChatListView: View {
                             .buttonStyle(PlainButtonStyle())
                         }
                     }
-                    .background(.ultraThinMaterial)
-                    .clipShape(Capsule())
+                    .background(.ultraThinMaterial, in: Capsule())
                 }
                 .padding(.horizontal, 16)
-                .padding(.bottom, 12) // Опустил вниз как просил юзер
+                .padding(.bottom, 8) // Сдвинул чуть ниже к краю
             }
+            .ignoresSafeArea(.keyboard, edges: .bottom)
         }
     }
 
     var searchBar: some View {
         ZStack {
-            // Фон поиска (Liquid Glass) - убрал сильное затемнение
+            // Фон поиска (Liquid Glass) - убрал сильное затемнение и обводку
             RoundedRectangle(cornerRadius: 18)
                 .fill(.ultraThinMaterial)
-                .frame(height: 44)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 18)
-                        .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
-                )
+                .frame(height: 52) // Увеличил высоту до 52 как просил ранее
             
             HStack {
                 if searchText.isEmpty {
