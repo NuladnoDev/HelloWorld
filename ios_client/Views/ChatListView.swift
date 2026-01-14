@@ -54,91 +54,115 @@ struct ChatListView: View {
             }
             .tag(Tab.posts)
 
-            NavigationView {
-                ZStack {
-                    Color.black.edgesIgnoringSafeArea(.all)
-                    
-                    VStack(spacing: 0) {
-                        // Кастомный заголовок (как в ТГ)
-                        HStack {
-                            Button(action: {}) {
-                                Text("Изм.")
-                                    .font(.system(size: 14, weight: .medium))
-                                    .foregroundColor(.blue)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 6)
-                                    .background(.ultraThinMaterial)
-                                    .cornerRadius(10)
-                            }
-                            
-                            Spacer()
-                            
-                            Text("Чаты")
-                                .font(.system(size: 17, weight: .semibold))
-                                .foregroundColor(.white)
-                            
-                            Spacer()
-                            
-                            Button(action: {}) {
-                                Image(systemName: "square.and.pencil")
-                                    .font(.system(size: 18))
-                                    .foregroundColor(.blue)
-                                    .padding(8)
-                                    .background(.ultraThinMaterial)
-                                    .cornerRadius(10)
-                            }
+            // Таб Чаты
+            ZStack {
+                Color.black.edgesIgnoringSafeArea(.all)
+                
+                VStack(spacing: 0) {
+                    // Кастомный заголовок (как в ТГ)
+                    HStack {
+                        Button(action: {}) {
+                            Text("Изм.")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.blue)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 6)
+                                .background(
+                                    Capsule()
+                                        .fill(.ultraThinMaterial)
+                                        .overlay(
+                                            Capsule()
+                                                .stroke(
+                                                    LinearGradient(
+                                                        colors: [.white.opacity(0.2), .white.opacity(0.05)],
+                                                        startPoint: .topLeading,
+                                                        endPoint: .bottomTrailing
+                                                    ),
+                                                    lineWidth: 0.5
+                                                )
+                                        )
+                                )
                         }
-                        .padding(.horizontal)
-                        .padding(.top, 10)
-                        .padding(.bottom, 8)
+                        
+                        Spacer()
+                        
+                        Text("Чаты")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(.white)
+                        
+                        Spacer()
+                        
+                        Button(action: {}) {
+                            Image(systemName: "square.and.pencil")
+                                .font(.system(size: 18))
+                                .foregroundColor(.blue)
+                                .padding(8)
+                                .background(
+                                    Capsule()
+                                        .fill(.ultraThinMaterial)
+                                        .overlay(
+                                            Capsule()
+                                                .stroke(
+                                                    LinearGradient(
+                                                        colors: [.white.opacity(0.2), .white.opacity(0.05)],
+                                                        startPoint: .topLeading,
+                                                        endPoint: .bottomTrailing
+                                                    ),
+                                                    lineWidth: 0.5
+                                                )
+                                        )
+                                )
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 5) // Минимальный отступ для статус-бара
+                    .padding(.bottom, 8)
 
-                        ScrollView {
-                            LazyVStack(spacing: 0) {
-                                // Поиск
-                                ZStack {
-                                    RoundedRectangle(cornerRadius: 18)
-                                        .fill(.regularMaterial)
-                                        .frame(height: 44)
-                                    
-                                    if searchText.isEmpty {
-                                        HStack {
-                                            Spacer()
-                                            Image(systemName: "magnifyingglass")
-                                                .foregroundColor(.gray)
-                                            Text("Поиск")
-                                                .foregroundColor(.gray)
-                                            Spacer()
-                                        }
-                                    }
-                                    
+                    ScrollView {
+                        LazyVStack(spacing: 0) {
+                            // Поиск
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 18)
+                                    .fill(.regularMaterial)
+                                    .frame(height: 44)
+                                
+                                if searchText.isEmpty {
                                     HStack {
-                                        if !searchText.isEmpty {
-                                            Image(systemName: "magnifyingglass")
-                                                .foregroundColor(.gray)
-                                                .padding(.leading, 12)
-                                        }
-                                        
-                                        TextField("", text: $searchText)
-                                            .foregroundColor(.white)
-                                            .padding(.leading, searchText.isEmpty ? 40 : 5)
+                                        Spacer()
+                                        Image(systemName: "magnifyingglass")
+                                            .foregroundColor(.gray)
+                                        Text("Поиск")
+                                            .foregroundColor(.gray)
+                                        Spacer()
                                     }
                                 }
-                                .padding(.horizontal, 10)
-                                .padding(.top, 5)
-                                .padding(.bottom, 10)
-
-                                // Список чатов
-                                ForEach(chats) { chat in
-                                    ChatRow(chat: chat)
-                                    Divider()
-                                        .background(Color.white.opacity(0.1))
-                                        .padding(.leading, 76)
+                                
+                                HStack {
+                                    if !searchText.isEmpty {
+                                        Image(systemName: "magnifyingglass")
+                                            .foregroundColor(.gray)
+                                            .padding(.leading, 12)
+                                    }
+                                    
+                                    TextField("", text: $searchText)
+                                        .foregroundColor(.white)
+                                        .padding(.leading, searchText.isEmpty ? 40 : 5)
                                 }
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.top, 5)
+                            .padding(.bottom, 10)
+
+                            // Список чатов
+                            ForEach(chats) { chat in
+                                ChatRow(chat: chat)
+                                Divider()
+                                    .background(Color.white.opacity(0.1))
+                                    .padding(.leading, 76)
                             }
                         }
                     }
                 }
-                .navigationBarHidden(true)
             }
             .tabItem {
                 Label("Чаты", systemImage: "message.fill")
