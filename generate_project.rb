@@ -69,7 +69,7 @@ target.build_configurations.each do |config|
   s['PRODUCT_BUNDLE_IDENTIFIER'] = 'com.helloworld.messenger'
   s['PRODUCT_NAME'] = project_name
   s['ASSETCATALOG_COMPILER_APPICON_NAME'] = 'AppIcon'
-  s['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+  s['IPHONEOS_DEPLOYMENT_TARGET'] = '26.0'
   s['SWIFT_VERSION'] = '5.0'
   s['GENERATE_INFOPLIST_FILE'] = 'NO'
   s['INFOPLIST_FILE'] = 'ios_client/Resources/Info.plist'

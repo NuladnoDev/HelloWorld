@@ -1,5 +1,6 @@
 import SwiftUI
 
+@available(iOS 26.0, *)
 struct WelcomeView: View {
     @Binding var showLogin: Bool
     
@@ -55,6 +56,7 @@ struct WelcomeView: View {
     }
 }
 
+@available(iOS 26.0, *)
 struct WelcomeView_Previews: PreviewProvider {
     static var previews: some View {
         WelcomeView(showLogin: .constant(false))

@@ -257,6 +257,7 @@ struct CategoryPill: View {
     }
 }
 
+@available(iOS 26.0, *)
 struct ChatListView_Previews: PreviewProvider {
     static var previews: some View {
         ChatListView()
