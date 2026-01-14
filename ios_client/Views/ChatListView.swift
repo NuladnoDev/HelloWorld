@@ -60,6 +60,7 @@ struct ChatListView: View {
                     }
                 }
                 .navigationBarTitleDisplayMode(.inline)
+                .hideToolbarStroke()
                 .toolbar {
                     ToolbarItem(placement: .principal) {
                         Text("Чаты")
@@ -69,23 +70,23 @@ struct ChatListView: View {
                     ToolbarItem(placement: .navigationBarLeading) {
                         Button(action: {}) {
                             Text("Изм.")
-                                .font(.system(size: 15, weight: .medium))
+                                .font(.system(size: 16, weight: .medium))
                                 .foregroundColor(.white)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 7)
                                 .background(.ultraThinMaterial, in: Capsule())
                         }
-                        .buttonStyle(PlainButtonStyle())
+                        .buttonStyle(.plain) // Используем нативный .plain стиль
                     }
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: {}) {
                             Image(systemName: "square.and.pencil")
-                                .font(.system(size: 15, weight: .medium))
+                                .font(.system(size: 16, weight: .medium))
                                 .foregroundColor(.white)
-                                .padding(8)
+                                .padding(9)
                                 .background(.ultraThinMaterial, in: Circle())
                         }
-                        .buttonStyle(PlainButtonStyle())
+                        .buttonStyle(.plain)
                     }
                 }
             }
@@ -99,10 +100,10 @@ struct ChatListView: View {
                         Image(systemName: "magnifyingglass")
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.white)
-                            .frame(width: 60, height: 60) // Увеличил размер
+                            .frame(width: 54, height: 54)
                             .background(.ultraThinMaterial, in: Circle())
                     }
-                    .buttonStyle(PlainButtonStyle())
+                    .buttonStyle(.plain)
 
                     // Основная панель
                     HStack(spacing: 0) {
@@ -119,7 +120,7 @@ struct ChatListView: View {
                                         .font(.system(size: 10, weight: .medium))
                                 }
                                 .frame(maxWidth: .infinity)
-                                .frame(height: 60) // Увеличил высоту
+                                .frame(height: 54)
                                 .foregroundColor(selectedTab == tab ? .blue : .white)
                                 .background(
                                     ZStack {
@@ -128,29 +129,42 @@ struct ChatListView: View {
                                             Capsule()
                                                 .fill(Color.white.opacity(0.12))
                                                 .matchedGeometryEffect(id: "activeTab", in: animation)
-                                                .padding(6)
+                                                .padding(4)
                                         }
                                     }
                                 )
                             }
-                            .buttonStyle(PlainButtonStyle())
+                            .buttonStyle(.plain)
                         }
                     }
                     .background(.ultraThinMaterial, in: Capsule())
                 }
                 .padding(.horizontal, 16)
-                .padding(.bottom, 8) // Сдвинул чуть ниже к краю
+                .padding(.bottom, 20)
             }
             .ignoresSafeArea(.keyboard, edges: .bottom)
         }
     }
+}
+
+extension View {
+    func hideToolbarStroke() -> some View {
+        self.onAppear {
+            let appearance = UINavigationBarAppearance()
+            appearance.configureWithTransparentBackground()
+            appearance.shadowColor = .clear
+            UINavigationBar.appearance().standardAppearance = appearance
+            UINavigationBar.appearance().scrollEdgeAppearance = appearance
+        }
+    }
+}
 
     var searchBar: some View {
         ZStack {
-            // Фон поиска (Liquid Glass) - убрал сильное затемнение и обводку
+            // Фон поиска (Liquid Glass) - восстановил размер и убрал обводку
             RoundedRectangle(cornerRadius: 18)
                 .fill(.ultraThinMaterial)
-                .frame(height: 52) // Увеличил высоту до 52 как просил ранее
+                .frame(height: 44) // Вернул 44 как было до расширения
             
             HStack {
                 if searchText.isEmpty {
