@@ -2,7 +2,6 @@ import SwiftUI
 
 struct ChatMessage: Identifiable {
     let id = UUID()
-    let name: some View { Text(username) } // Simplified for preview
     let username: String
     let lastMessage: String
     let time: String

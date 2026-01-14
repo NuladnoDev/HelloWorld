@@ -6,7 +6,7 @@ workflows:
     scripts:
       - name: Install dependencies
         script: |
-          gem install xcodeproj
+          sudo gem install xcodeproj
       - name: Build Rust Core
         script: |
           # Install Rust if not present

@@ -40,22 +40,20 @@
   - [src/crypto/crypto_service.rs](file:///c:/Users/lario/Desktop/hw-core/src/crypto/crypto_service.rs)
   - [src/crypto/key_manager.rs](file:///c:/Users/lario/Desktop/hw-core/src/crypto/key_manager.rs)
   - [src/models](file:///c:/Users/lario/Desktop/hw-core/src/models)
-- C++/Qt‑клиент:
-  - [cpp_client/main.cpp](file:///c:/Users/lario/Desktop/hw-core/cpp_client/main.cpp)
-  - [cpp_client/mainwindow.h](file:///c:/Users/lario/Desktop/hw-core/cpp_client/mainwindow.h)
-  - [cpp_client/mainwindow.cpp](file:///c:/Users/lario/Desktop/hw-core/cpp_client/mainwindow.cpp)
-  - [cpp_client/supabase_client.h](file:///c:/Users/lario/Desktop/hw-core/cpp_client/supabase_client.h)
-  - [cpp_client/supabase_client.cpp](file:///c:/Users/lario/Desktop/hw-core/cpp_client/supabase_client.cpp)
-  - [cpp_client/rust_core.h](file:///c:/Users/lario/Desktop/hw-core/cpp_client/rust_core.h)
-  - [cpp_client/supabase_config.h](file:///c:/Users/lario/Desktop/hw-core/cpp_client/supabase_config.h)
-  - [cpp_client/CMakeLists.txt](file:///c:/Users/lario/Desktop/hw-core/cpp_client/CMakeLists.txt)
+- iOS‑клиент:
+  - [ios_client/Views/MainApp.swift](file:///c:/Users/lario/Desktop/hw-core/ios_client/Views/MainApp.swift)
+  - [ios_client/Views/LoginView.swift](file:///c:/Users/lario/Desktop/hw-core/ios_client/Views/LoginView.swift)
+  - [ios_client/Views/ChatListView.swift](file:///c:/Users/lario/Desktop/hw-core/ios_client/Views/ChatListView.swift)
+  - [ios_client/Core/CoreWrapper.swift](file:///c:/Users/lario/Desktop/hw-core/ios_client/Core/CoreWrapper.swift)
+  - [ios_client/Core/CoreBridge-Bridging-Header.h](file:///c:/Users/lario/Desktop/hw-core/ios_client/Core/CoreBridge-Bridging-Header.h)
 - Сборка:
-  - [build_client.ps1](file:///c:/Users/lario/Desktop/hw-core/build_client.ps1) — единая команда для сборки ядра и Qt‑клиента.
-  - [build.md](file:///c:/Users/lario/Desktop/hw-core/build.md) — краткая инструкция по сборке (для человека).
+  - [generate_project.rb](file:///c:/Users/lario/Desktop/hw-core/generate_project.rb) — генерация Xcode‑проекта.
+  - [codemagic.yaml](file:///c:/Users/lario/Desktop/hw-core/codemagic.yaml) — конфигурация CI/CD.
+  - [build.md](file:///c:/Users/lario/Desktop/hw-core/build.md) — краткая инструкция по сборке.
 
 ---
 
-## 3. Криптоядро (Rust `hw_core`)
+## 3. Криптоядро (Rust `helloworld_core`)
 
 ### 3.1. Генерация identity‑ключей
 
