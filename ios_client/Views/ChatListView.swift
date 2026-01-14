@@ -1,5 +1,29 @@
 import SwiftUI
 
+// Кастомный стиль для кнопок с эффектом масштабирования и Liquid Glass
+struct LiquidGlassButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 1.15 : 1.0) // Увеличение при нажатии
+            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
+            .background(
+                Capsule()
+                    .fill(.ultraThinMaterial)
+                    .overlay(
+                        Capsule()
+                            .stroke(
+                                LinearGradient(
+                                    colors: [.white.opacity(0.3), .white.opacity(0.05)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 0.5
+                            )
+                    )
+            )
+    }
+}
+
 @available(iOS 15.0, *)
 struct ChatListView: View {
     @State private var searchText = ""
@@ -67,22 +91,8 @@ struct ChatListView: View {
                                 .foregroundColor(.blue)
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 6)
-                                .background(
-                                    Capsule()
-                                        .fill(.ultraThinMaterial)
-                                        .overlay(
-                                            Capsule()
-                                                .stroke(
-                                                    LinearGradient(
-                                                        colors: [.white.opacity(0.2), .white.opacity(0.05)],
-                                                        startPoint: .topLeading,
-                                                        endPoint: .bottomTrailing
-                                                    ),
-                                                    lineWidth: 0.5
-                                                )
-                                        )
-                                )
                         }
+                        .buttonStyle(LiquidGlassButtonStyle())
                         
                         Spacer()
                         
@@ -97,25 +107,11 @@ struct ChatListView: View {
                                 .font(.system(size: 18))
                                 .foregroundColor(.blue)
                                 .padding(8)
-                                .background(
-                                    Capsule()
-                                        .fill(.ultraThinMaterial)
-                                        .overlay(
-                                            Capsule()
-                                                .stroke(
-                                                    LinearGradient(
-                                                        colors: [.white.opacity(0.2), .white.opacity(0.05)],
-                                                        startPoint: .topLeading,
-                                                        endPoint: .bottomTrailing
-                                                    ),
-                                                    lineWidth: 0.5
-                                                )
-                                        )
-                                )
                         }
+                        .buttonStyle(LiquidGlassButtonStyle())
                     }
                     .padding(.horizontal)
-                    .padding(.top, 5) // Минимальный отступ для статус-бара
+                    .padding(.top, 5)
                     .padding(.bottom, 8)
 
                     ScrollView {
@@ -124,7 +120,7 @@ struct ChatListView: View {
                             ZStack {
                                 RoundedRectangle(cornerRadius: 18)
                                     .fill(.regularMaterial)
-                                    .frame(height: 44)
+                                    .frame(height: 48) // Увеличил с 44 до 48
                                 
                                 if searchText.isEmpty {
                                     HStack {
@@ -151,7 +147,7 @@ struct ChatListView: View {
                             }
                             .padding(.horizontal, 10)
                             .padding(.top, 5)
-                            .padding(.bottom, 10)
+                            .padding(.bottom, 12) // Увеличил отступ снизу
 
                             // Список чатов
                             ForEach(chats) { chat in
