@@ -9,14 +9,14 @@ class CoreWrapper {
         var privatePtr: UnsafeMutablePointer<Int8>?
         var publicPtr: UnsafeMutablePointer<Int8>?
         
-        let result = hw_generate_identity_keypair(&privatePtr, &publicPtr)
+        cpp_generate_keypair(&privatePtr, &publicPtr)
         
-        if result == 0, let priv = privatePtr, let pub = publicPtr {
+        if let priv = privatePtr, let pub = publicPtr {
             let privateKey = String(cString: priv)
             let publicKey = String(cString: pub)
             
-            hw_free_string(privatePtr)
-            hw_free_string(publicPtr)
+            cpp_free_string(privatePtr)
+            cpp_free_string(publicPtr)
             
             return (privateKey, publicKey)
         }

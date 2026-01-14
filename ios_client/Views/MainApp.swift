@@ -19,21 +19,21 @@ struct HelloWorldApp: App {
     }
 
     private func testCore() {
-        print("DEBUG: Starting Core test...")
+        print("DEBUG: Starting C++ Core test...")
         coreStatus = "Testing connection (ping)..."
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            let pong = hw_ping()
+            let pong = cpp_ping()
             print("DEBUG: Ping result: \(pong)")
             
-            if pong == 42 {
-                coreStatus = "Rust connection OK! Calling generateKeyPair..."
+            if pong == 100 {
+                coreStatus = "C++ connection OK! Calling generateKeyPair..."
                 
                 DispatchQueue.global(qos: .userInitiated).async {
                     if let keys = CoreWrapper.shared.generateKeyPair() {
-                        print("DEBUG: Success! Public Key: \(keys.publicKey.prefix(10))")
+                        print("DEBUG: Success! Public Key: \(keys.publicKey)")
                         DispatchQueue.main.async {
-                            coreStatus = "Core Full Init Success!\nPK: \(keys.publicKey.prefix(10))..."
+                            coreStatus = "C++ Core Success!\nPK: \(keys.publicKey)"
                         }
                     } else {
                         DispatchQueue.main.async {
