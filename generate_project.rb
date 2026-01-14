@@ -7,7 +7,7 @@ project_path = "#{project_name}.xcodeproj"
 project = Xcodeproj::Project.new(project_path)
 
 # Set the target
-target = project.new_target(:application, project_name, :ios, '15.0')
+target = project.new_target(:application, project_name, :ios, '26.0')
 
 # Create groups
 app_group = project.main_group.find_subpath('ios_client', true)

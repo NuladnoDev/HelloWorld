@@ -9,6 +9,7 @@ struct Chat: Identifiable {
     let isVerified: Bool
 }
 
+@available(iOS 26.0, *)
 struct ChatListView: View {
     @State private var searchText = ""
     @State private var selectedTab: Tab = .chats
