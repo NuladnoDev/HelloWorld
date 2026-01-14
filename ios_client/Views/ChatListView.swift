@@ -4,16 +4,17 @@ import SwiftUI
 struct ChatListView: View {
     @State private var searchText = ""
     @State private var selectedTab: Tab = .chats
-    @Namespace private var animation
     
     enum Tab: String, CaseIterable {
-        case feed = "Лента"
+        case posts = "посты"
+        case calls = "Звонки"
         case chats = "Чаты"
         case settings = "Настройки"
         
         var icon: String {
             switch self {
-            case .feed: return "person.2.fill"
+            case .posts: return "rectangle.grid.1x2.fill"
+            case .calls: return "phone.fill"
             case .chats: return "message.fill"
             case .settings: return "gear"
             }
@@ -29,167 +30,89 @@ struct ChatListView: View {
     ]
 
     var body: some View {
-        ZStack {
-            // Фон
-            Color.black.edgesIgnoringSafeArea(.all)
-            
-            // Основной контент
+        TabView(selection: $selectedTab) {
             NavigationView {
-                ZStack(alignment: .top) {
+                Text("посты")
+                    .foregroundColor(.white)
+                    .navigationTitle("посты")
+            }
+            .tabItem {
+                Label("посты", systemImage: "rectangle.grid.1x2.fill")
+            }
+            .tag(Tab.posts)
+
+            NavigationView {
+                Text("Звонки")
+                    .foregroundColor(.white)
+                    .navigationTitle("Звонки")
+            }
+            .tabItem {
+                Label("Звонки", systemImage: "phone.fill")
+            }
+            .tag(Tab.calls)
+
+            NavigationView {
+                ZStack {
                     Color.black.edgesIgnoringSafeArea(.all)
                     
-                    VStack(spacing: 0) {
-                        // Поиск (Liquid Glass) - вынесен из ScrollView, чтобы не уезжал
-                        searchBar
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .zIndex(10)
+                    ScrollView {
+                        LazyVStack(spacing: 0) {
+                            // Поиск
+                            HStack {
+                                Image(systemName: "magnifyingglass")
+                                    .foregroundColor(.gray)
+                                TextField("Поиск", text: $searchText)
+                                    .foregroundColor(.white)
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(.regularMaterial)
+                            .cornerRadius(10)
+                            .padding(.horizontal, 8)
+                            .padding(.top, 5)
 
-                        ScrollView {
-                            LazyVStack(spacing: 0) {
-                                ForEach(chats) { chat in
-                                    ChatRow(chat: chat)
-                                    Divider()
-                                        .background(Color.white.opacity(0.1))
-                                        .padding(.leading, 76)
-                                }
-                                // Отступ для нижней панели
-                                Color.clear.frame(height: 120)
+                            // Список чатов
+                            ForEach(chats) { chat in
+                                ChatRow(chat: chat)
+                                Divider()
+                                    .background(Color.white.opacity(0.1))
+                                    .padding(.leading, 76)
                             }
                         }
                     }
                 }
+                .navigationTitle("Чаты")
                 .navigationBarTitleDisplayMode(.inline)
-                .hideToolbarStroke()
                 .toolbar {
-                    ToolbarItem(placement: .principal) {
-                        Text("Чаты")
-                            .font(.system(size: 17, weight: .semibold))
-                            .foregroundColor(.white)
-                    }
                     ToolbarItem(placement: .navigationBarLeading) {
-                        Button(action: {}) {
-                            Text("Изм.")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 7)
-                                .background(.ultraThinMaterial, in: Capsule())
-                        }
-                        .buttonStyle(.plain) // Используем нативный .plain стиль
+                        Button("Изм.") { }
+                            .font(.system(size: 17))
+                            .foregroundColor(.blue)
                     }
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: {}) {
                             Image(systemName: "square.and.pencil")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(.white)
-                                .padding(9)
-                                .background(.ultraThinMaterial, in: Circle())
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
-            
-            // Кастомная навигация с морфингом капли
-            VStack {
-                Spacer()
-                HStack(spacing: 12) {
-                    // Кнопка поиска слева (Отдельная капля)
-                    Button(action: {}) {
-                        Image(systemName: "magnifyingglass")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(width: 54, height: 54)
-                            .background(.ultraThinMaterial, in: Circle())
-                    }
-                    .buttonStyle(.plain)
-
-                    // Основная панель
-                    HStack(spacing: 0) {
-                        ForEach(Tab.allCases, id: \.self) { tab in
-                            Button(action: {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7, blendDuration: 0)) {
-                                    selectedTab = tab
-                                }
-                            }) {
-                                VStack(spacing: 4) {
-                                    Image(systemName: tab.icon)
-                                        .font(.system(size: 18))
-                                    Text(tab.rawValue)
-                                        .font(.system(size: 10, weight: .medium))
-                                }
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 54)
-                                .foregroundColor(selectedTab == tab ? .blue : .white)
-                                .background(
-                                    ZStack {
-                                        if selectedTab == tab {
-                                            // Та самая "перемещающаяся капля"
-                                            Capsule()
-                                                .fill(Color.white.opacity(0.12))
-                                                .matchedGeometryEffect(id: "activeTab", in: animation)
-                                                .padding(4)
-                                        }
-                                    }
-                                )
-                            }
-                            .buttonStyle(.plain)
+                                .foregroundColor(.blue)
                         }
                     }
-                    .background(.ultraThinMaterial, in: Capsule())
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 20)
-            }
-            .ignoresSafeArea(.keyboard, edges: .bottom)
-        }
-    }
-    var searchBar: some View {
-        ZStack {
-            // Фон поиска (Liquid Glass) - восстановил размер и убрал обводку
-            RoundedRectangle(cornerRadius: 18)
-                .fill(.ultraThinMaterial)
-                .frame(height: 44) // Вернул 44 как было до расширения
-            
-            HStack {
-                if searchText.isEmpty {
-                    Spacer()
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 16))
-                        .foregroundColor(.gray)
-                    Text("Поиск")
-                        .font(.system(size: 16))
-                        .foregroundColor(.gray)
-                    Spacer()
-                } else {
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 16))
-                        .foregroundColor(.gray)
-                        .padding(.leading, 12)
-                    TextField("", text: $searchText)
-                        .foregroundColor(.white)
-                        .font(.system(size: 16))
-                    Button(action: { searchText = "" }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.gray)
-                    }
-                    .padding(.trailing, 12)
                 }
             }
-        }
-    }
-}
+            .tabItem {
+                Label("Чаты", systemImage: "message.fill")
+            }
+            .tag(Tab.chats)
 
-extension View {
-    func hideToolbarStroke() -> some View {
-        self.onAppear {
-            let appearance = UINavigationBarAppearance()
-            appearance.configureWithTransparentBackground()
-            appearance.shadowColor = .clear
-            UINavigationBar.appearance().standardAppearance = appearance
-            UINavigationBar.appearance().scrollEdgeAppearance = appearance
+            NavigationView {
+                Text("Настройки")
+                    .foregroundColor(.white)
+                    .navigationTitle("Настройки")
+            }
+            .tabItem {
+                Label("Настройки", systemImage: "gear")
+            }
+            .tag(Tab.settings)
         }
+        .accentColor(.blue)
     }
 }
 
