@@ -13,24 +13,37 @@ struct LiquidGlassButtonStyle: ButtonStyle {
             .background(
                 ZStack {
                     Capsule()
-                        .fill(Color.black.opacity(0.3)) // Затемняем подложку
+                        .fill(Color.black.opacity(0.4)) // Сделал еще темнее
                     Capsule()
-                        .fill(.ultraThinMaterial)
+                        .fill(.thinMaterial) // Используем thinMaterial вместо ultraThin
                 }
                 .overlay(
                     Capsule()
                         .stroke(
                             LinearGradient(
-                                colors: [.white.opacity(0.1), .white.opacity(0.02)],
+                                colors: [.white.opacity(0.15), .white.opacity(0.05)],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
                             lineWidth: 0.5
                         )
                 )
+                .scaleEffect(configuration.isPressed ? 1.12 : 1.0) // Увеличиваем только формочку
+                .offset(y: configuration.isPressed ? 1 : 0) // Легкое смещение при нажатии
             )
-            .scaleEffect(configuration.isPressed ? 1.08 : 1.0)
-            .animation(.spring(response: 0.25, dampingFraction: 0.5, blendDuration: 0), value: configuration.isPressed)
+            .animation(.spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0), value: configuration.isPressed)
+    }
+}
+
+// Вспомогательный стиль для отслеживания нажатия без изменения вида
+struct PressDetectorStyle: ButtonStyle {
+    @Binding var isPressed: Bool
+    
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .onChange(of: configuration.isPressed) { newValue in
+                isPressed = newValue
+            }
     }
 }
 
@@ -38,6 +51,10 @@ struct LiquidGlassButtonStyle: ButtonStyle {
 struct ChatListView: View {
     @State private var searchText = ""
     @State private var selectedTab: Tab = .chats
+    
+    // Состояния для анимации правой группы кнопок
+    @State private var isPlusPressed = false
+    @State private var isPencilPressed = false
     
     init() {
         let appearance = UITabBarAppearance()
@@ -114,39 +131,45 @@ struct ChatListView: View {
                             Spacer()
                             
                             // Правая группа кнопок в одном овале
-                            HStack(spacing: 20) {
+                            HStack(spacing: 25) { // Увеличил расстояние между иконками
                                 Button(action: {}) {
                                     Image(systemName: "plus.circle")
                                         .font(.system(size: 22))
+                                        .foregroundColor(isPlusPressed ? .blue : .white)
                                 }
+                                .buttonStyle(PressDetectorStyle(isPressed: $isPlusPressed))
                                 
                                 Button(action: {}) {
                                     Image(systemName: "square.and.pencil")
                                         .font(.system(size: 22))
+                                        .foregroundColor(isPencilPressed ? .blue : .white)
                                 }
+                                .buttonStyle(PressDetectorStyle(isPressed: $isPencilPressed))
                             }
-                            .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .background(
-                            ZStack {
-                                Capsule()
-                                    .fill(Color.black.opacity(0.3)) // Тоже затемняем
-                                Capsule()
-                                    .fill(.ultraThinMaterial)
-                            }
-                            .overlay(
-                                Capsule()
-                                    .stroke(
-                                        LinearGradient(
-                                            colors: [.white.opacity(0.1), .white.opacity(0.02)],
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        ),
-                                        lineWidth: 0.5
-                                    )
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 10)
+                            .background(
+                                ZStack {
+                                    Capsule()
+                                        .fill(Color.black.opacity(0.4))
+                                    Capsule()
+                                        .fill(.thinMaterial)
+                                }
+                                .overlay(
+                                    Capsule()
+                                        .stroke(
+                                            LinearGradient(
+                                                colors: [.white.opacity(0.15), .white.opacity(0.05)],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ),
+                                            lineWidth: 0.5
+                                        )
+                                )
+                                .scaleEffect((isPlusPressed || isPencilPressed) ? 1.12 : 1.0)
+                                .offset(y: (isPlusPressed || isPencilPressed) ? 1 : 0)
                             )
-                        )
-                        .foregroundColor(.white)
+                            .animation(.spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0), value: isPlusPressed || isPencilPressed)
                         }
                         .padding(.horizontal)
                         .padding(.top, 10)
@@ -155,20 +178,22 @@ struct ChatListView: View {
                         // Поиск (вынесен из ScrollView для фиксированной шапки)
                         ZStack {
                             RoundedRectangle(cornerRadius: 18)
-                                .fill(Color.black.opacity(0.4)) // Глубокая темная подложка
+                                .fill(Color.black.opacity(0.45)) // Еще чуть темнее
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 18)
-                                        .fill(.ultraThinMaterial)
+                                        .fill(.thinMaterial) // Используем thinMaterial для соответствия кнопкам
                                 )
-                                .frame(height: 44)
+                                .frame(height: 38) // Уменьшил высоту с 44 до 38
                             
                             if searchText.isEmpty {
                                 HStack {
                                     Spacer()
                                     Image(systemName: "magnifyingglass")
                                         .foregroundColor(.gray)
+                                        .font(.system(size: 14))
                                     Text("Поиск")
                                         .foregroundColor(.gray)
+                                        .font(.system(size: 15))
                                     Spacer()
                                 }
                             }
@@ -182,11 +207,12 @@ struct ChatListView: View {
                                 
                                 TextField("", text: $searchText)
                                     .foregroundColor(.white)
+                                    .font(.system(size: 15))
                                     .padding(.leading, searchText.isEmpty ? 40 : 5)
                             }
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 10)
+                        .padding(.horizontal, 20) // Увеличил отступы с 16 до 20
+                        .padding(.bottom, 12)
                     }
                      .background(Color(red: 12/255, green: 12/255, blue: 13/255).edgesIgnoringSafeArea(.top)) // Цвет #0c0c0d
                      
