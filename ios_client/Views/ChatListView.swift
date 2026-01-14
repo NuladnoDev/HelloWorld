@@ -69,15 +69,22 @@ struct ChatListView: View {
                     ToolbarItem(placement: .navigationBarLeading) {
                         Button(action: {}) {
                             Text("Изм.")
-                                .font(.system(size: 17))
+                                .font(.system(size: 15, weight: .medium))
                                 .foregroundColor(.white)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(.ultraThinMaterial)
+                                .clipShape(Capsule())
                         }
                     }
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: {}) {
                             Image(systemName: "square.and.pencil")
-                                .font(.system(size: 17))
+                                .font(.system(size: 15, weight: .medium))
                                 .foregroundColor(.white)
+                                .padding(8)
+                                .background(.ultraThinMaterial)
+                                .clipShape(Circle())
                         }
                     }
                 }
@@ -90,12 +97,11 @@ struct ChatListView: View {
                     // Кнопка поиска слева (Отдельная капля)
                     Button(action: {}) {
                         Image(systemName: "magnifyingglass")
-                            .font(.system(size: 20, weight: .medium))
+                            .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.white)
-                            .frame(width: 56, height: 56)
+                            .frame(width: 52, height: 52)
                             .background(.ultraThinMaterial)
                             .clipShape(Circle())
-                            .overlay(Circle().stroke(Color.white.opacity(0.15), lineWidth: 0.5))
                     }
                     .buttonStyle(PlainButtonStyle())
 
@@ -103,27 +109,27 @@ struct ChatListView: View {
                     HStack(spacing: 0) {
                         ForEach(Tab.allCases, id: \.self) { tab in
                             Button(action: {
-                                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7, blendDuration: 0)) {
                                     selectedTab = tab
                                 }
                             }) {
                                 VStack(spacing: 4) {
                                     Image(systemName: tab.icon)
-                                        .font(.system(size: 20))
+                                        .font(.system(size: 18))
                                     Text(tab.rawValue)
                                         .font(.system(size: 10, weight: .medium))
                                 }
                                 .frame(maxWidth: .infinity)
-                                .frame(height: 56)
+                                .frame(height: 52)
                                 .foregroundColor(selectedTab == tab ? .blue : .white)
                                 .background(
                                     ZStack {
                                         if selectedTab == tab {
                                             // Та самая "перемещающаяся капля"
-                                            RoundedRectangle(cornerRadius: 16)
-                                                .fill(Color.blue.opacity(0.12))
+                                            Capsule()
+                                                .fill(Color.white.opacity(0.12))
                                                 .matchedGeometryEffect(id: "activeTab", in: animation)
-                                                .padding(6)
+                                                .padding(4)
                                         }
                                     }
                                 )
@@ -133,10 +139,9 @@ struct ChatListView: View {
                     }
                     .background(.ultraThinMaterial)
                     .clipShape(Capsule())
-                    .overlay(Capsule().stroke(Color.white.opacity(0.15), lineWidth: 0.5))
                 }
                 .padding(.horizontal, 16)
-                .padding(.bottom, 34)
+                .padding(.bottom, 12) // Опустил вниз как просил юзер
             }
         }
     }
