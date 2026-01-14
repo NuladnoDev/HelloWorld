@@ -6,14 +6,14 @@ struct ChatListView: View {
     @State private var selectedTab: Tab = .chats
     
     enum Tab: String, CaseIterable {
-        case contacts = "Контакты"
+        case feed = "Лента"
         case calls = "Звонки"
         case chats = "Чаты"
         case settings = "Настройки"
         
         var icon: String {
             switch self {
-            case .contacts: return "person.circle.fill"
+            case .feed: return "person.2.fill"
             case .calls: return "phone.fill"
             case .chats: return "message.fill"
             case .settings: return "gear"
@@ -30,90 +30,143 @@ struct ChatListView: View {
     ]
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            NavigationView {
-                ZStack {
-                    Color.black.edgesIgnoringSafeArea(.all)
-                    
-                    ScrollView {
-                        LazyVStack(spacing: 0) {
-                            // Поиск
-                            HStack {
-                                Image(systemName: "magnifyingglass")
-                                    .foregroundColor(.gray)
-                                TextField("Поиск", text: $searchText)
-                                    .foregroundColor(.white)
-                            }
-                            .padding(10)
+        ZStack {
+            Color.black.edgesIgnoringSafeArea(.all)
+            
+            // Основной контент в зависимости от вкладки
+            VStack(spacing: 0) {
+                if selectedTab == .chats {
+                    chatsView
+                } else {
+                    // Заглушка для других вкладок
+                    NavigationView {
+                        ZStack {
+                            Color.black.edgesIgnoringSafeArea(.all)
+                            Text(selectedTab.rawValue)
+                                .foregroundColor(.white)
+                        }
+                        .navigationTitle(selectedTab.rawValue)
+                        .navigationBarTitleDisplayMode(.inline)
+                    }
+                }
+            }
+            
+            // Кастомная нижняя навигация
+            VStack {
+                Spacer()
+                HStack(spacing: 12) {
+                    // Кнопка поиска слева (как в референсе)
+                    Button(action: {}) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 22))
+                            .foregroundColor(.white)
+                            .frame(width: 54, height: 54)
                             .background(.ultraThinMaterial)
-                            .cornerRadius(10)
-                            .padding(.horizontal)
-                            .padding(.top, 10)
-
-                            // Категории
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 8) {
-                                    CategoryPill(title: "Все", isActive: true)
-                                    CategoryPill(title: "Личные", isActive: false)
-                                    CategoryPill(title: "Группы", isActive: false)
-                                    CategoryPill(title: "Каналы", isActive: false)
+                            .clipShape(Circle())
+                    }
+                    
+                    // Основная панель вкладок
+                    HStack(spacing: 0) {
+                        ForEach(Tab.allCases, id: \.self) { tab in
+                            Button(action: {
+                                withAnimation(.spring()) {
+                                    selectedTab = tab
                                 }
-                                .padding(.horizontal)
-                                .padding(.vertical, 12)
-                            }
-
-                            // Список чатов
-                            ForEach(chats) { chat in
-                                ChatRow(chat: chat)
-                                Divider()
-                                    .background(Color.white.opacity(0.1))
-                                    .padding(.leading, 76)
+                            }) {
+                                VStack(spacing: 4) {
+                                    Image(systemName: tab.icon)
+                                        .font(.system(size: 20))
+                                    Text(tab.rawValue)
+                                        .font(.system(size: 10, weight: .medium))
+                                }
+                                .foregroundColor(selectedTab == tab ? .blue : .white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 54)
                             }
                         }
                     }
+                    .background(.ultraThinMaterial)
+                    .clipShape(Capsule())
                 }
-                .navigationTitle("Чаты")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button("Изм.") { }
-                            .font(.system(size: 17))
-                            .foregroundColor(.blue)
-                    }
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button(action: {}) {
-                            Image(systemName: "square.and.pencil")
-                                .foregroundColor(.blue)
-                        }
-                    }
-                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 30)
             }
-            .tabItem {
-                Label("Контакты", systemImage: "person.circle.fill")
-            }
-            .tag(Tab.contacts)
-
-            NavigationView {
-                Text("Звонки")
-                    .foregroundColor(.white)
-                    .navigationTitle("Звонки")
-            }
-            .tabItem {
-                Label("Звонки", systemImage: "phone.fill")
-            }
-            .tag(Tab.calls)
-
-            NavigationView {
-                Text("Настройки")
-                    .foregroundColor(.white)
-                    .navigationTitle("Настройки")
-            }
-            .tabItem {
-                Label("Настройки", systemImage: "gear")
-            }
-            .tag(Tab.settings)
         }
-        .accentColor(.blue)
+    }
+
+    var chatsView: some View {
+        NavigationView {
+            ZStack {
+                Color.black.edgesIgnoringSafeArea(.all)
+                
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        // Поиск
+                        ZStack {
+                            // Фон поиска
+                            RoundedRectangle(cornerRadius: 18)
+                                .fill(.ultraThinMaterial)
+                                .brightness(-0.2) // Делаем материал темнее
+                                .frame(height: 48) // Увеличили высоту
+                            
+                            // Контент поиска (центрированный)
+                            HStack(spacing: 8) {
+                                if searchText.isEmpty {
+                                    Spacer()
+                                    Image(systemName: "magnifyingglass")
+                                        .foregroundColor(.gray)
+                                    Text("Поиск")
+                                        .foregroundColor(.gray)
+                                    Spacer()
+                                } else {
+                                    Image(systemName: "magnifyingglass")
+                                        .foregroundColor(.gray)
+                                        .padding(.leading, 12)
+                                    TextField("", text: $searchText)
+                                        .foregroundColor(.white)
+                                    if !searchText.isEmpty {
+                                        Button(action: { searchText = "" }) {
+                                            Image(systemName: "xmark.circle.fill")
+                                                .foregroundColor(.gray)
+                                        }
+                                        .padding(.trailing, 12)
+                                    }
+                                }
+                            }
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 10)
+                        .padding(.bottom, 10)
+
+                        // Список чатов
+                        ForEach(chats) { chat in
+                            ChatRow(chat: chat)
+                            Divider()
+                                .background(Color.white.opacity(0.1))
+                                .padding(.leading, 76)
+                        }
+                        
+                        // Отступ снизу для навигации
+                        Color.clear.frame(height: 100)
+                    }
+                }
+            }
+            .navigationTitle("Чаты")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Изм.") { }
+                        .font(.system(size: 17))
+                        .foregroundColor(.white) // Белый шрифт
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {}) {
+                        Image(systemName: "square.and.pencil")
+                            .foregroundColor(.white) // Белая иконка
+                    }
+                }
+            }
+        }
     }
 }
 
