@@ -11,19 +11,23 @@ struct LiquidGlassButtonStyle: ButtonStyle {
             .padding(.horizontal, paddingHorizontal)
             .padding(.vertical, paddingVertical)
             .background(
-                Capsule()
-                    .fill(.ultraThinMaterial) // Более прозрачный материал
-                    .overlay(
-                        Capsule()
-                            .stroke(
-                                LinearGradient(
-                                    colors: [.white.opacity(0.12), .white.opacity(0.02)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 0.5
-                            )
-                    )
+                ZStack {
+                    Capsule()
+                        .fill(Color.black.opacity(0.3)) // Затемняем подложку
+                    Capsule()
+                        .fill(.ultraThinMaterial)
+                }
+                .overlay(
+                    Capsule()
+                        .stroke(
+                            LinearGradient(
+                                colors: [.white.opacity(0.1), .white.opacity(0.02)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 0.5
+                        )
+                )
             )
             .scaleEffect(configuration.isPressed ? 1.08 : 1.0)
             .animation(.spring(response: 0.25, dampingFraction: 0.5, blendDuration: 0), value: configuration.isPressed)
@@ -122,23 +126,27 @@ struct ChatListView: View {
                                 }
                             }
                             .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(
+                        .padding(.vertical, 10)
+                        .background(
+                            ZStack {
+                                Capsule()
+                                    .fill(Color.black.opacity(0.3)) // Тоже затемняем
                                 Capsule()
                                     .fill(.ultraThinMaterial)
-                                    .overlay(
-                                        Capsule()
-                                            .stroke(
-                                                LinearGradient(
-                                                    colors: [.white.opacity(0.12), .white.opacity(0.02)],
-                                                    startPoint: .topLeading,
-                                                    endPoint: .bottomTrailing
-                                                ),
-                                                lineWidth: 0.5
-                                            )
+                            }
+                            .overlay(
+                                Capsule()
+                                    .stroke(
+                                        LinearGradient(
+                                            colors: [.white.opacity(0.1), .white.opacity(0.02)],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ),
+                                        lineWidth: 0.5
                                     )
                             )
-                            .foregroundColor(.white)
+                        )
+                        .foregroundColor(.white)
                         }
                         .padding(.horizontal)
                         .padding(.top, 10)
@@ -147,7 +155,11 @@ struct ChatListView: View {
                         // Поиск (вынесен из ScrollView для фиксированной шапки)
                         ZStack {
                             RoundedRectangle(cornerRadius: 18)
-                                .fill(.regularMaterial)
+                                .fill(Color.black.opacity(0.4)) // Глубокая темная подложка
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 18)
+                                        .fill(.ultraThinMaterial)
+                                )
                                 .frame(height: 44)
                             
                             if searchText.isEmpty {
@@ -176,9 +188,9 @@ struct ChatListView: View {
                         .padding(.horizontal, 16)
                         .padding(.bottom, 10)
                     }
-                    .background(Color(red: 0.08, green: 0.08, blue: 0.08).edgesIgnoringSafeArea(.top)) // Темно-серая заливка шапки
-                    
-                    ScrollView {
+                     .background(Color(red: 12/255, green: 12/255, blue: 13/255).edgesIgnoringSafeArea(.top)) // Цвет #0c0c0d
+                     
+                     ScrollView {
                         LazyVStack(spacing: 0) {
                             // Список чатов
                             ForEach(chats) { chat in
