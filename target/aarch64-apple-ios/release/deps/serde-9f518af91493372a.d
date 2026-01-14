@@ -1,0 +1,14 @@
+C:\Users\lario\Desktop\hw-core\target\aarch64-apple-ios\release\deps\serde-9f518af91493372a.d: C:\Users\lario\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\lario\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\lario\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\lario\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\lario\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs C:\Users\lario\Desktop\hw-core\target\aarch64-apple-ios\release\build\serde-d93f8d35952288ff\out/private.rs
+
+C:\Users\lario\Desktop\hw-core\target\aarch64-apple-ios\release\deps\libserde-9f518af91493372a.rlib: C:\Users\lario\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\lario\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\lario\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\lario\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\lario\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs C:\Users\lario\Desktop\hw-core\target\aarch64-apple-ios\release\build\serde-d93f8d35952288ff\out/private.rs
+
+C:\Users\lario\Desktop\hw-core\target\aarch64-apple-ios\release\deps\libserde-9f518af91493372a.rmeta: C:\Users\lario\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\lario\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\lario\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\lario\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\lario\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs C:\Users\lario\Desktop\hw-core\target\aarch64-apple-ios\release\build\serde-d93f8d35952288ff\out/private.rs
+
+C:\Users\lario\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs:
+C:\Users\lario\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs:
+C:\Users\lario\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs:
+C:\Users\lario\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs:
+C:\Users\lario\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs:
+C:\Users\lario\Desktop\hw-core\target\aarch64-apple-ios\release\build\serde-d93f8d35952288ff\out/private.rs:
+
+# env-dep:OUT_DIR=C:\\Users\\lario\\Desktop\\hw-core\\target\\aarch64-apple-ios\\release\\build\\serde-d93f8d35952288ff\\out
