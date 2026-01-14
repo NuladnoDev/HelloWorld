@@ -22,8 +22,9 @@ Dir.glob('ios_client/Views/*.swift').each do |file_path|
 end
 
 # core_wrapper_path = 'ios_client/Core/CoreWrapper.swift'
-# core_wrapper_ref = core_group.new_file(core_wrapper_path)
-# target.add_file_references([core_wrapper_ref])
+core_wrapper_path = 'ios_client/Core/CoreWrapper.swift'
+core_wrapper_ref = core_group.new_file(core_wrapper_path)
+target.add_file_references([core_wrapper_ref])
 
 # Add Resources
 launch_screen_path = 'ios_client/Resources/LaunchScreen.storyboard'
@@ -39,11 +40,11 @@ bridging_header_path = 'ios_client/Core/CoreBridge-Bridging-Header.h'
 core_group.new_file(bridging_header_path)
 
 # Add Rust library
-# lib_path = 'target/aarch64-apple-ios/release/libhelloworld_core.a'
-# if File.exist?(lib_path)
-#   lib_ref = project.frameworks_group.new_file(lib_path)
-#   target.frameworks_build_phase.add_file_reference(lib_ref)
-# end
+lib_path = 'target/aarch64-apple-ios/release/libhelloworld_core.a'
+if File.exist?(lib_path)
+  lib_ref = project.frameworks_group.new_file(lib_path)
+  target.frameworks_build_phase.add_file_reference(lib_ref)
+end
 
 # Build settings
 target.build_configurations.each do |config|
@@ -60,7 +61,7 @@ target.build_configurations.each do |config|
   s['INFOPLIST_FILE'] = 'ios_client/Resources/Info.plist'
   s['SWIFT_OBJC_BRIDGING_HEADER'] = 'ios_client/Core/CoreBridge-Bridging-Header.h'
   s['LIBRARY_SEARCH_PATHS'] = '$(inherited) $(PROJECT_DIR)/target/aarch64-apple-ios/release'
-  s['OTHER_LDFLAGS'] = '$(inherited) -framework Security -framework Foundation -framework UIKit'
+  s['OTHER_LDFLAGS'] = '$(inherited) -lhelloworld_core -framework Security -framework Foundation -framework UIKit'
   s['ENABLE_BITCODE'] = 'NO'
   s['LD_RUNPATH_SEARCH_PATHS'] = '$(inherited) @executable_path/Frameworks'
   s['SDKROOT'] = 'iphoneos'
