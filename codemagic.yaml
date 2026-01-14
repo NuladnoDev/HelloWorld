@@ -9,7 +9,7 @@ workflows:
           sudo gem install xcodeproj
       - name: Build C++ Core
         script: |
-          echo "Building C++ Core..."
+          echo "Building C++ hw-core..."
           # C++ core is compiled directly by Xcode via generate_project.rb
       - name: Generate Xcode Project
         script: |
