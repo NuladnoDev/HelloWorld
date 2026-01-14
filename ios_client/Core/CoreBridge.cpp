@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <cstring>
+#include <cstdlib>
 #include <CommonCrypto/CommonCrypto.h>
 #include <CommonCrypto/CommonRandom.h>
 #include "monocypher/monocypher.h"
@@ -33,7 +34,7 @@ static std::vector<uint8_t> base64_decode(const std::string& in) {
     std::vector<uint8_t> out;
     int val = 0, valb = -8;
     for (uint8_t c : in) {
-        if (c < T.size() && T[c] != -1) {
+        if (c < (int)T.size() && T[c] != -1) {
             val = (val << 6) + T[c];
             valb += 6;
             if (valb >= 0) {
@@ -43,6 +44,14 @@ static std::vector<uint8_t> base64_decode(const std::string& in) {
         }
     }
     return out;
+}
+
+static char* safe_strdup(const char* s) {
+    if (!s) return nullptr;
+    size_t len = strlen(s) + 1;
+    char* d = (char*)malloc(len);
+    if (d) memcpy(d, s, len);
+    return d;
 }
 
 extern "C" {
@@ -58,8 +67,8 @@ void cpp_generate_keypair(char** out_private_b64, char** out_public_b64) {
     CCRandomGenerateBytes(priv, 32);
     crypto_x25519_public_key(pub, priv);
     
-    *out_private_b64 = strdup(base64_encode(priv, 32).c_str());
-    *out_public_b64 = strdup(base64_encode(pub, 32).c_str());
+    *out_private_b64 = safe_strdup(base64_encode(priv, 32).c_str());
+    *out_public_b64 = safe_strdup(base64_encode(pub, 32).c_str());
 }
 
 int cpp_derive_shared_secret(const char* my_private_b64, const char* peer_public_b64, char** out_shared_b64) {
@@ -71,7 +80,7 @@ int cpp_derive_shared_secret(const char* my_private_b64, const char* peer_public
     uint8_t shared[32];
     crypto_x25519(shared, priv.data(), pub.data());
     
-    *out_shared_b64 = strdup(base64_encode(shared, 32).c_str());
+    *out_shared_b64 = safe_strdup(base64_encode(shared, 32).c_str());
     return 0;
 }
 
@@ -80,36 +89,40 @@ int cpp_encrypt_message(const char* shared_b64, const char* chat_id, const char*
     if (key.size() != 32) return -1;
     
     size_t plain_len = strlen(plaintext);
-    std::vector<uint8_t> cipher(plain_len + 16); // 16 bytes for MAC
+    std::vector<uint8_t> cipher(plain_len);
+    uint8_t mac[16];
     uint8_t nonce[24] = {0}; // In production, use real unique nonces
     
-    crypto_chacha20_poly1305_encrypt(cipher.data(), cipher.data() + plain_len, 
-                                     (const uint8_t*)plaintext, plain_len, 
-                                     key.data(), nonce, NULL, 0);
+    crypto_aead_lock(cipher.data(), mac, key.data(), nonce, nullptr, 0, (const uint8_t*)plaintext, plain_len);
     
-    *out_encrypted_b64 = strdup(base64_encode(cipher.data(), cipher.size()).c_str());
+    // Combine cipher + mac for storage/transfer
+    std::vector<uint8_t> combined;
+    combined.insert(combined.end(), cipher.begin(), cipher.end());
+    combined.insert(combined.end(), mac, mac + 16);
+    
+    *out_encrypted_b64 = safe_strdup(base64_encode(combined.data(), combined.size()).c_str());
     return 0;
 }
 
 int cpp_decrypt_message(const char* shared_b64, const char* chat_id, const char* sender_id, const char* encrypted_b64, char** out_plaintext) {
     auto key = base64_decode(shared_b64);
-    auto cipher_with_mac = base64_decode(encrypted_b64);
+    auto combined = base64_decode(encrypted_b64);
     
-    if (key.size() != 32 || cipher_with_mac.size() < 16) return -1;
+    if (key.size() != 32 || combined.size() < 16) return -1;
     
-    size_t plain_len = cipher_with_mac.size() - 16;
-    std::vector<uint8_t> plain(plain_len + 1);
+    size_t cipher_len = combined.size() - 16;
+    uint8_t mac[16];
+    memcpy(mac, combined.data() + cipher_len, 16);
+    
+    std::vector<uint8_t> plain(cipher_len + 1);
     uint8_t nonce[24] = {0};
     
-    if (crypto_chacha20_poly1305_decrypt(plain.data(), 
-                                         cipher_with_mac.data() + plain_len, 
-                                         cipher_with_mac.data(), plain_len, 
-                                         key.data(), nonce, NULL, 0) != 0) {
+    if (crypto_aead_unlock(plain.data(), mac, key.data(), nonce, nullptr, 0, combined.data(), cipher_len) != 0) {
         return -2; // MAC mismatch
     }
     
-    plain[plain_len] = '\0';
-    *out_plaintext = strdup((const char*)plain.data());
+    plain[cipher_len] = '\0';
+    *out_plaintext = safe_strdup((const char*)plain.data());
     return 0;
 }
 
