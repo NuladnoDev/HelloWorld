@@ -1,0 +1,38 @@
+workflows:
+  ios-unsigned-build:
+    name: HelloWorld iOS Unsigned Build
+    max_build_duration: 30
+    instance_type: mac_mini_m1
+    scripts:
+      - name: Install dependencies
+        script: |
+          gem install xcodeproj
+      - name: Build Rust Core
+        script: |
+          # Install Rust targets for iOS
+          rustup target add aarch64-apple-ios
+          # Build the core as a static library
+          cargo build --release --target aarch64-apple-ios
+      - name: Generate Xcode Project
+        script: |
+          ruby generate_project.rb
+      - name: Build iOS App
+        script: |
+          xcodebuild build \
+            -project HelloWorld.xcodeproj \
+            -scheme HelloWorld \
+            -sdk iphoneos \
+            -configuration Release \
+            -derivedDataPath build_output \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            PROVISIONING_PROFILE_SPECIFIER=""
+      - name: Package IPA
+        script: |
+          APP_PATH=$(find build_output -name "*.app" -type d | head -n 1)
+          mkdir -p Payload
+          cp -R "$APP_PATH" Payload/
+          zip -r HelloWorld.ipa Payload
+    artifacts:
+      - HelloWorld.ipa

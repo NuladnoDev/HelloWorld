@@ -1,0 +1,68 @@
+import Foundation
+
+class CoreWrapper {
+    static let shared = CoreWrapper()
+    
+    private init() {}
+    
+    func generateKeyPair() -> (privateKey: String, publicKey: String)? {
+        var privatePtr: UnsafeMutablePointer<Int8>?
+        var publicPtr: UnsafeMutablePointer<Int8>?
+        
+        let result = hw_generate_identity_keypair(&privatePtr, &publicPtr)
+        
+        if result == 0, let priv = privatePtr, let pub = publicPtr {
+            let privateKey = String(cString: priv)
+            let publicKey = String(cString: pub)
+            
+            hw_free_string(privatePtr)
+            hw_free_string(publicPtr)
+            
+            return (privateKey, publicKey)
+        }
+        
+        return nil
+    }
+    
+    func deriveSharedSecret(myPrivateKey: String, peerPublicKey: String) -> String? {
+        var sharedPtr: UnsafeMutablePointer<Int8>?
+        
+        let result = hw_derive_shared_secret(myPrivateKey, peerPublicKey, &sharedPtr)
+        
+        if result == 0, let shared = sharedPtr {
+            let secret = String(cString: shared)
+            hw_free_string(sharedPtr)
+            return secret
+        }
+        
+        return nil
+    }
+
+    func encryptMessage(sharedSecret: String, chatId: String, senderId: String, text: String) -> String? {
+        var encryptedPtr: UnsafeMutablePointer<Int8>?
+        
+        let result = hw_encrypt_message(sharedSecret, chatId, senderId, text, &encryptedPtr)
+        
+        if result == 0, let encrypted = encryptedPtr {
+            let resultStr = String(cString: encrypted)
+            hw_free_string(encryptedPtr)
+            return resultStr
+        }
+        
+        return nil
+    }
+    
+    func decryptMessage(sharedSecret: String, chatId: String, senderId: String, encryptedText: String) -> String? {
+        var decryptedPtr: UnsafeMutablePointer<Int8>?
+        
+        let result = hw_decrypt_message(sharedSecret, chatId, senderId, encryptedText, &decryptedPtr)
+        
+        if result == 0, let decrypted = decryptedPtr {
+            let resultStr = String(cString: decrypted)
+            hw_free_string(decryptedPtr)
+            return resultStr
+        }
+        
+        return nil
+    }
+}
