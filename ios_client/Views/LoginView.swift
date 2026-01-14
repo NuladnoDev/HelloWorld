@@ -15,25 +15,16 @@ struct LoginView: View {
             VStack(spacing: 40) {
                 Spacer()
                 
-                // Telegram-like Logo
-                Image(systemName: "paperplane.fill")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
+                // Голубой круг вместо лого ТГ
+                Circle()
+                    .fill(Color.blue)
                     .frame(width: 100, height: 100)
-                    .foregroundColor(.white)
-                    .padding(25)
-                    .background(Color.blue)
-                    .clipShape(Circle())
                 
                 VStack(spacing: 20) {
                     Text(isRegistering ? "Создать аккаунт" : "Вход")
                         .font(.title)
                         .bold()
                         .foregroundColor(.white)
-                    
-                    Text("Введите данные для доступа к HelloWorld")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
                 }
                 
                 VStack(spacing: 15) {

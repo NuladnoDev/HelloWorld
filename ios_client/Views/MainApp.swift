@@ -3,14 +3,19 @@ import SwiftUI
 @main
 struct HelloWorldApp: App {
     @State private var isAuthenticated = false
+    @State private var hasSeenWelcome = false
     @State private var coreStatus = "Initializing Core..."
 
     var body: some Scene {
         WindowGroup {
             if isAuthenticated {
                 ChatListView()
-            } else {
+            } else if hasSeenWelcome {
                 LoginView(isAuthenticated: $isAuthenticated)
+                    .transition(.move(edge: .trailing))
+            } else {
+                WelcomeView(showLogin: $hasSeenWelcome)
+                    .transition(.opacity)
             }
         }
     }

@@ -16,6 +16,11 @@ resources_group = app_group.find_subpath('Resources', true)
 views_group = app_group.find_subpath('Views', true)
 
 # Add Swift files
+Dir.glob('ios_client/*.swift').each do |file_path|
+  file_ref = app_group.new_file(file_path)
+  target.add_file_references([file_ref])
+end
+
 Dir.glob('ios_client/Views/*.swift').each do |file_path|
   file_ref = views_group.new_file(file_path)
   target.add_file_references([file_ref])
