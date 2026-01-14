@@ -2,19 +2,22 @@ import SwiftUI
 
 // Кастомный стиль для кнопок с эффектом масштабирования и Liquid Glass
 struct LiquidGlassButtonStyle: ButtonStyle {
+    var paddingHorizontal: CGFloat = 16
+    var paddingVertical: CGFloat = 8
+    
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .foregroundColor(configuration.isPressed ? .blue : .white) // Белый по умолчанию, синий при нажатии
-            .padding(.horizontal, 14)
-            .padding(.vertical, 6)
+            .foregroundColor(configuration.isPressed ? .blue : .white)
+            .padding(.horizontal, paddingHorizontal)
+            .padding(.vertical, paddingVertical)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(.thinMaterial)
+                Capsule()
+                    .fill(.ultraThinMaterial) // Более прозрачный материал
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
+                        Capsule()
                             .stroke(
                                 LinearGradient(
-                                    colors: [.white.opacity(0.2), .white.opacity(0.05)],
+                                    colors: [.white.opacity(0.12), .white.opacity(0.02)],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 ),
@@ -22,9 +25,8 @@ struct LiquidGlassButtonStyle: ButtonStyle {
                             )
                     )
             )
-            .scaleEffect(configuration.isPressed ? 1.15 : 1.0)
-            .offset(y: configuration.isPressed ? 2 : 0) // Немного перемещается при нажатии
-            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
+            .scaleEffect(configuration.isPressed ? 1.08 : 1.0)
+            .animation(.spring(response: 0.25, dampingFraction: 0.5, blendDuration: 0), value: configuration.isPressed)
     }
 }
 
@@ -87,68 +89,98 @@ struct ChatListView: View {
                 Color.black.edgesIgnoringSafeArea(.all)
                 
                 VStack(spacing: 0) {
-                    // Кастомный заголовок (как в ТГ)
-                    HStack {
-                        Button(action: {}) {
-                            Text("Изм.")
-                                .font(.system(size: 14, weight: .medium))
-                        }
-                        .buttonStyle(LiquidGlassButtonStyle())
-                        
-                        Spacer()
-                        
-                        Text("Чаты")
-                            .font(.system(size: 17, weight: .semibold))
+                    // Верхняя панель (Хедер + Поиск) с темно-серой заливкой
+                    VStack(spacing: 0) {
+                        // Кастомный заголовок (как в ТГ)
+                        HStack {
+                            Button(action: {}) {
+                                Text("Изм.")
+                                    .font(.system(size: 16, weight: .medium))
+                            }
+                            .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 20, paddingVertical: 10))
+                            
+                            Spacer()
+                            
+                            HStack(spacing: 4) {
+                                Text("Чаты")
+                                Text("🍎") // Яблоко как на скриншоте
+                            }
+                            .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.white)
-                        
-                        Spacer()
-                        
-                        Button(action: {}) {
-                            Image(systemName: "square.and.pencil")
-                                .font(.system(size: 18))
-                                .padding(2) // Небольшой отступ для иконки внутри кнопки
-                        }
-                        .buttonStyle(LiquidGlassButtonStyle())
-                    }
-                    .padding(.horizontal)
-                    .padding(.top, 5)
-                    .padding(.bottom, 8)
-
-                    ScrollView {
-                        LazyVStack(spacing: 0) {
-                            // Поиск
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 18)
-                                    .fill(.regularMaterial)
-                                    .frame(height: 52) // Увеличил с 48 до 52 (вниз)
-                                
-                                if searchText.isEmpty {
-                                    HStack {
-                                        Spacer()
-                                        Image(systemName: "magnifyingglass")
-                                            .foregroundColor(.gray)
-                                        Text("Поиск")
-                                            .foregroundColor(.gray)
-                                        Spacer()
-                                    }
+                            
+                            Spacer()
+                            
+                            // Правая группа кнопок в одном овале
+                            HStack(spacing: 20) {
+                                Button(action: {}) {
+                                    Image(systemName: "plus.circle")
+                                        .font(.system(size: 22))
                                 }
                                 
-                                HStack {
-                                    if !searchText.isEmpty {
-                                        Image(systemName: "magnifyingglass")
-                                            .foregroundColor(.gray)
-                                            .padding(.leading, 12)
-                                    }
-                                    
-                                    TextField("", text: $searchText)
-                                        .foregroundColor(.white)
-                                        .padding(.leading, searchText.isEmpty ? 40 : 5)
+                                Button(action: {}) {
+                                    Image(systemName: "square.and.pencil")
+                                        .font(.system(size: 22))
                                 }
                             }
-                            .padding(.horizontal, 10)
-                            .padding(.top, 5)
-                            .padding(.bottom, 12) // Увеличил отступ снизу
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(
+                                Capsule()
+                                    .fill(.ultraThinMaterial)
+                                    .overlay(
+                                        Capsule()
+                                            .stroke(
+                                                LinearGradient(
+                                                    colors: [.white.opacity(0.12), .white.opacity(0.02)],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                ),
+                                                lineWidth: 0.5
+                                            )
+                                    )
+                            )
+                            .foregroundColor(.white)
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 10)
+                        .padding(.bottom, 8)
 
+                        // Поиск (вынесен из ScrollView для фиксированной шапки)
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 18)
+                                .fill(.regularMaterial)
+                                .frame(height: 44)
+                            
+                            if searchText.isEmpty {
+                                HStack {
+                                    Spacer()
+                                    Image(systemName: "magnifyingglass")
+                                        .foregroundColor(.gray)
+                                    Text("Поиск")
+                                        .foregroundColor(.gray)
+                                    Spacer()
+                                }
+                            }
+                            
+                            HStack {
+                                if !searchText.isEmpty {
+                                    Image(systemName: "magnifyingglass")
+                                        .foregroundColor(.gray)
+                                        .padding(.leading, 12)
+                                }
+                                
+                                TextField("", text: $searchText)
+                                    .foregroundColor(.white)
+                                    .padding(.leading, searchText.isEmpty ? 40 : 5)
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 10)
+                    }
+                    .background(Color(red: 0.08, green: 0.08, blue: 0.08).edgesIgnoringSafeArea(.top)) // Темно-серая заливка шапки
+                    
+                    ScrollView {
+                        LazyVStack(spacing: 0) {
                             // Список чатов
                             ForEach(chats) { chat in
                                 ChatRow(chat: chat)
