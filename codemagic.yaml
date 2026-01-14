@@ -23,21 +23,19 @@ workflows:
           ruby generate_project.rb
       - name: Build iOS App
         script: |
-          xcodebuild build \
+          xcodebuild archive \
             -project HelloWorld.xcodeproj \
             -scheme HelloWorld \
-            -sdk iphoneos \
             -configuration Release \
-            -derivedDataPath build_output \
+            -archivePath build/HelloWorld.xcarchive \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            PROVISIONING_PROFILE_SPECIFIER=""
+            AD_HOC_CODE_SIGNING_ALLOWED=YES
       - name: Package IPA
         script: |
-          APP_PATH=$(find build_output -name "*.app" -type d | head -n 1)
           mkdir -p Payload
-          cp -R "$APP_PATH" Payload/
+          cp -R build/HelloWorld.xcarchive/Products/Applications/HelloWorld.app Payload/
           zip -r HelloWorld.ipa Payload
     artifacts:
       - HelloWorld.ipa

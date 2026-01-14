@@ -15,6 +15,13 @@ Dir.glob('ios_client/**/*.swift').each do |file_path|
   target.add_file_references([file_ref])
 end
 
+# Add Resources
+resources_group = project.main_group.find_subgroup('Resources', true)
+['ios_client/Resources/LaunchScreen.storyboard', 'ios_client/Resources/Info.plist'].each do |f|
+  file_ref = project.new_file(f)
+  target.add_resources([file_ref])
+end
+
 # Add Bridging Header
 bridging_header = 'ios_client/Core/CoreBridge-Bridging-Header.h'
 project.main_group.new_file(bridging_header)
@@ -30,8 +37,8 @@ target.build_configurations.each do |config|
   s['PRODUCT_BUNDLE_IDENTIFIER'] = 'com.helloworld.messenger'
   s['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
   s['SWIFT_VERSION'] = '5.0'
-  s['GENERATE_INFOPLIST_FILE'] = 'YES'
-  s['INFOPLIST_KEY_CFBundleExecutable'] = 'HelloWorld'
+  s['GENERATE_INFOPLIST_FILE'] = 'NO'
+  s['INFOPLIST_FILE'] = 'ios_client/Resources/Info.plist'
   s['SWIFT_OBJC_BRIDGING_HEADER'] = bridging_header
   s['LIBRARY_SEARCH_PATHS'] = '$(inherited) $(PROJECT_DIR)/target/aarch64-apple-ios/release'
   s['OTHER_LDFLAGS'] = '$(inherited) -lhelloworld_core -framework Security -framework Foundation'
