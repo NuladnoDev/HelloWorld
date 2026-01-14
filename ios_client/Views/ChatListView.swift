@@ -4,16 +4,17 @@ import SwiftUI
 struct LiquidGlassButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? 1.15 : 1.0) // Увеличение при нажатии
-            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
+            .foregroundColor(configuration.isPressed ? .blue : .white) // Белый по умолчанию, синий при нажатии
+            .padding(.horizontal, 14)
+            .padding(.vertical, 6)
             .background(
-                Capsule()
-                    .fill(.ultraThinMaterial)
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(.thinMaterial)
                     .overlay(
-                        Capsule()
+                        RoundedRectangle(cornerRadius: 12)
                             .stroke(
                                 LinearGradient(
-                                    colors: [.white.opacity(0.3), .white.opacity(0.05)],
+                                    colors: [.white.opacity(0.2), .white.opacity(0.05)],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 ),
@@ -21,6 +22,9 @@ struct LiquidGlassButtonStyle: ButtonStyle {
                             )
                     )
             )
+            .scaleEffect(configuration.isPressed ? 1.15 : 1.0)
+            .offset(y: configuration.isPressed ? 2 : 0) // Немного перемещается при нажатии
+            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
     }
 }
 
@@ -88,9 +92,6 @@ struct ChatListView: View {
                         Button(action: {}) {
                             Text("Изм.")
                                 .font(.system(size: 14, weight: .medium))
-                                .foregroundColor(.blue)
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 6)
                         }
                         .buttonStyle(LiquidGlassButtonStyle())
                         
@@ -105,8 +106,7 @@ struct ChatListView: View {
                         Button(action: {}) {
                             Image(systemName: "square.and.pencil")
                                 .font(.system(size: 18))
-                                .foregroundColor(.blue)
-                                .padding(8)
+                                .padding(2) // Небольшой отступ для иконки внутри кнопки
                         }
                         .buttonStyle(LiquidGlassButtonStyle())
                     }
@@ -120,7 +120,7 @@ struct ChatListView: View {
                             ZStack {
                                 RoundedRectangle(cornerRadius: 18)
                                     .fill(.regularMaterial)
-                                    .frame(height: 48) // Увеличил с 44 до 48
+                                    .frame(height: 52) // Увеличил с 48 до 52 (вниз)
                                 
                                 if searchText.isEmpty {
                                     HStack {
@@ -200,26 +200,26 @@ struct ChatRow: View {
     let chat: Chat
     
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 16) { // Увеличил расстояние до 16
             // Аватар
             ZStack {
                 Circle()
                     .fill(LinearGradient(colors: [.blue, .cyan], startPoint: .topLeading, endPoint: .bottomTrailing))
-                    .frame(width: 54, height: 54)
+                    .frame(width: 60, height: 60) // Увеличил аватарку с 54 до 60
                 
                 Text(String(chat.name.prefix(1)))
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: 24, weight: .semibold))
                     .foregroundColor(.white)
             }
             
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 6) { // Увеличил расстояние между строками
                 HStack {
                     Text(chat.name).bold()
-                        .font(.system(size: 16))
+                        .font(.system(size: 17)) // Чуть больше шрифт заголовка
                         .foregroundColor(.white)
                     
                     if chat.isVerified {
-                        Image(systemName: "checkmark.circle.fill")
+                        Image(systemName: "checkmark.seal.fill")
                             .foregroundColor(.blue)
                             .font(.system(size: 14))
                     }
@@ -233,26 +233,27 @@ struct ChatRow: View {
                 
                 HStack {
                     Text(chat.lastMessage)
-                        .font(.system(size: 14))
+                        .font(.system(size: 15))
                         .foregroundColor(.gray)
-                        .lineLimit(2)
+                        .lineLimit(2) // Telegram часто показывает до 2 строк
                     
                     Spacer()
                     
                     if chat.unreadCount > 0 {
                         Text("\(chat.unreadCount)")
                             .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.white)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
                             .background(Color.blue)
-                            .foregroundColor(.white)
                             .clipShape(Capsule())
                     }
                 }
             }
         }
-        .padding(.horizontal)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12) // Увеличил высоту ячейки (отступы сверху и снизу)
+        .contentShape(Rectangle())
     }
 }
 
