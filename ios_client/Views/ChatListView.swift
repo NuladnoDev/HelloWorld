@@ -44,13 +44,7 @@ struct ChatListView: View {
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.white)
                             .frame(width: 50, height: 36)
-                            .background(
-                                ZStack {
-                                    RoundedRectangle(cornerRadius: 18)
-                                        .fill(Color.white.opacity(0.1))
-                                    Blur(style: .systemThinMaterialDark).cornerRadius(18)
-                                }
-                            )
+                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18))
                             .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color.white.opacity(0.1), lineWidth: 0.5))
                     }
                     
@@ -76,20 +70,14 @@ struct ChatListView: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 12)
                     .frame(height: 36)
-                    .background(
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 18)
-                                .fill(Color.white.opacity(0.1))
-                            Blur(style: .systemThinMaterialDark).cornerRadius(18)
-                        }
-                    )
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18))
                     .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color.white.opacity(0.1), lineWidth: 0.5))
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 50)
                 .padding(.bottom, 15)
                 
-                // Native-styled Search Bar
+                // Native-styled Search Bar with Liquid Glass
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.gray)
@@ -97,8 +85,8 @@ struct ChatListView: View {
                         .foregroundColor(.white)
                 }
                 .padding(10)
-                .background(Color(white: 0.12))
-                .cornerRadius(12)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.05), lineWidth: 0.5))
                 .padding(.horizontal, 16)
                 .padding(.bottom, 10)
                 
@@ -134,12 +122,8 @@ struct ChatListView: View {
                             .font(.system(size: 22))
                             .foregroundColor(.white)
                             .frame(width: 60, height: 60)
-                            .background(
-                                Circle()
-                                    .fill(Color.white.opacity(0.1))
-                                    .background(Blur(style: .systemThinMaterialDark).clipShape(Circle()))
-                                    .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 0.5))
-                            )
+                            .background(.ultraThinMaterial, in: Circle())
+                            .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 0.5))
                     }
                     
                     // Main Nav Pill
@@ -172,12 +156,8 @@ struct ChatListView: View {
                         }
                     }
                     .padding(.horizontal, 8)
-                    .background(
-                        RoundedRectangle(cornerRadius: 30)
-                            .fill(Color.white.opacity(0.1))
-                            .background(Blur(style: .systemThinMaterialDark).cornerRadius(30))
-                            .overlay(RoundedRectangle(cornerRadius: 30).stroke(Color.white.opacity(0.1), lineWidth: 0.5))
-                    )
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 30))
+                    .overlay(RoundedRectangle(cornerRadius: 30).stroke(Color.white.opacity(0.1), lineWidth: 0.5))
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 40)
@@ -258,7 +238,7 @@ struct ChatRow: View {
      }
  }
  
- struct CategoryPill: View {
+struct CategoryPill: View {
     let title: String
     var isSelected: Bool = false
     var count: Int? = nil
@@ -282,17 +262,6 @@ struct ChatRow: View {
         .padding(.vertical, 8)
         .background(isSelected ? Color.white.opacity(0.15) : Color.clear)
         .cornerRadius(15)
-    }
- }
- 
- // Blur Effect Helper
-struct Blur: UIViewRepresentable {
-    var style: UIBlurEffect.Style
-    func makeUIView(context: Context) -> UIVisualEffectView {
-        return UIVisualEffectView(effect: UIBlurEffect(style: style))
-    }
-    func updateUIView(_ uiView: UIVisualEffectView, context: Context) {
-        uiView.effect = UIBlurEffect(style: style)
     }
 }
 
