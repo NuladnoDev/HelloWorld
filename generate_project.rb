@@ -16,10 +16,12 @@ Dir.glob('ios_client/**/*.swift').each do |file_path|
 end
 
 # Add Resources
-['ios_client/Resources/LaunchScreen.storyboard', 'ios_client/Resources/Info.plist'].each do |f|
-  file_ref = project.new_file(f)
-  target.add_resources([file_ref])
-end
+launch_screen = project.new_file('ios_client/Resources/LaunchScreen.storyboard')
+target.add_resources([launch_screen])
+
+# Add Info.plist reference (but NOT to resources, as it's handled by build settings)
+info_plist_path = 'ios_client/Resources/Info.plist'
+project.new_file(info_plist_path)
 
 # Add Bridging Header
 bridging_header = 'ios_client/Core/CoreBridge-Bridging-Header.h'
