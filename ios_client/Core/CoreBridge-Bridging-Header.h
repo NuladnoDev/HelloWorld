@@ -5,6 +5,7 @@
 
 // Function signatures from src/ffi.rs
 void hw_free_string(char* s);
+int hw_ping(void);
 int hw_generate_identity_keypair(char** out_private_b64, char** out_public_b64);
 int hw_derive_shared_secret(const char* my_private_b64, const char* peer_public_b64, char** out_shared_b64);
 int hw_encrypt_message(const char* shared_b64, const char* chat_id, const char* sender_id, const char* plaintext, char** out_encrypted_b64);

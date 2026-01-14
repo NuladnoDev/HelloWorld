@@ -45,6 +45,8 @@ lib_path = 'target/aarch64-apple-ios/release/libhelloworld_core.a'
 if File.exist?(lib_path)
   lib_ref = project.frameworks_group.new_file(lib_path)
   target.frameworks_build_phase.add_file_reference(lib_ref)
+  # Убедимся, что библиотека добавлена в Target Membership
+  target.add_file_references([lib_ref])
 end
 
 # Build settings
@@ -65,7 +67,7 @@ target.build_configurations.each do |config|
   s['LIBRARY_SEARCH_PATHS'] = '$(inherited) $(PROJECT_DIR)/target/aarch64-apple-ios/release'
   s['OTHER_LDFLAGS'] = [
     '$(inherited)',
-    '-force_load', '$(PROJECT_DIR)/target/aarch64-apple-ios/release/libhelloworld_core.a',
+    '-lhelloworld_core',
     '-lresolv',
     '-lc++',
     '-framework', 'Security',

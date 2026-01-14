@@ -39,6 +39,11 @@ pub extern "C" fn hw_free_string(s: *mut c_char) {
     }
 }
 
+#[no_mangle]
+pub extern "C" fn hw_ping() -> i32 {
+    42
+}
+
 /// Генерация пары ключей пользователя.
 ///
 /// out_private_b64 и out_public_b64 должны быть указателями на NULL,

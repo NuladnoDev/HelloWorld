@@ -20,20 +20,29 @@ struct HelloWorldApp: App {
 
     private func testCore() {
         print("DEBUG: Starting Core test...")
-        coreStatus = "Calling Rust..."
+        coreStatus = "Testing connection (ping)..."
         
-        DispatchQueue.global(qos: .userInitiated).async {
-            print("DEBUG: Calling generateKeyPair from background thread")
-            if let keys = CoreWrapper.shared.generateKeyPair() {
-                print("DEBUG: Success! Public Key: \(keys.publicKey.prefix(10))")
-                DispatchQueue.main.async {
-                    coreStatus = "Core initialized!\nPublic Key: \(keys.publicKey.prefix(10))..."
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            let pong = hw_ping()
+            print("DEBUG: Ping result: \(pong)")
+            
+            if pong == 42 {
+                coreStatus = "Rust connection OK! Calling generateKeyPair..."
+                
+                DispatchQueue.global(qos: .userInitiated).async {
+                    if let keys = CoreWrapper.shared.generateKeyPair() {
+                        print("DEBUG: Success! Public Key: \(keys.publicKey.prefix(10))")
+                        DispatchQueue.main.async {
+                            coreStatus = "Core Full Init Success!\nPK: \(keys.publicKey.prefix(10))..."
+                        }
+                    } else {
+                        DispatchQueue.main.async {
+                            coreStatus = "Ping OK, but KeyPair failed."
+                        }
+                    }
                 }
             } else {
-                print("DEBUG: Core returned nil")
-                DispatchQueue.main.async {
-                    coreStatus = "Failed to initialize Core (returned nil)."
-                }
+                coreStatus = "Ping failed: wrong value \(pong)"
             }
         }
     }
