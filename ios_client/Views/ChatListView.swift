@@ -178,22 +178,20 @@ struct ChatListView: View {
                         // Поиск (вынесен из ScrollView для фиксированной шапки)
                         ZStack {
                             RoundedRectangle(cornerRadius: 18)
-                                .fill(Color.black.opacity(0.45)) // Еще чуть темнее
+                                .fill(Color.black.opacity(0.4)) // Глубокая темная подложка
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 18)
-                                        .fill(.thinMaterial) // Используем thinMaterial для соответствия кнопкам
+                                        .fill(.ultraThinMaterial)
                                 )
-                                .frame(height: 38) // Уменьшил высоту с 44 до 38
+                                .frame(height: 44)
                             
                             if searchText.isEmpty {
                                 HStack {
                                     Spacer()
                                     Image(systemName: "magnifyingglass")
                                         .foregroundColor(.gray)
-                                        .font(.system(size: 14))
                                     Text("Поиск")
                                         .foregroundColor(.gray)
-                                        .font(.system(size: 15))
                                     Spacer()
                                 }
                             }
@@ -207,12 +205,11 @@ struct ChatListView: View {
                                 
                                 TextField("", text: $searchText)
                                     .foregroundColor(.white)
-                                    .font(.system(size: 15))
                                     .padding(.leading, searchText.isEmpty ? 40 : 5)
                             }
                         }
-                        .padding(.horizontal, 20) // Увеличил отступы с 16 до 20
-                        .padding(.bottom, 12)
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 10)
                     }
                      .background(Color(red: 12/255, green: 12/255, blue: 13/255).edgesIgnoringSafeArea(.top)) // Цвет #0c0c0d
                      
