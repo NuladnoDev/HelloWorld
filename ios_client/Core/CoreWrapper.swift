@@ -27,11 +27,11 @@ class CoreWrapper {
     func deriveSharedSecret(myPrivateKey: String, peerPublicKey: String) -> String? {
         var sharedPtr: UnsafeMutablePointer<Int8>?
         
-        let result = hw_derive_shared_secret(myPrivateKey, peerPublicKey, &sharedPtr)
+        let result = cpp_derive_shared_secret(myPrivateKey, peerPublicKey, &sharedPtr)
         
         if result == 0, let shared = sharedPtr {
             let secret = String(cString: shared)
-            hw_free_string(sharedPtr)
+            cpp_free_string(sharedPtr)
             return secret
         }
         
@@ -41,11 +41,11 @@ class CoreWrapper {
     func encryptMessage(sharedSecret: String, chatId: String, senderId: String, text: String) -> String? {
         var encryptedPtr: UnsafeMutablePointer<Int8>?
         
-        let result = hw_encrypt_message(sharedSecret, chatId, senderId, text, &encryptedPtr)
+        let result = cpp_encrypt_message(sharedSecret, chatId, senderId, text, &encryptedPtr)
         
         if result == 0, let encrypted = encryptedPtr {
             let resultStr = String(cString: encrypted)
-            hw_free_string(encryptedPtr)
+            cpp_free_string(encryptedPtr)
             return resultStr
         }
         
@@ -55,11 +55,11 @@ class CoreWrapper {
     func decryptMessage(sharedSecret: String, chatId: String, senderId: String, encryptedText: String) -> String? {
         var decryptedPtr: UnsafeMutablePointer<Int8>?
         
-        let result = hw_decrypt_message(sharedSecret, chatId, senderId, encryptedText, &decryptedPtr)
+        let result = cpp_decrypt_message(sharedSecret, chatId, senderId, encryptedText, &decryptedPtr)
         
         if result == 0, let decrypted = decryptedPtr {
             let resultStr = String(cString: decrypted)
-            hw_free_string(decryptedPtr)
+            cpp_free_string(decryptedPtr)
             return resultStr
         }
         
