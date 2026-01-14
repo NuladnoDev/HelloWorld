@@ -26,6 +26,7 @@ workflows:
           xcodebuild archive \
             -project HelloWorld.xcodeproj \
             -scheme HelloWorld \
+            -sdk iphoneos \
             -configuration Release \
             -archivePath build/HelloWorld.xcarchive \
             CODE_SIGNING_ALLOWED=NO \

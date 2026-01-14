@@ -16,9 +16,8 @@ Dir.glob('ios_client/**/*.swift').each do |file_path|
 end
 
 # Add Resources
-resources_group = project.main_group.find_subpath('Resources', true)
 ['ios_client/Resources/LaunchScreen.storyboard', 'ios_client/Resources/Info.plist'].each do |f|
-  file_ref = resources_group.new_file(f)
+  file_ref = project.new_file(f)
   target.add_resources([file_ref])
 end
 
