@@ -103,7 +103,6 @@ struct ChatListView: View {
                             
                             HStack(spacing: 4) {
                                 Text("Чаты")
-                                Text("🍎") // Яблоко как на скриншоте
                             }
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.white)
