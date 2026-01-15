@@ -287,9 +287,8 @@ struct SettingsView: View {
                 refreshData()
             }
         }
-    }
-    
-    private func refreshData() {
+
+    func refreshData() {
         username = UserDefaults.standard.string(forKey: "saved_username") ?? "problem"
         firstName = UserDefaults.standard.string(forKey: "saved_firstName") ?? ""
         lastName = UserDefaults.standard.string(forKey: "saved_lastName") ?? ""
