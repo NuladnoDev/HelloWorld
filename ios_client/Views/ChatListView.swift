@@ -7,6 +7,10 @@ struct ChatListView: View {
     @State private var selectedTab: Tab = .chats
     @State private var searchCategory: String = "Чаты"
     
+    // Состояние для вкладки Звонки
+    @State private var isCallsVisible = true
+    @State private var showHideCallsMenu = false
+    
     // Состояния для анимации правой группы кнопок
     @State private var isPlusPressed = false
     @State private var isPencilPressed = false
@@ -29,16 +33,16 @@ struct ChatListView: View {
     }
     
     enum Tab: String, CaseIterable {
-        case posts = "Посты"
+        case posts = "Лента"
         case chats = "Чаты"
-        case apps = "Приложения"
+        case calls = "Звонки"
         case settings = "Настройки"
         
         var icon: String {
             switch self {
             case .posts: return "rectangle.grid.1x2.fill"
             case .chats: return "message.fill"
-            case .apps: return "square.grid.2x2.fill"
+            case .calls: return "phone.fill"
             case .settings: return "gear"
             }
         }
@@ -49,187 +53,240 @@ struct ChatListView: View {
     ]
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            // Вкладка Посты
-            NavigationView {
-                ZStack {
-                    Color.black.edgesIgnoringSafeArea(.all)
-                    Text("Посты")
-                        .foregroundColor(.white)
+        ZStack(alignment: .bottom) {
+            TabView(selection: $selectedTab) {
+                // Вкладка Посты
+                NavigationView {
+                    ZStack {
+                        Color.black.edgesIgnoringSafeArea(.all)
+                        Text("Лента")
+                            .foregroundColor(.white)
+                    }
+                    .navigationBarHidden(true)
                 }
-                .navigationBarHidden(true)
-            }
-            .tabItem {
-                Label(Tab.posts.rawValue, systemImage: Tab.posts.icon)
-            }
-            .tag(Tab.posts)
-            
-            // Вкладка Чаты (Основная)
-            NavigationView {
-                ZStack {
-                    Color.black.edgesIgnoringSafeArea(.all)
-                    
-                    VStack(spacing: 0) {
-                        // Верхняя панель (Хедер + Поиск)
-                        VStack(spacing: 0) {
-                            if !isSearchActive {
-                                // Кастомный заголовок (как в ТГ)
-                                ZStack {
-                                    Text("Чаты")
-                                        .font(.system(size: 18, weight: .bold))
-                                        .foregroundColor(.white)
-                                    
-                                    HStack {
-                                        Button(action: {}) {
-                                            Text("Изм.")
-                                                .font(.system(size: 16, weight: .medium))
-                                        }
-                                        .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 16, paddingVertical: 8))
-                                        
-                                        Spacer()
-                                        
-                                        HStack(spacing: 15) {
-                                            Button(action: {}) {
-                                                Image(systemName: "plus.circle")
-                                                    .font(.system(size: 22))
-                                                    .foregroundColor(isPlusPressed ? .blue : .white)
-                                            }
-                                            .buttonStyle(PressDetectorStyle(isPressed: $isPlusPressed))
-                                            
-                                            Button(action: {}) {
-                                                Image(systemName: "square.and.pencil")
-                                                    .font(.system(size: 22))
-                                                    .foregroundColor(isPencilPressed ? .blue : .white)
-                                            }
-                                            .buttonStyle(PressDetectorStyle(isPressed: $isPencilPressed))
-                                        }
-                                        .padding(.horizontal, 14)
-                                        .padding(.vertical, 8)
-                                        .background(
-                                            ZStack {
-                                                Capsule()
-                                                    .fill(Color.black.opacity(0.4))
-                                                Capsule()
-                                                    .fill(.ultraThinMaterial)
-                                            }
-                                            .overlay(
-                                                Capsule()
-                                                    .stroke(Color.white.opacity(0.12), lineWidth: 0.5)
-                                            )
-                                        )
-                                    }
-                                }
-                                .padding(.horizontal)
-                                .padding(.top, 10)
-                                .padding(.bottom, 8)
-                            }
-
-                            // Поиск
-                            HStack(spacing: 10) {
-                                ZStack {
-                                    RoundedRectangle(cornerRadius: 18)
-                                        .fill(Color.black) // Установил чисто черный фон для поиска
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 18)
-                                                .stroke(Color.white.opacity(0.1), lineWidth: 1) // Тонкая обводка, чтобы видеть границы на черном
-                                        )
-                                        .frame(height: 36)
-                                    
-                                    HStack {
-                                        Image(systemName: "magnifyingglass")
-                                            .foregroundColor(.gray)
-                                            .padding(.leading, 10)
-                                        
-                                        TextField("Поиск", text: $searchText, onEditingChanged: { editing in
-                                            withAnimation(.spring()) {
-                                                isSearchActive = editing
-                                            }
-                                        })
-                                        .foregroundColor(.white)
-                                        .font(.system(size: 16))
-                                    }
-                                }
-                                
-                                if isSearchActive {
-                                    Button("Отмена") {
-                                        withAnimation(.spring()) {
-                                            isSearchActive = false
-                                            searchText = ""
-                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                        }
-                                    }
-                                    .foregroundColor(.blue)
-                                }
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.bottom, 10)
-                        }
-                        .background(Color.black)
+                .tabItem {
+                    Label(Tab.posts.rawValue, systemImage: Tab.posts.icon)
+                }
+                .tag(Tab.posts)
+                
+                // Вкладка Чаты (Основная)
+                NavigationView {
+                    ZStack {
+                        Color.black.edgesIgnoringSafeArea(.all)
                         
-                        // Список
-                        ScrollView {
+                        VStack(spacing: 0) {
+                            // Верхняя панель (Хедер + Поиск)
                             VStack(spacing: 0) {
-                                if isSearchActive {
-                                    SearchNavigationBar(selectedCategory: $searchCategory)
-                                        .padding(.vertical, 10)
-                                    
-                                    VStack(alignment: .leading, spacing: 20) {
-                                        Text("Недавние")
-                                            .font(.system(size: 14, weight: .semibold))
-                                            .foregroundColor(.gray)
-                                            .padding(.horizontal, 16)
+                                if !isSearchActive {
+                                    // Кастомный заголовок (как в ТГ)
+                                    ZStack {
+                                        Text("Чаты")
+                                            .font(.system(size: 18, weight: .bold))
+                                            .foregroundColor(.white)
                                         
-                                        ScrollView(.horizontal, showsIndicators: false) {
-                                            HStack(spacing: 20) {
-                                                RecentContactItem(name: "HelloWorld", color: .blue)
+                                        HStack {
+                                            Button(action: {}) {
+                                                Text("Изм.")
+                                                    .font(.system(size: 16, weight: .medium))
                                             }
-                                            .padding(.horizontal, 16)
+                                            .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 16, paddingVertical: 8))
+                                            
+                                            Spacer()
+                                            
+                                            HStack(spacing: 15) {
+                                                Button(action: {}) {
+                                                    Image(systemName: "plus.circle")
+                                                        .font(.system(size: 22))
+                                                        .foregroundColor(isPlusPressed ? .blue : .white)
+                                                }
+                                                .buttonStyle(PressDetectorStyle(isPressed: $isPlusPressed))
+                                                
+                                                Button(action: {}) {
+                                                    Image(systemName: "square.and.pencil")
+                                                        .font(.system(size: 22))
+                                                        .foregroundColor(isPencilPressed ? .blue : .white)
+                                                }
+                                                .buttonStyle(PressDetectorStyle(isPressed: $isPencilPressed))
+                                            }
+                                            .padding(.horizontal, 14)
+                                            .padding(.vertical, 8)
+                                            .background(
+                                                ZStack {
+                                                    Capsule()
+                                                        .fill(Color.black.opacity(0.4))
+                                                    Capsule()
+                                                        .fill(.ultraThinMaterial)
+                                                }
+                                                .overlay(
+                                                    Capsule()
+                                                        .stroke(Color.white.opacity(0.12), lineWidth: 0.5)
+                                                )
+                                            )
                                         }
                                     }
-                                } else {
-                                    LazyVStack(spacing: 0) {
-                                        ForEach(chats) { chat in
-                                            ChatRow(chat: chat)
-                                            Divider()
-                                                .background(Color.white.opacity(0.1))
-                                                .padding(.leading, 76)
+                                    .padding(.horizontal)
+                                    .padding(.top, 10)
+                                    .padding(.bottom, 8)
+                                }
+
+                                // Поиск
+                                HStack(spacing: 10) {
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 18)
+                                            .fill(Color.black) // Установил чисто черный фон для поиска
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 18)
+                                                    .stroke(Color.white.opacity(0.1), lineWidth: 1) // Тонкая обводка, чтобы видеть границы на черном
+                                            )
+                                            .frame(height: 36)
+                                        
+                                        HStack {
+                                            Image(systemName: "magnifyingglass")
+                                                .foregroundColor(.gray)
+                                                .padding(.leading, 10)
+                                            
+                                            TextField("Поиск", text: $searchText, onEditingChanged: { editing in
+                                                withAnimation(.spring()) {
+                                                    isSearchActive = editing
+                                                }
+                                            })
+                                            .foregroundColor(.white)
+                                            .font(.system(size: 16))
+                                        }
+                                    }
+                                    
+                                    if isSearchActive {
+                                        Button("Отмена") {
+                                            withAnimation(.spring()) {
+                                                isSearchActive = false
+                                                searchText = ""
+                                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                            }
+                                        }
+                                        .foregroundColor(.blue)
+                                    }
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.bottom, 10)
+                            }
+                            .background(Color.black)
+                            
+                            // Список
+                            ScrollView {
+                                VStack(spacing: 0) {
+                                    if isSearchActive {
+                                        SearchNavigationBar(selectedCategory: $searchCategory)
+                                            .padding(.vertical, 10)
+                                        
+                                        VStack(alignment: .leading, spacing: 20) {
+                                            Text("Недавние")
+                                                .font(.system(size: 14, weight: .semibold))
+                                                .foregroundColor(.gray)
+                                                .padding(.horizontal, 16)
+                                            
+                                            ScrollView(.horizontal, showsIndicators: false) {
+                                                HStack(spacing: 20) {
+                                                    RecentContactItem(name: "HelloWorld", color: .blue)
+                                                }
+                                                .padding(.horizontal, 16)
+                                            }
+                                        }
+                                    } else {
+                                        LazyVStack(spacing: 0) {
+                                            ForEach(chats) { chat in
+                                                ChatRow(chat: chat)
+                                                Divider()
+                                                    .background(Color.white.opacity(0.1))
+                                                    .padding(.leading, 76)
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
                     }
+                    .navigationBarHidden(true)
                 }
-                .navigationBarHidden(true)
-            }
-            .tabItem {
-                Label(Tab.chats.rawValue, systemImage: Tab.chats.icon)
-            }
-            .tag(Tab.chats)
-            
-            // Вкладка Приложения
-            NavigationView {
-                ZStack {
-                    Color.black.edgesIgnoringSafeArea(.all)
-                    Text("Приложения")
-                        .foregroundColor(.white)
-                }
-                .navigationBarHidden(true)
-            }
-            .tabItem {
-                Label(Tab.apps.rawValue, systemImage: Tab.apps.icon)
-            }
-            .tag(Tab.apps)
-            
-            // Вкладка Настройки
-            SettingsView(isAuthenticated: $isAuthenticated)
                 .tabItem {
-                    Label(Tab.settings.rawValue, systemImage: Tab.settings.icon)
+                    Label(Tab.chats.rawValue, systemImage: Tab.chats.icon)
                 }
-                .tag(Tab.settings)
+                .tag(Tab.chats)
+                
+                // Вкладка Звонки
+                if isCallsVisible {
+                    NavigationView {
+                        ZStack {
+                            Color.black.edgesIgnoringSafeArea(.all)
+                            VStack {
+                                Image(systemName: "phone.fill")
+                                    .font(.system(size: 50))
+                                    .foregroundColor(.gray)
+                                    .padding(.bottom, 10)
+                                Text("Здесь будут ваши звонки")
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                        .navigationBarHidden(true)
+                        .contentShape(Rectangle())
+                        .onLongPressGesture {
+                            withAnimation(.spring()) {
+                                showHideCallsMenu = true
+                            }
+                        }
+                    }
+                    .tabItem {
+                        Label(Tab.calls.rawValue, systemImage: Tab.calls.icon)
+                    }
+                    .tag(Tab.calls)
+                }
+                
+                // Вкладка Настройки
+                SettingsView(isAuthenticated: $isAuthenticated)
+                    .tabItem {
+                        Label(Tab.settings.rawValue, systemImage: Tab.settings.icon)
+                    }
+                    .tag(Tab.settings)
+            }
+            .accentColor(.blue)
+            .preferredColorScheme(.dark)
+            
+            // Меню скрытия вкладки (как в ТГ)
+            if showHideCallsMenu {
+                VStack {
+                    Button(action: {
+                        withAnimation(.spring()) {
+                            isCallsVisible = false
+                            showHideCallsMenu = false
+                            selectedTab = .chats
+                        }
+                    }) {
+                        HStack {
+                            Image(systemName: "eye.slash")
+                            Text("Скрыть вкладку 'Звонки'")
+                        }
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(
+                            ZStack {
+                                Capsule().fill(Color.black.opacity(0.8))
+                                Capsule().stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                            }
+                        )
+                    }
+                    .padding(.bottom, 100) // Положение над таббаром
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.black.opacity(0.1).onTapGesture {
+                    withAnimation { showHideCallsMenu = false }
+                })
+                .edgesIgnoringSafeArea(.all)
+            }
         }
-        .accentColor(.blue)
-        .preferredColorScheme(.dark)
     }
 }
 

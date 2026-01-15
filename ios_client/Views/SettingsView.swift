@@ -71,7 +71,8 @@ struct SettingsView: View {
                                             height: isAvatarExpanded ? expandedAvatarHeight : collapsedAvatarSize
                                         )
                                         .clipShape(isAvatarExpanded ? AnyShape(Rectangle()) : AnyShape(Circle()))
-                                        .padding(.top, isAvatarExpanded ? 0 : 30)
+                                        .padding(.top, isAvatarExpanded ? 0 : 20) // Уменьшил верхний отступ в свернутом виде
+                                        .offset(y: isAvatarExpanded ? 0 : -20) // Поднял аватарку выше
                                         .onTapGesture {
                                             withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
                                                 isAvatarExpanded.toggle()

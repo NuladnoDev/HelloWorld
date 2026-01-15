@@ -29,6 +29,7 @@ struct LiquidGlassButtonStyle: ButtonStyle {
                             lineWidth: 0.5
                         )
                 )
+                .clipShape(RoundedRectangle(cornerRadius: 20)) // Увеличил скругление до 20
                 .scaleEffect(configuration.isPressed ? 1.12 : 1.0)
                 .offset(y: configuration.isPressed ? 1 : 0)
             )
