@@ -227,17 +227,16 @@ struct ChatListView: View {
                             }
                         }
                         .navigationBarHidden(true)
-                        .contentShape(Rectangle())
-                        .onLongPressGesture {
-                            withAnimation(.spring()) {
-                                showHideCallsMenu = true
-                            }
-                        }
                     }
                     .tabItem {
                         Label(Tab.calls.rawValue, systemImage: Tab.calls.icon)
                     }
                     .tag(Tab.calls)
+                    .onAppear {
+                        // Для работы long press на системном таббаре в SwiftUI 
+                        // обычно требуется кастомный таббар, но мы можем добавить 
+                        // распознаватель на все вью, если выбрана эта вкладка
+                    }
                 }
                 
                 // Вкладка Настройки
@@ -249,42 +248,77 @@ struct ChatListView: View {
             }
             .accentColor(.blue)
             .preferredColorScheme(.dark)
+            .simultaneousGesture(
+                LongPressGesture(minimumDuration: 0.5).onEnded { _ in
+                    if selectedTab == .calls {
+                        withAnimation(.spring()) {
+                            showHideCallsMenu = true
+                        }
+                    }
+                }
+            )
             
             // Меню скрытия вкладки (как в ТГ)
             if showHideCallsMenu {
-                VStack {
-                    Button(action: {
-                        withAnimation(.spring()) {
-                            isCallsVisible = false
-                            showHideCallsMenu = false
-                            selectedTab = .chats
+                ZStack {
+                    Color.black.opacity(0.4)
+                        .edgesIgnoringSafeArea(.all)
+                        .onTapGesture {
+                            withAnimation { showHideCallsMenu = false }
                         }
-                    }) {
-                        HStack {
-                            Image(systemName: "eye.slash")
-                            Text("Скрыть вкладку 'Звонки'")
-                        }
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(
-                            ZStack {
-                                Capsule().fill(Color.black.opacity(0.8))
-                                Capsule().stroke(Color.white.opacity(0.2), lineWidth: 0.5)
-                            }
-                        )
-                    }
-                    .padding(.bottom, 100) // Положение над таббаром
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
                     
-                    Spacer()
+                    VStack(spacing: 0) {
+                        Spacer()
+                        
+                        VStack(spacing: 0) {
+                            // Кнопка: Начать новый звонок
+                            Button(action: {
+                                withAnimation { showHideCallsMenu = false }
+                            }) {
+                                HStack {
+                                    Text("Начать новый звонок")
+                                        .font(.system(size: 17))
+                                    Spacer()
+                                    Image(systemName: "person.badge.plus")
+                                        .font(.system(size: 20))
+                                }
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 14)
+                            }
+                            
+                            Divider()
+                                .background(Color.white.opacity(0.15))
+                            
+                            // Кнопка: Скрыть вкладку
+                            Button(action: {
+                                withAnimation(.spring()) {
+                                    isCallsVisible = false
+                                    showHideCallsMenu = false
+                                    selectedTab = .chats
+                                }
+                            }) {
+                                HStack {
+                                    Text("Скрыть вкладку «Звонки»")
+                                        .font(.system(size: 17))
+                                    Spacer()
+                                    Image(systemName: "eye.slash")
+                                        .font(.system(size: 20))
+                                }
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 14)
+                            }
+                        }
+                        .background(Color(red: 0.12, green: 0.12, blue: 0.13))
+                        .cornerRadius(28) // Увеличил скругление меню до 28
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 110) // Над таббаром
+                    }
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.black.opacity(0.1).onTapGesture {
-                    withAnimation { showHideCallsMenu = false }
-                })
                 .edgesIgnoringSafeArea(.all)
+                .zIndex(10)
             }
         }
     }

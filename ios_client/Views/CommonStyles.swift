@@ -29,7 +29,7 @@ struct LiquidGlassButtonStyle: ButtonStyle {
                             lineWidth: 0.5
                         )
                 )
-                .clipShape(RoundedRectangle(cornerRadius: 20)) // Увеличил скругление до 20
+                .clipShape(RoundedRectangle(cornerRadius: 28)) // Увеличил скругление до 28 для стиля кнопок
                 .scaleEffect(configuration.isPressed ? 1.12 : 1.0)
                 .offset(y: configuration.isPressed ? 1 : 0)
             )
@@ -74,7 +74,7 @@ struct SettingsGroup<Content: View>: View {
             content
         }
         .background(Color(red: 0.08, green: 0.08, blue: 0.08)) // Сделал фон групп настроек темнее
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .clipShape(RoundedRectangle(cornerRadius: 28)) // Увеличил скругление групп до 28
     }
 }
 
