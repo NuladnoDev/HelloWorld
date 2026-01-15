@@ -172,8 +172,7 @@ struct SettingsView: View {
                             }
                         }
                         .padding(.horizontal)
-                        .padding(.bottom, 30)
-                    }
+                    .padding(.bottom, 30)
                 }
             }
             .onPreferenceChange(ScrollOffsetKey.self) { value in
@@ -307,6 +306,18 @@ struct SettingsRow: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(SettingsButtonStyle())
+    }
+}
+
+@available(iOS 15.0, *)
+struct PressDetectorStyle: ButtonStyle {
+    @Binding var isPressed: Bool
+    
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .onChange(of: configuration.isPressed) { newValue in
+                isPressed = newValue
+            }
     }
 }
 
