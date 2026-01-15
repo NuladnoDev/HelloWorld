@@ -28,29 +28,8 @@ struct MediaViewer: View {
             Color.black.edgesIgnoringSafeArea(.all)
                 .opacity(Double(1.0 - (abs(offset.height) / 500)))
             
+            // Основной контент (фото или видео)
             VStack {
-                HStack {
-                    Button(action: { isPresented = false }) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Circle().fill(Color.black.opacity(0.5)))
-                    }
-                    Spacer()
-                    
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text(message.isMe ? "Вы" : "hikka")
-                            .font(.system(size: 16, weight: .bold))
-                        Text(message.time)
-                            .font(.system(size: 12))
-                            .opacity(0.7)
-                    }
-                    .foregroundColor(.white)
-                    .padding(.trailing)
-                }
-                .padding(.top, 50)
-                
                 Spacer()
                 
                 if let videoURL = message.videoURL {
@@ -82,8 +61,97 @@ struct MediaViewer: View {
                 
                 Spacer()
             }
+            
+            // Верхняя панель
+            VStack {
+                HStack {
+                    Button(action: { isPresented = false }) {
+                        HStack(spacing: 5) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 20, weight: .semibold))
+                            Text("Назад")
+                                .font(.system(size: 17))
+                        }
+                        .foregroundColor(.white)
+                        .padding(.leading, 8)
+                    }
+                    
+                    Spacer()
+                    
+                    Text("1 из 1") // В реальном приложении здесь будет индекс
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(.white)
+                    
+                    Spacer()
+                    
+                    HStack(spacing: 20) {
+                        Button(action: {}) {
+                            Image(systemName: "text.viewfinder")
+                                .font(.system(size: 20))
+                                .foregroundColor(.white)
+                        }
+                        
+                        Button(action: {}) {
+                            Image(systemName: "ellipsis.circle")
+                                .font(.system(size: 22))
+                                .foregroundColor(.white)
+                        }
+                    }
+                    .padding(.trailing, 12)
+                }
+                .padding(.top, 60)
+                .padding(.bottom, 20)
+                .background(
+                    LinearGradient(
+                        colors: [.black.opacity(0.4), .clear],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                
+                Spacer()
+            }
+            
+            // Нижняя панель
+            VStack {
+                Spacer()
+                
+                HStack {
+                    Button(action: {}) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 22))
+                            .foregroundColor(.white)
+                    }
+                    .padding(.leading, 20)
+                    
+                    Spacer()
+                    
+                    Text("вчера в \(message.time)")
+                        .font(.system(size: 15))
+                        .foregroundColor(.white)
+                    
+                    Spacer()
+                    
+                    Button(action: {}) {
+                        Image(systemName: "pencil.tip.crop.circle") // Заглушка для иконки редактирования/A
+                            .font(.system(size: 22))
+                            .foregroundColor(.white)
+                    }
+                    .padding(.trailing, 20)
+                }
+                .padding(.bottom, 40)
+                .padding(.top, 20)
+                .background(
+                    LinearGradient(
+                        colors: [.clear, .black.opacity(0.4)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+            }
         }
         .transition(.move(edge: .bottom))
+        .edgesIgnoringSafeArea(.all)
     }
 }
 
@@ -100,7 +168,8 @@ struct ChatView: View {
         ChatMessage(text: "Привет! Все отлично, работаю над новым проектом. А у тебя?", isMe: true, time: "10:01", hasTail: true),
         ChatMessage(text: "Тоже неплохо. Помнишь, я говорил про тот дизайн?", isMe: false, time: "10:02", hasTail: true),
         ChatMessage(text: "Да, конечно. Есть какие-то наработки?", isMe: true, time: "10:03", hasTail: true),
-        ChatMessage(text: "Да, вот посмотри скриншот.", isMe: false, time: "10:04", hasTail: true)
+        ChatMessage(text: "Да, вот посмотри скриншот.", isMe: false, time: "10:04", hasTail: true),
+        ChatMessage(text: "", isMe: false, time: "10:04", hasTail: true, image: UIImage(systemName: "photo.artframe"), isPhoto: true)
     ]
     
     var body: some View {
@@ -153,6 +222,7 @@ struct ChatView: View {
             }
         }
         .navigationBarHidden(true)
+        .toolbar(.hidden, for: .tabBar)
         .photosPicker(isPresented: $showMediaPicker, selection: $selectedMediaItem, matching: .any(of: [.images, .videos]))
         .onChange(of: selectedMediaItem) { newItem in
             Task {
@@ -243,14 +313,16 @@ struct ChatView: View {
             }.buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 12, paddingVertical: 10))
             
             LiquidGlassView(cornerRadius: 20) {
-                HStack {
-                    Spacer()
-                    VStack(spacing: 2) {
-                        Text("hikka").font(.system(size: 16, weight: .bold)).foregroundColor(.white)
-                        Text("был(а) недавно").font(.system(size: 12)).foregroundColor(.white.opacity(0.6))
-                    }
-                    Spacer()
-                }.padding(.vertical, 6)
+                VStack(spacing: 2) {
+                    Text("hikka")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                    Text("был(а) недавно")
+                        .font(.system(size: 12))
+                        .foregroundColor(.white.opacity(0.6))
+                }
+                .padding(.vertical, 6)
+                .padding(.horizontal, 20)
             }
             
             Button(action: {}) {
