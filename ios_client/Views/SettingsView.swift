@@ -27,6 +27,11 @@ struct SettingsView: View {
     @State private var avatarImage: UIImage? = nil
     @State private var isEditingProfile = false
     
+    // Состояния для выбора фото
+    @State private var tempImage: UIImage? = nil
+    @State private var showImagePicker = false
+    @State private var showCropper = false
+    
     // Состояние для расширяемой аватарки
     @State private var scrollOffset: CGFloat = 0
     @State private var isAvatarExpanded = false
@@ -40,21 +45,22 @@ struct SettingsView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            // Фоновая заливка с учетом Safe Area
-            Color(red: 0.05, green: 0.05, blue: 0.06)
+            // Общий черный фон для всей страницы
+            Color.black
                 .edgesIgnoringSafeArea(.all)
              
             ScrollView(showsIndicators: false) {
                 ZStack(alignment: .top) {
                     // Прозрачный слой для отслеживания скролла
                     GeometryReader { geo in
-                        let yOffset = geo.frame(in: .global).minY
+                        let yOffset = geo.frame(in: .named("scroll")).minY
                         Color.clear.preference(key: ScrollOffsetKey.self, value: yOffset)
                     }
+                    .frame(height: 0) // Делаем GeometryReader нулевой высоты
                     
                     VStack(spacing: 0) {
                         // Верхняя часть с анимированной аватаркой
-                        ZStack(alignment: .bottom) {
+                        ZStack(alignment: .top) { // Изменил alignment на .top
                             // Сама аватарка или фон
                             ZStack(alignment: .bottom) {
                                 if let image = avatarImage {
@@ -63,9 +69,10 @@ struct SettingsView: View {
                                         .scaledToFill()
                                         .frame(
                                             width: isAvatarExpanded ? UIScreen.main.bounds.width : collapsedAvatarSize,
-                                            height: isAvatarExpanded ? expandedAvatarHeight : 320
+                                            height: isAvatarExpanded ? expandedAvatarHeight : collapsedAvatarSize
                                         )
                                         .clipShape(isAvatarExpanded ? AnyShape(Rectangle()) : AnyShape(Circle()))
+                                        .padding(.top, isAvatarExpanded ? 0 : 60) // Поднял еще чуть выше для выравнивания
                                         .onTapGesture {
                                             withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
                                                 isAvatarExpanded.toggle()
@@ -76,29 +83,30 @@ struct SettingsView: View {
                                     if isAvatarExpanded {
                                         VStack(alignment: .leading, spacing: 2) {
                                             Text(fullName)
-                                                .font(.system(size: 26, weight: .bold))
+                                                .font(.system(size: 24, weight: .bold))
                                                 .foregroundColor(.white)
                                             
                                             HStack(spacing: 4) {
                                                 Image(systemName: "checkmark.shield.fill")
-                                                    .font(.system(size: 12))
+                                                    .font(.system(size: 11))
                                                 Text(tag.isEmpty ? phoneNumber : "@\(tag)")
                                             }
-                                            .font(.system(size: 16))
-                                            .foregroundColor(.white.opacity(0.8))
+                                            .font(.system(size: 14))
+                                            .foregroundColor(.white.opacity(0.9))
                                         }
-                                        .padding(.horizontal, 24)
-                                        .padding(.top, 20)
-                                        .padding(.bottom, 30)
+                                        .padding(.horizontal, 16)
+                                        .padding(.top, 10)
+                                        .padding(.bottom, 15)
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .background(
                                             LinearGradient(
-                                                colors: [.clear, .black.opacity(0.3), .black.opacity(0.5)],
+                                                colors: [.clear, .black.opacity(0.2)],
                                                 startPoint: .top,
                                                 endPoint: .bottom
                                             )
                                         )
-                                        .background(.ultraThinMaterial)
+                                        .background(Color.black.opacity(0.3))
+                                        .background(.ultraThinMaterial.opacity(0.5))
                                         .transition(.opacity.combined(with: .move(edge: .bottom)))
                                     }
                                 } else {
@@ -122,7 +130,7 @@ struct SettingsView: View {
                                         }
                                 }
                             }
-                            .frame(height: isAvatarExpanded ? expandedAvatarHeight : 320)
+                            .frame(height: isAvatarExpanded ? expandedAvatarHeight : 260)
                             .frame(maxWidth: .infinity)
                             
                             // Информация под маленькой аватаркой
@@ -136,22 +144,26 @@ struct SettingsView: View {
                                         .font(.system(size: 16))
                                         .foregroundColor(.white.opacity(0.5))
                                 }
-                                .padding(.bottom, 40)
+                                .padding(.top, 180) // Сместил текст под поднятую аватарку
                                 .transition(.opacity)
                             }
                         }
-                        .frame(height: isAvatarExpanded ? expandedAvatarHeight : 320)
+                        .frame(height: isAvatarExpanded ? expandedAvatarHeight : 260)
                         .clipShape(Rectangle())
                         
-                        // Группы настроек
-                        VStack(spacing: 20) {
-                            SettingsGroup {
+                        // Группы настроек с серой заливкой
+                        ZStack {
+                            Color(red: 0.05, green: 0.05, blue: 0.06)
+                                .edgesIgnoringSafeArea(.bottom)
+                            
+                            VStack(spacing: 20) {
+                                SettingsGroup {
                                 SettingsRow(icon: "face.smiling", iconColor: .blue, title: "Сменить эмодзи-статус", textColor: .blue, noIconBackground: true)
                                 Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
                                 SettingsRow(icon: "wand.and.stars", iconColor: .blue, title: "Изменить цвет профиля", textColor: .blue, noIconBackground: true)
                                 Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
                                 SettingsRow(icon: "camera", iconColor: .blue, title: "Выбрать фотографию", textColor: .blue, noIconBackground: true) {
-                                    isEditingProfile = true
+                                    showImagePicker = true
                                 }
                                 
                                 if tag.isEmpty {
@@ -194,15 +206,16 @@ struct SettingsView: View {
                                 Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
                                 SettingsRow(icon: "lightbulb.fill", iconColor: .yellow, title: "Возможности HelloWorld")
                             }
+                            .padding(.horizontal)
+                            .padding(.bottom, 30)
                         }
-                        .padding(.horizontal)
-                        .padding(.bottom, 30)
                     }
                 }
             }
+            .coordinateSpace(name: "scroll")
             .onPreferenceChange(ScrollOffsetKey.self) { value in
-                let threshold: CGFloat = -20
-                if value < threshold && isAvatarExpanded {
+                // При скролле вниз (контент уходит вверх) значение уменьшается
+                if value < -10 && isAvatarExpanded {
                     withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                         isAvatarExpanded = false
                     }
@@ -245,6 +258,27 @@ struct SettingsView: View {
             }
         }
         .navigationBarHidden(true)
+        .sheet(isPresented: $showImagePicker) {
+            ImagePicker(image: $tempImage)
+        }
+        .fullScreenCover(isPresented: $showCropper) {
+            ImageCropperView(image: $tempImage, isPresented: $showCropper)
+                .onDisappear {
+                    if let cropped = tempImage {
+                        avatarImage = cropped
+                        // Сохраняем в UserDefaults
+                        if let imageData = cropped.jpegData(compressionQuality: 0.5) {
+                            let base64String = imageData.base64EncodedString()
+                            UserDefaults.standard.set(base64String, forKey: "saved_avatar")
+                        }
+                    }
+                }
+        }
+        .onChange(of: tempImage) { newValue in
+            if newValue != nil && !showCropper {
+                showCropper = true
+            }
+        }
         .onAppear {
             refreshData()
         }
