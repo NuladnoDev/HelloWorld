@@ -287,6 +287,7 @@ struct SettingsView: View {
                 refreshData()
             }
         }
+    } // Closing brace for body
 
     func refreshData() {
         username = UserDefaults.standard.string(forKey: "saved_username") ?? "problem"
@@ -301,7 +302,7 @@ struct SettingsView: View {
             avatarImage = image
         }
     }
-}
+} // Closing brace for SettingsView
 
 struct ScrollOffsetKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
