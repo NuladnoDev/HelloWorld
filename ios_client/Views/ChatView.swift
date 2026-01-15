@@ -25,17 +25,25 @@ struct MediaViewer: View {
     @State private var isPlaying = false
     @State private var currentTime: Double = 0
     @State private var duration: Double = 0.1
+    @State private var showControls = true
+    @State private var timer: Timer? = nil
     
     var body: some View {
         ZStack {
             Color.black.edgesIgnoringSafeArea(.all)
                 .opacity(Double(1.0 - (abs(offset.height) / 500)))
+                .onTapGesture {
+                    toggleControls()
+                }
             
             // Основной контент (фото или видео)
             Group {
                 if message.isVideo, let videoURL = message.videoURL {
                     VideoPlayerView(url: videoURL, isPlaying: $isPlaying, currentTime: $currentTime, duration: $duration)
                         .edgesIgnoringSafeArea(.all)
+                        .onTapGesture {
+                            toggleControls()
+                        }
                 } else if let image = message.image {
                     Image(uiImage: image)
                         .resizable()
@@ -62,56 +70,59 @@ struct MediaViewer: View {
             
             // Верхняя панель
             VStack {
-                HStack {
-                    Button(action: { isPresented = false }) {
-                        HStack(spacing: 5) {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 20, weight: .semibold))
-                            Text("Назад")
-                                .font(.system(size: 17))
-                        }
-                        .foregroundColor(.white)
-                        .padding(.leading, 8)
-                    }
-                    
-                    Spacer()
-                    
-                    Text("137 из 137")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.white)
-                    
-                    Spacer()
-                    
-                    HStack(spacing: 20) {
-                        Button(action: {}) {
-                            Image(systemName: "rectangle.portrait.and.arrow.right")
-                                .font(.system(size: 20))
-                                .foregroundColor(.white)
+                if showControls {
+                    HStack {
+                        Button(action: { isPresented = false }) {
+                            HStack(spacing: 5) {
+                                Image(systemName: "chevron.left")
+                                    .font(.system(size: 20, weight: .semibold))
+                                Text("Назад")
+                                    .font(.system(size: 17))
+                            }
+                            .foregroundColor(.white)
+                            .padding(.leading, 8)
                         }
                         
-                        Button(action: {}) {
-                            Image(systemName: "gearshape")
-                                .font(.system(size: 20))
-                                .foregroundColor(.white)
-                        }
+                        Spacer()
                         
-                        Button(action: {}) {
-                            Image(systemName: "ellipsis.circle")
-                                .font(.system(size: 22))
-                                .foregroundColor(.white)
+                        Text("137 из 137")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(.white)
+                        
+                        Spacer()
+                        
+                        HStack(spacing: 20) {
+                            Button(action: {}) {
+                                Image(systemName: "rectangle.portrait.and.arrow.right")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(.white)
+                            }
+                            
+                            Button(action: {}) {
+                                Image(systemName: "gearshape")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(.white)
+                            }
+                            
+                            Button(action: {}) {
+                                Image(systemName: "ellipsis.circle")
+                                    .font(.system(size: 22))
+                                    .foregroundColor(.white)
+                            }
                         }
+                        .padding(.trailing, 12)
                     }
-                    .padding(.trailing, 12)
-                }
-                .padding(.top, 60)
-                .padding(.bottom, 20)
-                .background(
-                    LinearGradient(
-                        colors: [.black.opacity(0.6), .clear],
-                        startPoint: .top,
-                        endPoint: .bottom
+                    .padding(.top, 60)
+                    .padding(.bottom, 20)
+                    .background(
+                        LinearGradient(
+                            colors: [.black.opacity(0.6), .clear],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
                     )
-                )
+                    .transition(.opacity)
+                }
                 
                 Spacer()
             }
@@ -120,71 +131,100 @@ struct MediaViewer: View {
             VStack {
                 Spacer()
                 
-                VStack(spacing: 0) {
-                    if message.isVideo {
-                        // Слайдер времени
-                        VStack(spacing: 8) {
-                            Slider(value: $currentTime, in: 0...duration)
-                                .accentColor(.white)
-                                .padding(.horizontal, 10)
-                            
-                            HStack {
-                                Text(formatTime(currentTime))
-                                Spacer()
-                                Text(formatTime(duration))
-                            }
-                            .font(.system(size: 12))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 10)
-                        }
-                        .padding(.bottom, 10)
-                    }
-                    
-                    HStack {
-                        Button(action: {}) {
-                            Image(systemName: "arrowshape.turn.up.right")
-                                .font(.system(size: 22))
-                                .foregroundColor(.white)
-                        }
-                        .padding(.leading, 20)
-                        
-                        Spacer()
-                        
+                if showControls {
+                    VStack(spacing: 0) {
                         if message.isVideo {
-                            Button(action: { isPlaying.toggle() }) {
-                                Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                                    .font(.system(size: 28))
+                            // Слайдер времени
+                            VStack(spacing: 8) {
+                                Slider(value: $currentTime, in: 0...duration)
+                                    .accentColor(.white)
+                                    .padding(.horizontal, 10)
+                                
+                                HStack {
+                                    Text(formatTime(currentTime))
+                                    Spacer()
+                                    Text(formatTime(duration))
+                                }
+                                .font(.system(size: 12))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 10)
+                            }
+                            .padding(.bottom, 10)
+                        }
+                        
+                        HStack {
+                            Button(action: {}) {
+                                Image(systemName: "arrowshape.turn.up.right")
+                                    .font(.system(size: 22))
                                     .foregroundColor(.white)
                             }
-                        } else {
-                            Text("вчера в \(message.time)")
-                                .font(.system(size: 15))
-                                .foregroundColor(.white)
+                            .padding(.leading, 20)
+                            
+                            Spacer()
+                            
+                            if message.isVideo {
+                                Button(action: { isPlaying.toggle() }) {
+                                    Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                                        .font(.system(size: 28))
+                                        .foregroundColor(.white)
+                                }
+                            } else {
+                                Text("вчера в \(message.time)")
+                                    .font(.system(size: 15))
+                                    .foregroundColor(.white)
+                            }
+                            
+                            Spacer()
+                            
+                            Button(action: {}) {
+                                Image(systemName: "trash")
+                                    .font(.system(size: 22))
+                                    .foregroundColor(.white)
+                            }
+                            .padding(.trailing, 20)
                         }
-                        
-                        Spacer()
-                        
-                        Button(action: {}) {
-                            Image(systemName: "trash")
-                                .font(.system(size: 22))
-                                .foregroundColor(.white)
-                        }
-                        .padding(.trailing, 20)
+                        .padding(.bottom, 40)
+                        .padding(.top, message.isVideo ? 10 : 20)
                     }
-                    .padding(.bottom, 40)
-                    .padding(.top, message.isVideo ? 10 : 20)
-                }
-                .background(
-                    LinearGradient(
-                        colors: [.clear, .black.opacity(0.6)],
-                        startPoint: .top,
-                        endPoint: .bottom
+                    .background(
+                        LinearGradient(
+                            colors: [.clear, .black.opacity(0.6)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
                     )
-                )
+                    .transition(.opacity)
+                }
             }
         }
         .transition(.opacity)
         .edgesIgnoringSafeArea(.all)
+        .onAppear {
+            startTimer()
+        }
+        .onDisappear {
+            timer?.invalidate()
+        }
+    }
+    
+    private func toggleControls() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            showControls.toggle()
+        }
+        if showControls {
+            startTimer()
+        } else {
+            timer?.invalidate()
+        }
+    }
+    
+    private func startTimer() {
+        timer?.invalidate()
+        timer = Timer.scheduledTimer(withTimeInterval: 4.0, repeats: false) { _ in
+            withAnimation(.easeInOut(duration: 0.3)) {
+                showControls = false
+            }
+        }
     }
     
     private func formatTime(_ seconds: Double) -> String {
@@ -430,8 +470,9 @@ struct ChatView: View {
             }
         }
         .navigationBarHidden(true)
-        .edgesIgnoringSafeArea(.bottom) // Игнорируем отступ снизу, так как TabBar скрыт
         .toolbar(.hidden, for: .tabBar)
+        .ignoresSafeArea(.all, edges: .top) // Игнорируем верх для хедера
+        .ignoresSafeArea(.keyboard, edges: .bottom) // Позволяем клавиатуре самой двигать контент (стандартное поведение)
         .photosPicker(isPresented: $showMediaPicker, selection: $selectedMediaItem, matching: .any(of: [.images, .videos]))
         .onChange(of: selectedMediaItem) { newItem in
             Task {
@@ -518,7 +559,7 @@ struct ChatView: View {
             }
             .padding(.horizontal, 10)
             .padding(.top, 8)
-            .padding(.bottom, showCustomKeyboard ? 0 : 34) // 34 - стандартный отступ Safe Area для iPhone без челки
+            .padding(.bottom, showCustomKeyboard ? 0 : (isTextFieldFocused ? 8 : 34))
             .background(Color.black.opacity(0.3))
         }
     }
@@ -678,8 +719,8 @@ struct MessageBubble: View {
                             if let image = message.image {
                                 Image(uiImage: image)
                                     .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .frame(maxWidth: 250, maxHeight: 300)
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(maxWidth: 280, maxHeight: 400)
                                     .clipShape(RoundedRectangle(cornerRadius: 18))
                             } else {
                                 RoundedRectangle(cornerRadius: 18)
