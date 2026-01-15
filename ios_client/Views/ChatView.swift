@@ -568,6 +568,7 @@ struct ProfileTab: View {
     }
 }
 
+@available(iOS 16.0, *)
 struct ChatView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var messageText: String = ""
@@ -813,7 +814,7 @@ extension UITabBar {
         
         let frame = tabBarController.tabBar.frame
         let height = frame.size.height
-        let offsetY = (visible ? 0 : height)
+        _ = (visible ? 0 : height)
         
         let duration = (animated ? 0.3 : 0.0)
         
