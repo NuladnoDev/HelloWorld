@@ -98,44 +98,68 @@ struct ImageCropperView: View {
     private func cropImage() {
         guard let uiImage = image else { return }
         
-        let targetSize = CGSize(width: maskSize, height: maskSize)
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = UIScreen.main.scale // Используем масштаб экрана для высокого качества
+        // Получаем размеры вью и картинки
+        let viewWidth = containerSize.width > 0 ? containerSize.width : UIScreen.main.bounds.width
+        let viewHeight = containerSize.height > 0 ? containerSize.height : UIScreen.main.bounds.height
+        let imageSize = uiImage.size
         
-        let renderer = UIGraphicsImageRenderer(size: targetSize, format: format)
+        // Расчет размеров как в .scaledToFill()
+        let horizontalScale = viewWidth / imageSize.width
+        let verticalScale = viewHeight / imageSize.height
+        let baseScale = max(horizontalScale, verticalScale)
         
-        let cropped = renderer.image { context in
-            // Черный фон
-            UIColor.black.setFill()
-            context.fill(CGRect(origin: .zero, size: targetSize))
+        // Итоговый масштаб отображения (базовый * пользовательский)
+        let totalScale = baseScale * scale
+        
+        // Размеры отображаемой картинки
+        let displayedWidth = imageSize.width * totalScale
+        let displayedHeight = imageSize.height * totalScale
+        
+        // Центр маски в координатах вью
+        let maskCenterInView = CGPoint(x: viewWidth / 2, y: viewHeight / 2)
+        
+        // Центр картинки в координатах вью с учетом смещения
+        let imageCenterInView = CGPoint(
+            x: viewWidth / 2 + offset.width,
+            y: viewHeight / 2 + offset.height
+        )
+        
+        // Положение верхнего левого угла маски относительно верхнего левого угла картинки
+        // В координатах вью:
+        let maskTopLeftInView = CGPoint(
+            x: maskCenterInView.x - maskSize / 2,
+            y: maskCenterInView.y - maskSize / 2
+        )
+        
+        let imageTopLeftInView = CGPoint(
+            x: imageCenterInView.x - displayedWidth / 2,
+            y: imageCenterInView.y - displayedHeight / 2
+        )
+        
+        // Смещение маски относительно картинки в пикселях вью
+        let xOffsetInView = maskTopLeftInView.x - imageTopLeftInView.x
+        let yOffsetInView = maskTopLeftInView.y - imageTopLeftInView.y
+        
+        // Переводим в координаты оригинальной картинки
+        let cropRect = CGRect(
+            x: xOffsetInView / totalScale,
+            y: yOffsetInView / totalScale,
+            width: maskSize / totalScale,
+            height: maskSize / totalScale
+        )
+        
+        // Выполняем кроп
+        if let cgImage = uiImage.cgImage?.cropping(to: cropRect) {
+            let croppedUIImage = UIImage(cgImage: cgImage, scale: uiImage.scale, orientation: uiImage.imageOrientation)
             
-            // Размер контейнера (где отображалось фото)
-            let viewWidth = containerSize.width > 0 ? containerSize.width : UIScreen.main.bounds.width
-            let viewHeight = containerSize.height > 0 ? containerSize.height : UIScreen.main.bounds.height
+            // Масштабируем до целевого размера для сохранения (например, 600x600 для четкости)
+            let finalSize = CGSize(width: 600, height: 600)
+            UIGraphicsBeginImageContextWithOptions(finalSize, false, 0)
+            croppedUIImage.draw(in: CGRect(origin: .zero, size: finalSize))
+            let finalImage = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
             
-            let aspectRatio = uiImage.size.width / uiImage.size.height
-            
-            // Начальные размеры как в scaledToFill
-            var drawWidth = viewWidth
-            var drawHeight = viewWidth / aspectRatio
-            
-            if drawHeight < viewHeight {
-                drawHeight = viewHeight
-                drawWidth = viewHeight * aspectRatio
-            }
-            
-            // Применяем масштаб пользователя
-            let finalWidth = drawWidth * scale
-            let finalHeight = drawHeight * scale
-            
-            // Центрируем и применяем смещение
-            // Маска находится в центре вью
-            let drawX = (targetSize.width / 2) - (drawWidth * scale / 2) + offset.width
-            let drawY = (targetSize.height / 2) - (drawHeight * scale / 2) + offset.height
-            
-            uiImage.draw(in: CGRect(x: drawX, y: drawY, width: finalWidth, height: finalHeight))
+            image = finalImage
         }
-        
-        image = cropped
     }
 }

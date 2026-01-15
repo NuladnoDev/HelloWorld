@@ -72,7 +72,7 @@ struct SettingsGroup<Content: View>: View {
         VStack(spacing: 0) {
             content
         }
-        .background(Color(red: 0.11, green: 0.11, blue: 0.12))
+        .background(Color(red: 0.08, green: 0.08, blue: 0.08)) // Сделал фон групп настроек темнее
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }

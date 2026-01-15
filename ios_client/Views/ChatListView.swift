@@ -13,13 +13,14 @@ struct ChatListView: View {
     
     init(isAuthenticated: Binding<Bool>) {
         self._isAuthenticated = isAuthenticated
-        UITabBar.appearance().isHidden = true
+        // Настройка внешнего вида системного таббара согласно гайду (Liquid Glass)
         let appearance = UITabBarAppearance()
-        appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = UIColor(red: 0.07, green: 0.07, blue: 0.07, alpha: 1.0)
+        appearance.configureWithDefaultBackground()
+        appearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
+        appearance.backgroundColor = UIColor.black.withAlphaComponent(0.4)
         
         // Цвет обводки сверху таббара
-        appearance.shadowColor = UIColor.white.withAlphaComponent(0.15)
+        appearance.shadowColor = UIColor.white.withAlphaComponent(0.12)
         
         UITabBar.appearance().standardAppearance = appearance
         if #available(iOS 15.0, *) {
@@ -28,14 +29,16 @@ struct ChatListView: View {
     }
     
     enum Tab: String, CaseIterable {
-        case posts = "посты"
+        case posts = "Посты"
         case chats = "Чаты"
+        case apps = "Приложения"
         case settings = "Настройки"
         
         var icon: String {
             switch self {
             case .posts: return "rectangle.grid.1x2.fill"
             case .chats: return "message.fill"
+            case .apps: return "square.grid.2x2.fill"
             case .settings: return "gear"
             }
         }
@@ -46,266 +49,213 @@ struct ChatListView: View {
     ]
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            // Контент вкладок
-            Group {
-                switch selectedTab {
-                case .posts:
-                    NavigationView {
-                        ZStack {
-                            Color.black.edgesIgnoringSafeArea(.all)
-                            Text("посты")
-                                .foregroundColor(.white)
-                        }
-                        .navigationBarHidden(true)
-                    }
-                case .chats:
-                    ZStack {
-                        Color.black.edgesIgnoringSafeArea(.all)
-                        
+        TabView(selection: $selectedTab) {
+            // Вкладка Посты
+            NavigationView {
+                ZStack {
+                    Color.black.edgesIgnoringSafeArea(.all)
+                    Text("Посты")
+                        .foregroundColor(.white)
+                }
+                .navigationBarHidden(true)
+            }
+            .tabItem {
+                Label(Tab.posts.rawValue, systemImage: Tab.posts.icon)
+            }
+            .tag(Tab.posts)
+            
+            // Вкладка Чаты (Основная)
+            NavigationView {
+                ZStack {
+                    Color.black.edgesIgnoringSafeArea(.all)
+                    
+                    VStack(spacing: 0) {
+                        // Верхняя панель (Хедер + Поиск)
                         VStack(spacing: 0) {
-                            // Верхняя панель (Хедер + Поиск)
-                            VStack(spacing: 0) {
-                                if !isSearchActive {
-                                    // Кастомный заголовок (как в ТГ)
-                                    ZStack {
-                                        // Центрированный заголовок
-                                        Text("Чаты")
-                                            .font(.system(size: 18, weight: .bold))
-                                            .foregroundColor(.white)
-                                        
-                                        HStack {
-                                            Button(action: {}) {
-                                                Text("Изм.")
-                                                    .font(.system(size: 16, weight: .medium))
-                                            }
-                                            .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 16, paddingVertical: 8))
-                                            
-                                            Spacer()
-                                            
-                                            // Правая группа кнопок в одном овале
-                                            HStack(spacing: 15) {
-                                                Button(action: {}) {
-                                                    Image(systemName: "plus.circle")
-                                                        .font(.system(size: 22))
-                                                        .foregroundColor(isPlusPressed ? .blue : .white)
-                                                }
-                                                .buttonStyle(PressDetectorStyle(isPressed: $isPlusPressed))
-                                                
-                                                Button(action: {}) {
-                                                    Image(systemName: "square.and.pencil")
-                                                        .font(.system(size: 22))
-                                                        .foregroundColor(isPencilPressed ? .blue : .white)
-                                                }
-                                                .buttonStyle(PressDetectorStyle(isPressed: $isPencilPressed))
-                                            }
-                                            .padding(.horizontal, 14)
-                                            .padding(.vertical, 8)
-                                            .background(
-                                                ZStack {
-                                                    Capsule()
-                                                        .fill(Color.black.opacity(0.4))
-                                                    Capsule()
-                                                        .fill(.thinMaterial)
-                                                }
-                                                .overlay(
-                                                    Capsule()
-                                                        .stroke(
-                                                            LinearGradient(
-                                                                colors: [.white.opacity(0.15), .white.opacity(0.05)],
-                                                                startPoint: .topLeading,
-                                                                endPoint: .bottomTrailing
-                                                            ),
-                                                            lineWidth: 0.5
-                                                        )
-                                                )
-                                                .scaleEffect((isPlusPressed || isPencilPressed) ? 1.12 : 1.0)
-                                                .offset(y: (isPlusPressed || isPencilPressed) ? 1 : 0)
-                                            )
-                                            .animation(.spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0), value: isPlusPressed || isPencilPressed)
-                                        }
-                                    }
-                                    .padding(.horizontal)
-                                    .padding(.top, 10)
-                                    .padding(.bottom, 8)
-                                    .transition(.asymmetric(insertion: .opacity, removal: .move(edge: .top).combined(with: .opacity)))
-                                }
-
-                                // Поиск (вынесен из ScrollView для фиксированной шапки)
-                                HStack(spacing: 10) {
-                                    ZStack {
-                                        RoundedRectangle(cornerRadius: 18)
-                                            .fill(Color(red: 0.12, green: 0.12, blue: 0.12)) // Тёмный фон вместо серого
-                                            .frame(height: 44)
-                                        
-                                        if searchText.isEmpty {
-                                            HStack {
-                                                if !isSearchActive { Spacer() }
-                                                Image(systemName: "magnifyingglass")
-                                                    .foregroundColor(.gray)
-                                                    .padding(.leading, isSearchActive ? 12 : 0)
-                                                Text("Поиск")
-                                                    .foregroundColor(.gray)
-                                                if !isSearchActive { Spacer() }
-                                            }
-                                        }
-                                        
-                                        HStack {
-                                            if !searchText.isEmpty || isSearchActive {
-                                                Image(systemName: "magnifyingglass")
-                                                    .foregroundColor(.gray)
-                                                    .padding(.leading, 12)
-                                                    .opacity(searchText.isEmpty && isSearchActive ? 0 : 1)
-                                            }
-                                            
-                                            TextField("", text: $searchText, onEditingChanged: { editing in
-                                                if editing {
-                                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                                                        isSearchActive = true
-                                                    }
-                                                }
-                                            })
-                                            .foregroundColor(.white)
-                                            .padding(.leading, (searchText.isEmpty && !isSearchActive) ? 40 : 5)
-                                        }
-                                    }
+                            if !isSearchActive {
+                                // Кастомный заголовок (как в ТГ)
+                                ZStack {
+                                    Text("Чаты")
+                                        .font(.system(size: 18, weight: .bold))
+                                        .foregroundColor(.white)
                                     
-                                    if isSearchActive {
-                                        Button(action: {
-                                            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                                                isSearchActive = false
-                                                searchText = ""
-                                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                            }
-                                        }) {
-                                            Text("Отмена")
-                                                .foregroundColor(.blue)
+                                    HStack {
+                                        Button(action: {}) {
+                                            Text("Изм.")
+                                                .font(.system(size: 16, weight: .medium))
                                         }
-                                        .transition(.move(edge: .trailing).combined(with: .opacity))
+                                        .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 16, paddingVertical: 8))
+                                        
+                                        Spacer()
+                                        
+                                        HStack(spacing: 15) {
+                                            Button(action: {}) {
+                                                Image(systemName: "plus.circle")
+                                                    .font(.system(size: 22))
+                                                    .foregroundColor(isPlusPressed ? .blue : .white)
+                                            }
+                                            .buttonStyle(PressDetectorStyle(isPressed: $isPlusPressed))
+                                            
+                                            Button(action: {}) {
+                                                Image(systemName: "square.and.pencil")
+                                                    .font(.system(size: 22))
+                                                    .foregroundColor(isPencilPressed ? .blue : .white)
+                                            }
+                                            .buttonStyle(PressDetectorStyle(isPressed: $isPencilPressed))
+                                        }
+                                        .padding(.horizontal, 14)
+                                        .padding(.vertical, 8)
+                                        .background(
+                                            ZStack {
+                                                Capsule()
+                                                    .fill(Color.black.opacity(0.4))
+                                                Capsule()
+                                                    .fill(.ultraThinMaterial)
+                                            }
+                                            .overlay(
+                                                Capsule()
+                                                    .stroke(Color.white.opacity(0.12), lineWidth: 0.5)
+                                            )
+                                        )
                                     }
                                 }
-                                .padding(.horizontal, 16)
-                                .padding(.bottom, 10)
-                                .padding(.top, isSearchActive ? 10 : 0)
+                                .padding(.horizontal)
+                                .padding(.top, 10)
+                                .padding(.bottom, 8)
                             }
-                            .background(Color.black.edgesIgnoringSafeArea(.top))
-                            
-                            ZStack(alignment: .bottom) {
-                                Color.black.edgesIgnoringSafeArea(.all)
-                                ScrollView {
-                                    if isSearchActive {
-                                        // Контент режима поиска
-                                        VStack(alignment: .leading, spacing: 20) {
-                                            // Секция недавних контактов
-                                            VStack(alignment: .leading, spacing: 12) {
-                                                Text("Недавние")
-                                                    .font(.system(size: 14, weight: .semibold))
-                                                    .foregroundColor(.gray)
-                                                    .padding(.horizontal, 16)
-                                                
-                                                ScrollView(.horizontal, showsIndicators: false) {
-                                                    HStack(spacing: 20) {
-                                                        RecentContactItem(name: "HelloWorld", color: .blue)
-                                                    }
-                                                    .padding(.horizontal, 16)
-                                                }
+
+                            // Поиск
+                            HStack(spacing: 10) {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 18)
+                                        .fill(Color.black) // Установил чисто черный фон для поиска
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 18)
+                                                .stroke(Color.white.opacity(0.1), lineWidth: 1) // Тонкая обводка, чтобы видеть границы на черном
+                                        )
+                                        .frame(height: 36)
+                                    
+                                    HStack {
+                                        Image(systemName: "magnifyingglass")
+                                            .foregroundColor(.gray)
+                                            .padding(.leading, 10)
+                                        
+                                        TextField("Поиск", text: $searchText, onEditingChanged: { editing in
+                                            withAnimation(.spring()) {
+                                                isSearchActive = editing
                                             }
-                                            .padding(.top, 10)
-                                            
-                                            Spacer()
-                                        }
-                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                        .background(Color.black)
-                                    } else {
-                                        LazyVStack(spacing: 0) {
-                                            // Список чатов
-                                            ForEach(chats) { chat in
-                                                ChatRow(chat: chat)
-                                                Divider()
-                                                    .background(Color.white.opacity(0.1))
-                                                    .padding(.leading, 76)
-                                            }
-                                        }
+                                        })
+                                        .foregroundColor(.white)
+                                        .font(.system(size: 16))
                                     }
                                 }
                                 
                                 if isSearchActive {
-                                    // Категории внизу (как в ТГ на скрине) - Одно меню навигации
+                                    Button("Отмена") {
+                                        withAnimation(.spring()) {
+                                            isSearchActive = false
+                                            searchText = ""
+                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                        }
+                                    }
+                                    .foregroundColor(.blue)
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.bottom, 10)
+                        }
+                        .background(Color.black)
+                        
+                        // Список
+                        ScrollView {
+                            VStack(spacing: 0) {
+                                if isSearchActive {
                                     SearchNavigationBar(selectedCategory: $searchCategory)
-                                        .padding(.bottom, 10)
-                                        .transition(.asymmetric(
-                                            insertion: .move(edge: .bottom).combined(with: .opacity),
-                                            removal: .opacity.animation(.none) // Мгновенное исчезновение без анимации
-                                        ))
+                                        .padding(.vertical, 10)
+                                    
+                                    VStack(alignment: .leading, spacing: 20) {
+                                        Text("Недавние")
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundColor(.gray)
+                                            .padding(.horizontal, 16)
+                                        
+                                        ScrollView(.horizontal, showsIndicators: false) {
+                                            HStack(spacing: 20) {
+                                                RecentContactItem(name: "HelloWorld", color: .blue)
+                                            }
+                                            .padding(.horizontal, 16)
+                                        }
+                                    }
+                                } else {
+                                    LazyVStack(spacing: 0) {
+                                        ForEach(chats) { chat in
+                                            ChatRow(chat: chat)
+                                            Divider()
+                                                .background(Color.white.opacity(0.1))
+                                                .padding(.leading, 76)
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
-                case .settings:
-                    SettingsView(isAuthenticated: $isAuthenticated)
                 }
+                .navigationBarHidden(true)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .padding(.bottom, isSearchActive ? 0 : 80) // Отступ для кастомного таббара только когда поиск не активен
-
+            .tabItem {
+                Label(Tab.chats.rawValue, systemImage: Tab.chats.icon)
+            }
+            .tag(Tab.chats)
             
-            if !isSearchActive {
-                // Кастомный Таббар в стиле Liquid Glass (полноэкранный, как в iOS/Telegram)
-                VStack(spacing: 0) {
-                    Divider()
-                        .background(Color.white.opacity(0.12))
-                    
-                    HStack(spacing: 0) {
-                        ForEach(Tab.allCases, id: \.self) { tab in
-                            Button(action: {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                    selectedTab = tab
-                                }
-                            }) {
-                                VStack(spacing: 4) {
-                                    Image(systemName: tab.icon)
-                                        .font(.system(size: 23))
-                                        .symbolVariant(selectedTab == tab ? .fill : .none)
-                                    Text(tab.rawValue)
-                                        .font(.system(size: 10, weight: .medium))
-                                }
-                                .foregroundColor(selectedTab == tab ? .blue : .gray)
-                                .frame(maxWidth: .infinity)
-                                .padding(.top, 8)
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 10)
-                    .padding(.bottom, 25) // Отступ под "челку"
-                    .background(
-                        ZStack {
-                            Color.black.opacity(0.8)
-                            Rectangle()
-                                .fill(.ultraThinMaterial)
-                        }
-                    )
+            // Вкладка Приложения
+            NavigationView {
+                ZStack {
+                    Color.black.edgesIgnoringSafeArea(.all)
+                    Text("Приложения")
+                        .foregroundColor(.white)
                 }
-                .transition(.move(edge: .bottom))
+                .navigationBarHidden(true)
             }
+            .tabItem {
+                Label(Tab.apps.rawValue, systemImage: Tab.apps.icon)
+            }
+            .tag(Tab.apps)
+            
+            // Вкладка Настройки
+            SettingsView(isAuthenticated: $isAuthenticated)
+                .tabItem {
+                    Label(Tab.settings.rawValue, systemImage: Tab.settings.icon)
+                }
+                .tag(Tab.settings)
         }
-        .background(Color.black.edgesIgnoringSafeArea(.all))
         .accentColor(.blue)
+        .preferredColorScheme(.dark)
     }
 }
 
-@available(iOS 15.0, *)
-struct CategoryPill: View {
-    let title: String
-    let isActive: Bool
+// Вспомогательные компоненты
+struct LiquidGlassButtonStyle: ButtonStyle {
+    let paddingHorizontal: CGFloat
+    let paddingVertical: CGFloat
     
-    var body: some View {
-        Text(title).bold()
-            .font(.caption)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(isActive ? Color.blue.opacity(0.2) : Color.white.opacity(0.1))
-            .foregroundColor(isActive ? .blue : .white)
-            .clipShape(Capsule())
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .padding(.horizontal, paddingHorizontal)
+            .padding(.vertical, paddingVertical)
+            .background(.ultraThinMaterial)
+            .cornerRadius(10)
+            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
+            .animation(.spring(), value: configuration.isPressed)
+    }
+}
+
+struct PressDetectorStyle: ButtonStyle {
+    @Binding var isPressed: Bool
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .onChange(of: configuration.isPressed) { newValue in
+                isPressed = newValue
+            }
     }
 }
 
@@ -314,22 +264,21 @@ struct ChatRow: View {
     let chat: Chat
     
     var body: some View {
-        HStack(spacing: 16) { // Увеличил расстояние до 16
-            // Аватар
+        HStack(spacing: 16) {
             ZStack {
                 Circle()
                     .fill(LinearGradient(colors: [.blue, .cyan], startPoint: .topLeading, endPoint: .bottomTrailing))
-                    .frame(width: 60, height: 60) // Увеличил аватарку с 54 до 60
+                    .frame(width: 60, height: 60)
                 
                 Text(String(chat.name.prefix(1)))
                     .font(.system(size: 24, weight: .semibold))
                     .foregroundColor(.white)
             }
             
-            VStack(alignment: .leading, spacing: 6) { // Увеличил расстояние между строками
+            VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text(chat.name).bold()
-                        .font(.system(size: 17)) // Чуть больше шрифт заголовка
+                        .font(.system(size: 17))
                         .foregroundColor(.white)
                     
                     if chat.isVerified {
@@ -349,7 +298,7 @@ struct ChatRow: View {
                     Text(chat.lastMessage)
                         .font(.system(size: 15))
                         .foregroundColor(.gray)
-                        .lineLimit(2) // Telegram часто показывает до 2 строк
+                        .lineLimit(1)
                     
                     Spacer()
                     
@@ -366,7 +315,7 @@ struct ChatRow: View {
             }
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 12) // Увеличил высоту ячейки (отступы сверху и снизу)
+        .padding(.vertical, 8)
         .contentShape(Rectangle())
     }
 }
@@ -383,28 +332,18 @@ struct Chat: Identifiable {
 @available(iOS 15.0, *)
 struct RecentContactItem: View {
     let name: String
-    var image: String? = nil
     var color: Color = .gray
     
     var body: some View {
         VStack(spacing: 8) {
             ZStack {
-                if let image = image {
-                    Image(systemName: image)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 60, height: 60)
-                        .clipShape(Circle())
-                        .foregroundColor(.gray)
-                } else {
-                    Circle()
-                        .fill(LinearGradient(colors: [color.opacity(0.8), color], startPoint: .topLeading, endPoint: .bottomTrailing))
-                        .frame(width: 60, height: 60)
-                    
-                    Text(String(name.prefix(1)).uppercased())
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(.white)
-                }
+                Circle()
+                    .fill(LinearGradient(colors: [color.opacity(0.8), color], startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .frame(width: 60, height: 60)
+                
+                Text(String(name.prefix(1)).uppercased())
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(.white)
             }
             
             Text(name)
@@ -433,10 +372,8 @@ struct SearchNavigationBar: View {
                     Text(category)
                         .font(.system(size: 12, weight: selectedCategory == category ? .bold : .medium))
                         .lineLimit(1)
-                        .fixedSize(horizontal: true, vertical: false)
                         .foregroundColor(selectedCategory == category ? .white : .gray)
                         .padding(.vertical, 8)
-                        .padding(.horizontal, 10)
                         .frame(maxWidth: .infinity)
                         .background(
                             ZStack {
@@ -452,18 +389,8 @@ struct SearchNavigationBar: View {
             }
         }
         .padding(4)
-        .background(
-            Capsule()
-                .fill(Color(red: 0.1, green: 0.1, blue: 0.1)) // Темно-серый/черный овал
-        )
+        .background(Color.white.opacity(0.05))
+        .clipShape(Capsule())
         .padding(.horizontal, 16)
-    }
-}
-
-@available(iOS 15.0, *)
-struct ChatListView_Previews: PreviewProvider {
-    static var previews: some View {
-        ChatListView(isAuthenticated: .constant(true))
-            .preferredColorScheme(.dark)
     }
 }
