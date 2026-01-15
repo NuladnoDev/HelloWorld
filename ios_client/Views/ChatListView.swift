@@ -194,7 +194,11 @@ struct ChatListView: View {
                                     } else {
                                         LazyVStack(spacing: 0) {
                                             ForEach(chats) { chat in
-                                                ChatRow(chat: chat)
+                                                NavigationLink(destination: ChatView()) {
+                                                    ChatRow(chat: chat)
+                                                }
+                                                .buttonStyle(PlainButtonStyle())
+                                                
                                                 Divider()
                                                     .background(Color.white.opacity(0.1))
                                                     .padding(.leading, 76)

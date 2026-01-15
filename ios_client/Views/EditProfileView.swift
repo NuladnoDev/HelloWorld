@@ -205,17 +205,15 @@ struct EditProfileView: View {
                             
                             Divider().background(Color.white.opacity(0.1)).padding(.leading, 50)
                             
-                            SettingsRow(icon: "at", iconColor: .blue, title: "Имя пользователя", showArrow: true)
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    showEditTag = true
-                                }
-                                .overlay(
-                                    Text(tag.isEmpty ? "Установить тег" : "@\(tag)")
-                                        .font(.system(size: 16))
-                                        .foregroundColor(tag.isEmpty ? .white.opacity(0.3) : .white)
-                                        .padding(.trailing, 40)
-                                , alignment: .trailing)
+                            SettingsRow(icon: "at", iconColor: .blue, title: "Имя пользователя", showArrow: true) {
+                                showEditTag = true
+                            }
+                            .overlay(
+                                Text(tag.isEmpty ? "Установить тег" : "@\(tag)")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(tag.isEmpty ? .white.opacity(0.3) : .white)
+                                    .padding(.trailing, 40)
+                            , alignment: .trailing)
                             
                             Divider().background(Color.white.opacity(0.1)).padding(.leading, 50)
                             
