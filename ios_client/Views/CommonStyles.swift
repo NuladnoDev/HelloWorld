@@ -1,7 +1,7 @@
 import SwiftUI
 
 // Кастомный стиль для кнопок с эффектом масштабирования и Liquid Glass
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct LiquidGlassButtonStyle: ButtonStyle {
     var paddingHorizontal: CGFloat = 16
     var paddingVertical: CGFloat = 8
@@ -38,7 +38,7 @@ struct LiquidGlassButtonStyle: ButtonStyle {
 }
 
 // Вспомогательный стиль для отслеживания нажатия без изменения вида
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct PressDetectorStyle: ButtonStyle {
     @Binding var isPressed: Bool
     
@@ -51,7 +51,7 @@ struct PressDetectorStyle: ButtonStyle {
 }
 
 // Стиль для рядов настроек с подсветкой при нажатии
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct SettingsButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -61,7 +61,7 @@ struct SettingsButtonStyle: ButtonStyle {
 }
 
 // Компоненты для настроек
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct SettingsGroup<Content: View>: View {
     let content: Content
     
@@ -78,7 +78,7 @@ struct SettingsGroup<Content: View>: View {
     }
 }
 
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct SettingsRow: View {
     let icon: String
     let iconColor: Color

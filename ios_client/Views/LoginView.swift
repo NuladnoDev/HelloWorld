@@ -1,6 +1,6 @@
 import SwiftUI
 
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct LoginView: View {
     @Binding var isAuthenticated: Bool
     @State private var username = ""

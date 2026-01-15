@@ -1,5 +1,6 @@
 import SwiftUI
 
+@available(iOS 16.0, *)
 struct ChatListView: View {
     @Binding var isAuthenticated: Bool
     @State private var searchText = ""
@@ -328,7 +329,7 @@ struct ChatListView: View {
     }
 }
 
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct ChatRow: View {
     let chat: Chat
     
@@ -398,7 +399,7 @@ struct Chat: Identifiable {
     var isVerified: Bool = false
 }
 
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct RecentContactItem: View {
     let name: String
     var color: Color = .gray
@@ -424,7 +425,7 @@ struct RecentContactItem: View {
     }
 }
 
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct SearchNavigationBar: View {
     @Binding var selectedCategory: String
     let categories = ["Чаты", "Каналы", "Приложения", "Медиа"]

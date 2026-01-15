@@ -1,6 +1,6 @@
 import SwiftUI
 
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct EditProfileView: View {
     @Binding var isPresented: Bool
     @Binding var isAuthenticated: Bool

@@ -1,6 +1,6 @@
 import SwiftUI
 
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 @main
 struct HelloWorldApp: App {
     @State private var isAuthenticated = UserDefaults.standard.bool(forKey: "is_authenticated")

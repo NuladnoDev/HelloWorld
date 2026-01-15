@@ -1,6 +1,6 @@
 import SwiftUI
 
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct RegistrationFlowView: View {
     @Binding var isAuthenticated: Bool
     @State private var currentStep: Int = 1
@@ -62,7 +62,7 @@ struct RegistrationFlowView: View {
 }
 
 // MARK: - Step 1: Phone
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct PhoneStepView: View {
     @Binding var phoneNumber: String
     var nextStep: () -> Void
@@ -115,7 +115,7 @@ struct PhoneStepView: View {
 }
 
 // MARK: - Step 2: Name
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct NameStepView: View {
     @Binding var firstName: String
     @Binding var lastName: String
@@ -176,7 +176,7 @@ struct NameStepView: View {
 }
 
 // MARK: - Step 3: Tag
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct TagStepView: View {
     @Binding var tag: String
     var nextStep: () -> Void
@@ -243,7 +243,7 @@ struct TagStepView: View {
 }
 
 // MARK: - Step 4: Avatar
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct AvatarStepView: View {
     @Binding var selectedImage: UIImage?
     var finish: () -> Void

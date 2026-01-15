@@ -2,7 +2,7 @@ import SwiftUI
 import PhotosUI
 import AVKit
 
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct ChatMessage: Identifiable {
     let id = UUID()
     let text: String
@@ -16,7 +16,7 @@ struct ChatMessage: Identifiable {
     var isEmoji: Bool = false
 }
 
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct MediaViewer: View {
     let message: ChatMessage
     @Binding var isPresented: Bool
@@ -87,7 +87,7 @@ struct MediaViewer: View {
     }
 }
 
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct ChatView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var messageText: String = ""
@@ -261,7 +261,7 @@ struct ChatView: View {
     }
 }
 
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct LiquidGlassView<Content: View>: View {
     let content: Content
     var cornerRadius: CGFloat = 28
@@ -296,6 +296,7 @@ struct LiquidGlassView<Content: View>: View {
 }
 
 // Модель для загрузки видео
+@available(iOS 16.0, *)
 struct VideoModel: Transferable {
     let url: URL
     static var transferRepresentation: some TransferRepresentation {
@@ -312,7 +313,7 @@ struct VideoModel: Transferable {
     }
 }
 
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct MessageBubble: View {
     let message: ChatMessage
     var onMediaTap: (() -> Void)? = nil
@@ -370,7 +371,7 @@ struct MessageBubble: View {
     }
 }
 
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct TelegramCheckmarks: View {
     var body: some View {
         HStack(spacing: -5) {

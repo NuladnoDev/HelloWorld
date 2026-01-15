@@ -16,7 +16,7 @@ struct AnyShape: Shape {
     }
 }
 
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct SettingsView: View {
     @Binding var isAuthenticated: Bool
     @State private var username: String = UserDefaults.standard.string(forKey: "saved_username") ?? "problem"
