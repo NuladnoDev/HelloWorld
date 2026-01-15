@@ -46,9 +46,9 @@ struct SettingsView: View {
                                     ],
                                     center: .center,
                                     startRadius: 20,
-                                    endRadius: 140
+                                    endRadius: 150
                                 )
-                                .frame(width: 350, height: 350)
+                                .frame(width: 380, height: 380)
                                 
                                 Circle()
                                     .fill(LinearGradient(
@@ -56,13 +56,13 @@ struct SettingsView: View {
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     ))
-                                    .frame(width: 100, height: 100)
+                                    .frame(width: 120, height: 120) // Увеличил аватарку (было 100)
                                 
                                 Text(String(username.prefix(1)).uppercased())
-                                    .font(.system(size: 40, weight: .bold))
+                                    .font(.system(size: 48, weight: .bold)) // Увеличил букву
                                     .foregroundColor(.white)
                             }
-                            .padding(.top, -35)
+                            .padding(.top, -65) // Поднял аватарку значительно выше (было -35)
                             
                             VStack(spacing: 2) {
                                 Text("@\(username)")
@@ -78,6 +78,7 @@ struct SettingsView: View {
                                         .foregroundColor(.white.opacity(0.5))
                                 }
                             }
+                            .padding(.top, -5) // Подтянул текст еще ближе к аватарке
                         }
                         .padding(.top, 5)
                         .padding(.bottom, 40)
@@ -88,7 +89,7 @@ struct SettingsView: View {
                             let minY = geo.frame(in: .global).minY
                             Color(white: 0.1)
                                 .offset(y: minY > 0 ? -minY : 0)
-                                .frame(height: minY > 0 ? 250 + minY : 250)
+                                .frame(height: minY > 0 ? 220 + minY : 220) // Немного уменьшил базовую высоту фона
                         }
                     )
                     
