@@ -16,8 +16,9 @@ struct EditBioView: View {
                     Button("Отмена") {
                         presentationMode.wrappedValue.dismiss()
                     }
-                    .foregroundColor(.white)
                     .font(.system(size: 17))
+                    .foregroundColor(.white)
+                    .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 20, paddingVertical: 10))
                     
                     Spacer()
                     
@@ -31,10 +32,12 @@ struct EditBioView: View {
                         bio = tempBio
                         presentationMode.wrappedValue.dismiss()
                     }
-                    .foregroundColor(.white)
                     .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(.white)
+                    .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 20, paddingVertical: 10))
                 }
-                .padding()
+                .padding(.horizontal)
+                .padding(.top, 15)
                 .background(Color.black)
                 
                 ScrollView {
@@ -47,14 +50,12 @@ struct EditBioView: View {
                             
                             ZStack(alignment: .topLeading) {
                                 RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(white: 0.1))
+                                    .fill(Color(white: 0.12))
                                 
-                                TextEditor(text: $tempBio)
-                                    .scrollContentBackground(.hidden) // Available in iOS 16+, for iOS 15 we might need a workaround but let's try this
-                                    .foregroundColor(.white)
+                                bioEditorView
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 8)
-                                    .frame(minHeight: 100)
+                                    .frame(minHeight: 120)
                             }
                             .padding(.horizontal, 16)
                         }
@@ -72,6 +73,18 @@ struct EditBioView: View {
             tempBio = bio
             // TextEditor background workaround for iOS 15
             UITextView.appearance().backgroundColor = .clear
+        }
+    }
+    
+    @ViewBuilder
+    private var bioEditorView: some View {
+        if #available(iOS 16.0, *) {
+            TextEditor(text: $tempBio)
+                .scrollContentBackground(.hidden)
+                .foregroundColor(.white)
+        } else {
+            TextEditor(text: $tempBio)
+                .foregroundColor(.white)
         }
     }
 }

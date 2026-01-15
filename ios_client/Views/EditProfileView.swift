@@ -278,10 +278,10 @@ struct EditProfileView: View {
                     }
             }
         }
-        .fullScreenCover(isPresented: $showEditTag) {
+        .sheet(isPresented: $showEditTag) {
             EditTagView(tag: $tag)
         }
-        .fullScreenCover(isPresented: $showEditBio) {
+        .sheet(isPresented: $showEditBio) {
             EditBioView(bio: $bio)
         }
         .onChange(of: tempImage) { newValue in

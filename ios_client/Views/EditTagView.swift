@@ -16,8 +16,9 @@ struct EditTagView: View {
                     Button("Отмена") {
                         presentationMode.wrappedValue.dismiss()
                     }
-                    .foregroundColor(.white)
                     .font(.system(size: 17))
+                    .foregroundColor(.white)
+                    .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 20, paddingVertical: 10))
                     
                     Spacer()
                     
@@ -31,10 +32,12 @@ struct EditTagView: View {
                         tag = tempTag
                         presentationMode.wrappedValue.dismiss()
                     }
-                    .foregroundColor(.white)
                     .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(.white)
+                    .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 20, paddingVertical: 10))
                 }
-                .padding()
+                .padding(.horizontal)
+                .padding(.top, 15)
                 .background(Color.black)
                 
                 ScrollView {
@@ -47,16 +50,16 @@ struct EditTagView: View {
                             
                             ZStack {
                                 RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(white: 0.1))
+                                    .fill(Color(white: 0.12))
                                 
-                                TextField("Имя пользователя", text: $tempTag)
+                                TextField("", text: $tempTag, prompt: Text("Имя пользователя").foregroundColor(.white.opacity(0.3)))
                                     .autocapitalization(.none)
                                     .disableAutocorrection(true)
                                     .foregroundColor(.white)
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 12)
                             }
-                            .frame(height: 44)
+                            .frame(height: 50)
                             .padding(.horizontal, 16)
                         }
                         

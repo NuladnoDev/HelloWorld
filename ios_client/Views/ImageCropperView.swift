@@ -76,7 +76,7 @@ struct ImageCropperView: View {
                         isPresented = false
                     }
                     .foregroundColor(.white)
-                    .fontWeight(.bold)
+                    .font(.system(size: 17, weight: .bold))
                     .padding()
                 }
                 Spacer()
