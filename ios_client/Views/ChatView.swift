@@ -150,7 +150,7 @@ struct MediaViewer: View {
                 )
             }
         }
-        .transition(.move(edge: .bottom))
+        .transition(.opacity)
         .edgesIgnoringSafeArea(.all)
     }
 }
@@ -195,6 +195,10 @@ struct ChatView: View {
                         }
                         .padding(.horizontal, 10)
                         .padding(.bottom, 20)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                        }
                     }
                     .onChange(of: messages.count) { _ in
                         if let lastMessage = messages.last {
@@ -257,16 +261,17 @@ struct ChatView: View {
                 // Поле ввода
                 LiquidGlassView(cornerRadius: 28) {
                     HStack(spacing: 8) {
-                        Button(action: {}) {
-                            Image(systemName: "face.smiling")
-                                .font(.system(size: 20))
-                                .foregroundColor(.white.opacity(0.6))
-                        }
-                        .padding(.leading, 12)
-                        
                         TextField("Сообщение", text: $messageText)
                             .foregroundColor(.white)
                             .font(.system(size: 16))
+                            .padding(.leading, 16)
+                        
+                        Button(action: {}) {
+                            Image(systemName: "face.smiling")
+                                .font(.system(size: 22))
+                                .foregroundColor(.white.opacity(0.5))
+                        }
+                        .padding(.trailing, messageText.isEmpty ? 12 : 4)
                         
                         if !messageText.isEmpty {
                             Button(action: {
@@ -276,7 +281,7 @@ struct ChatView: View {
                                 }
                             }) {
                                 Image(systemName: "arrow.up.circle.fill")
-                                    .font(.system(size: 26))
+                                    .font(.system(size: 28))
                                     .foregroundColor(.blue)
                             }
                             .padding(.trailing, 8)
@@ -312,6 +317,8 @@ struct ChatView: View {
                 Image(systemName: "chevron.left").font(.system(size: 18, weight: .bold))
             }.buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 12, paddingVertical: 10))
             
+            Spacer()
+            
             LiquidGlassView(cornerRadius: 20) {
                 VStack(spacing: 2) {
                     Text("hikka")
@@ -324,6 +331,8 @@ struct ChatView: View {
                 .padding(.vertical, 6)
                 .padding(.horizontal, 20)
             }
+            
+            Spacer()
             
             Button(action: {}) {
                 Circle().fill(Color.gray.opacity(0.3)).frame(width: 36, height: 36)
@@ -438,7 +447,7 @@ struct MessageBubble: View {
                         .foregroundColor(message.isMe ? .white.opacity(0.7) : .white.opacity(0.5))
                     }
                     .padding(.horizontal, 12).padding(.vertical, 8)
-                    .background(message.isMe ? Color(red: 0.4, green: 0.3, blue: 0.8) : Color(white: 0.15))
+                    .background(message.isMe ? Color.blue : Color(white: 0.15))
                     .cornerRadius(18)
                 }
             }
