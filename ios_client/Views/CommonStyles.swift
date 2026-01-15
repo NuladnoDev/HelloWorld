@@ -72,8 +72,8 @@ struct SettingsGroup<Content: View>: View {
         VStack(spacing: 0) {
             content
         }
-        .background(Color(white: 0.12))
-        .clipShape(RoundedRectangle(cornerRadius: 22))
+        .background(Color(red: 0.11, green: 0.11, blue: 0.12))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
 

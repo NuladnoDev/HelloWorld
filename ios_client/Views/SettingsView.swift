@@ -71,7 +71,7 @@ struct SettingsView: View {
                                             height: isAvatarExpanded ? expandedAvatarHeight : collapsedAvatarSize
                                         )
                                         .clipShape(isAvatarExpanded ? AnyShape(Rectangle()) : AnyShape(Circle()))
-                                        .padding(.top, isAvatarExpanded ? 0 : 60)
+                                        .padding(.top, isAvatarExpanded ? 0 : 30)
                                         .onTapGesture {
                                             withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
                                                 isAvatarExpanded.toggle()
@@ -148,7 +148,7 @@ struct SettingsView: View {
                         .clipShape(Rectangle())
                         
                         ZStack {
-                            Color(red: 0.05, green: 0.05, blue: 0.06)
+                            Color.black
                                 .edgesIgnoringSafeArea(.bottom)
                             
                             VStack(spacing: 20) {
@@ -201,9 +201,9 @@ struct SettingsView: View {
                                     Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
                                     SettingsRow(icon: "lightbulb.fill", iconColor: .yellow, title: "Возможности HelloWorld")
                                 }
-                                .padding(.horizontal)
                                 .padding(.bottom, 30)
                             }
+                            .padding(.horizontal, 16)
                         }
                     }
                 }
