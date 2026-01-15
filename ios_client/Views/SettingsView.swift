@@ -2,90 +2,111 @@ import SwiftUI
 
 @available(iOS 15.0, *)
 struct SettingsView: View {
+    @State private var username: String = "jsoaai"
+    @State private var phoneNumber: String = "+7 (999) 123-45-67"
+    
     var body: some View {
         ZStack {
             Color.black.edgesIgnoringSafeArea(.all)
             
             ScrollView {
-                VStack(spacing: 24) {
-                    // Верхняя панель настроек
-                    HStack {
-                        Button(action: {}) {
-                            Image(systemName: "square.grid.2x2.fill")
-                                .font(.system(size: 20))
-                        }
-                        .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 12, paddingVertical: 12))
+                VStack(spacing: 0) {
+                    // Хедер с градиентом
+                    ZStack(alignment: .top) {
+                        // Темная заливка как на скрине (темнее цвета аватарки)
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.1, green: 0.15, blue: 0.25).opacity(0.8),
+                                Color(red: 0.05, green: 0.07, blue: 0.12),
+                                .black
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .frame(height: 380)
+                        .edgesIgnoringSafeArea(.top)
                         
-                        Spacer()
-                        
-                        Button(action: {}) {
-                            Text("Изм.")
-                                .font(.system(size: 16, weight: .medium))
+                        VStack(spacing: 0) {
+                            // Верхняя панель кнопок
+                            HStack {
+                                Button(action: {}) {
+                                    Image(systemName: "square.grid.2x2.fill")
+                                        .font(.system(size: 20))
+                                }
+                                .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 12, paddingVertical: 12))
+                                
+                                Spacer()
+                                
+                                Button(action: {}) {
+                                    Text("Изм.")
+                                        .font(.system(size: 16, weight: .medium))
+                                }
+                                .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 20, paddingVertical: 10))
+                            }
+                            .padding(.horizontal)
+                            .padding(.top, 10)
+                            
+                            // Секция профиля (Аватар + Тег + Номер + Имя)
+                            VStack(spacing: 12) {
+                                ZStack {
+                                    Circle()
+                                        .fill(LinearGradient(
+                                            colors: [Color(red: 0.3, green: 0.7, blue: 1.0), .blue],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ))
+                                        .frame(width: 110, height: 110)
+                                    
+                                    Text(String(username.prefix(1)).uppercased())
+                                        .font(.system(size: 44, weight: .bold))
+                                        .foregroundColor(.white)
+                                }
+                                .padding(.top, -5) // Еще выше
+                                
+                                VStack(spacing: 4) {
+                                    Text("@\(username)")
+                                        .font(.system(size: 26, weight: .bold))
+                                        .foregroundColor(.white)
+                                    
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "info.circle")
+                                            .font(.system(size: 14))
+                                            .foregroundColor(.white.opacity(0.5))
+                                        Text(phoneNumber)
+                                            .font(.system(size: 15))
+                                            .foregroundColor(.white.opacity(0.5))
+                                    }
+                                }
+                            }
+                            .padding(.top, 10)
                         }
-                        .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 20, paddingVertical: 10))
                     }
-                    .padding(.horizontal)
-                    .padding(.top, 10)
-                    
-                    // Секция профиля (Аватар + Тег + Имя)
-                    VStack(spacing: 12) {
-                        ZStack {
-                            // Свечение вокруг аватарки
-                            Circle()
-                                .fill(Color.blue.opacity(0.3))
-                                .frame(width: 120, height: 120)
-                                .blur(radius: 20)
-                            
-                            Circle()
-                                .fill(LinearGradient(
-                                    colors: [Color(red: 0.3, green: 0.7, blue: 1.0), .blue],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ))
-                                .frame(width: 100, height: 100)
-                            
-                            Text("L")
-                                .font(.system(size: 40, weight: .bold))
-                                .foregroundColor(.white)
-                        }
-                        
-                        VStack(spacing: 4) {
-                            Text("@lario")
-                                .font(.system(size: 28, weight: .bold))
-                                .foregroundColor(.white)
-                            
-                            Text("Laryion")
-                                .font(.system(size: 16))
-                                .foregroundColor(.gray)
-                        }
-                    }
-                    .padding(.bottom, 10)
                     
                     // Группы настроек
                     VStack(spacing: 20) {
-                        // Первая группа (синие кнопки)
+                        // Первая группа (без фона иконок)
                         SettingsGroup {
-                            SettingsRow(icon: "face.smiling", iconColor: .blue, title: "Сменить эмодзи-статус", textColor: .blue)
+                            SettingsRow(icon: "face.smiling", iconColor: .blue, title: "Сменить эмодзи-статус", textColor: .blue, noIconBackground: true)
                             Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                            SettingsRow(icon: "wand.and.stars", iconColor: .blue, title: "Изменить цвет профиля", textColor: .blue)
+                            SettingsRow(icon: "wand.and.stars", iconColor: .blue, title: "Изменить цвет профиля", textColor: .blue, noIconBackground: true)
                             Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                            SettingsRow(icon: "camera.fill", iconColor: .blue, title: "Выбрать фотографию", textColor: .blue)
+                            SettingsRow(icon: "camera.fill", iconColor: .blue, title: "Выбрать фотографию", textColor: .blue, noIconBackground: true)
                             Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                            SettingsRow(icon: "at", iconColor: .blue, title: "Выбрать имя пользователя", textColor: .blue)
+                            SettingsRow(icon: "at", iconColor: .blue, title: "Выбрать имя пользователя", textColor: .blue, noIconBackground: true)
                         }
                         
                         // Группа аккаунтов
                         SettingsGroup {
-                            SettingsRow(icon: "person.circle.fill", iconColor: .green, title: "tagoff acc", showArrow: false)
+                            SettingsRow(icon: "person.circle.fill", iconColor: .green, title: username, showArrow: false)
                             Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
                             SettingsRow(icon: "plus", iconColor: .blue, title: "Добавить аккаунт", textColor: .blue, showArrow: false)
                         }
                         
-                        // Группа профиля и кошелька
+                        // Группа профиля и подарков
                         SettingsGroup {
                             SettingsRow(icon: "person.crop.circle.badge.exclamationmark", iconColor: .red, title: "Мой профиль")
                             Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                            SettingsRow(icon: "creditcard.fill", iconColor: .blue, title: "Кошелёк")
+                            SettingsRow(icon: "gift.fill", iconColor: .blue, title: "Gifts for the boy")
                         }
                         
                         // Дополнительные тестовые кнопки
@@ -102,9 +123,9 @@ struct SettingsView: View {
                         SettingsGroup {
                             SettingsRow(icon: "questionmark.circle.fill", iconColor: .orange, title: "Помощь")
                             Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                            SettingsRow(icon: "bubble.left.and.bubble.right.fill", iconColor: .cyan, title: "Вопросы о Telegram")
+                            SettingsRow(icon: "bubble.left.and.bubble.right.fill", iconColor: .cyan, title: "Вопросы о HelloWorld")
                             Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                            SettingsRow(icon: "lightbulb.fill", iconColor: .yellow, title: "Возможности Telegram")
+                            SettingsRow(icon: "lightbulb.fill", iconColor: .yellow, title: "Возможности HelloWorld")
                         }
                     }
                     .padding(.horizontal)
@@ -129,7 +150,7 @@ struct SettingsGroup<Content: View>: View {
             content
         }
         .background(Color(white: 0.12))
-        .clipShape(RoundedRectangle(cornerRadius: 15))
+        .clipShape(RoundedRectangle(cornerRadius: 18)) // Увеличил скругление
     }
 }
 
@@ -140,19 +161,23 @@ struct SettingsRow: View {
     let title: String
     var textColor: Color = .white
     var showArrow: Bool = true
+    var noIconBackground: Bool = false
     
     var body: some View {
         Button(action: {}) {
             HStack(spacing: 16) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(iconColor)
-                        .frame(width: 28, height: 28)
+                    if !noIconBackground {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(iconColor)
+                            .frame(width: 28, height: 28)
+                    }
                     
                     Image(systemName: icon)
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(noIconBackground ? iconColor : .white)
                 }
+                .frame(width: 28, height: 28)
                 
                 Text(title)
                     .font(.system(size: 17))
