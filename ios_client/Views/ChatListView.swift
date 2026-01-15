@@ -1,52 +1,5 @@
 import SwiftUI
 
-// Кастомный стиль для кнопок с эффектом масштабирования и Liquid Glass
-struct LiquidGlassButtonStyle: ButtonStyle {
-    var paddingHorizontal: CGFloat = 16
-    var paddingVertical: CGFloat = 8
-    
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .foregroundColor(configuration.isPressed ? .blue : .white)
-            .padding(.horizontal, paddingHorizontal)
-            .padding(.vertical, paddingVertical)
-            .background(
-                ZStack {
-                    Capsule()
-                        .fill(Color.black.opacity(0.4)) // Сделал еще темнее
-                    Capsule()
-                        .fill(.thinMaterial) // Используем thinMaterial вместо ultraThin
-                }
-                .overlay(
-                    Capsule()
-                        .stroke(
-                            LinearGradient(
-                                colors: [.white.opacity(0.15), .white.opacity(0.05)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 0.5
-                        )
-                )
-                .scaleEffect(configuration.isPressed ? 1.12 : 1.0) // Увеличиваем только формочку
-                .offset(y: configuration.isPressed ? 1 : 0) // Легкое смещение при нажатии
-            )
-            .animation(.spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0), value: configuration.isPressed)
-    }
-}
-
-// Вспомогательный стиль для отслеживания нажатия без изменения вида
-struct PressDetectorStyle: ButtonStyle {
-    @Binding var isPressed: Bool
-    
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .onChange(of: configuration.isPressed) { newValue in
-                isPressed = newValue
-            }
-    }
-}
-
 struct ChatListView: View {
     @Binding var isAuthenticated: Bool
     @State private var searchText = ""

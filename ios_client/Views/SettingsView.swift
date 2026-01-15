@@ -186,7 +186,7 @@ struct SettingsView: View {
                         Image(systemName: "square.grid.2x2")
                             .font(.system(size: 20))
                     }
-                    .buttonStyle(SettingsButtonStyle())
+                    .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 12, paddingVertical: 12))
                     
                     Spacer()
                     
@@ -198,7 +198,7 @@ struct SettingsView: View {
                         Text("Изм.")
                             .font(.system(size: 16, weight: .medium))
                     }
-                    .buttonStyle(SettingsButtonStyle())
+                    .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 16, paddingVertical: 8))
                 }
                 .padding(.horizontal)
                 .padding(.top, 10)
@@ -242,91 +242,6 @@ struct ScrollOffsetKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = nextValue()
-    }
-}
-
-// Компоненты для настроек
-@available(iOS 15.0, *)
-struct SettingsGroup<Content: View>: View {
-    let content: Content
-    
-    init(@ViewBuilder content: () -> Content) {
-        self.content = content()
-    }
-    
-    var body: some View {
-        VStack(spacing: 0) {
-            content
-        }
-        .background(Color(white: 0.12))
-        .clipShape(RoundedRectangle(cornerRadius: 22))
-    }
-}
-
-@available(iOS 15.0, *)
-struct SettingsRow: View {
-    let icon: String
-    let iconColor: Color
-    let title: String
-    var textColor: Color = .white
-    var showArrow: Bool = true
-    var noIconBackground: Bool = false
-    var action: (() -> Void)? = nil
-    
-    var body: some View {
-        Button(action: { action?() }) {
-            HStack(spacing: 16) {
-                ZStack {
-                    if !noIconBackground {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(iconColor)
-                            .frame(width: 28, height: 28)
-                    }
-                    
-                    Image(systemName: icon)
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(noIconBackground ? iconColor : .white)
-                }
-                .frame(width: 28, height: 28)
-                
-                Text(title)
-                    .font(.system(size: 17))
-                    .foregroundColor(textColor)
-                
-                Spacer()
-                
-                if showArrow {
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(Color.white.opacity(0.2))
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(SettingsButtonStyle())
-    }
-}
-
-@available(iOS 15.0, *)
-struct PressDetectorStyle: ButtonStyle {
-    @Binding var isPressed: Bool
-    
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .onChange(of: configuration.isPressed) { newValue in
-                isPressed = newValue
-            }
-    }
-}
-
-@available(iOS 15.0, *)
-struct SettingsButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .background(configuration.isPressed ? Color.white.opacity(0.1) : Color.clear)
-            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 
