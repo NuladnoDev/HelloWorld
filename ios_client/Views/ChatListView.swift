@@ -135,11 +135,7 @@ struct ChatListView: View {
                                 HStack(spacing: 10) {
                                     ZStack {
                                         RoundedRectangle(cornerRadius: 18)
-                                            .fill(Color.black.opacity(0.4))
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 18)
-                                                    .fill(.ultraThinMaterial)
-                                            )
+                                            .fill(Color(red: 0.12, green: 0.12, blue: 0.12)) // Тёмный фон вместо серого
                                             .frame(height: 44)
                                         
                                         if searchText.isEmpty {
@@ -182,10 +178,9 @@ struct ChatListView: View {
                                                 UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                                             }
                                         }) {
-                                            Image(systemName: "xmark")
-                                                .font(.system(size: 16, weight: .bold))
+                                            Text("Отмена")
+                                                .foregroundColor(.blue)
                                         }
-                                        .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 12, paddingVertical: 12))
                                         .transition(.move(edge: .trailing).combined(with: .opacity))
                                     }
                                 }
@@ -255,44 +250,42 @@ struct ChatListView: View {
 
             
             if !isSearchActive {
-                // Кастомный Таббар в стиле Liquid Glass
-                HStack(spacing: 0) {
-                    ForEach(Tab.allCases, id: \.self) { tab in
-                        Button(action: {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                selectedTab = tab
+                // Кастомный Таббар в стиле Liquid Glass (полноэкранный, как в iOS/Telegram)
+                VStack(spacing: 0) {
+                    Divider()
+                        .background(Color.white.opacity(0.12))
+                    
+                    HStack(spacing: 0) {
+                        ForEach(Tab.allCases, id: \.self) { tab in
+                            Button(action: {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                    selectedTab = tab
+                                }
+                            }) {
+                                VStack(spacing: 4) {
+                                    Image(systemName: tab.icon)
+                                        .font(.system(size: 23))
+                                        .symbolVariant(selectedTab == tab ? .fill : .none)
+                                    Text(tab.rawValue)
+                                        .font(.system(size: 10, weight: .medium))
+                                }
+                                .foregroundColor(selectedTab == tab ? .blue : .gray)
+                                .frame(maxWidth: .infinity)
+                                .padding(.top, 8)
                             }
-                        }) {
-                            VStack(spacing: 4) {
-                                Image(systemName: tab.icon)
-                                    .font(.system(size: 22))
-                                    .symbolVariant(selectedTab == tab ? .fill : .none)
-                                Text(tab.rawValue)
-                                    .font(.system(size: 10, weight: .medium))
-                            }
-                            .foregroundColor(selectedTab == tab ? .blue : .gray)
-                            .frame(maxWidth: .infinity)
                         }
                     }
+                    .padding(.horizontal, 10)
+                    .padding(.bottom, 25) // Отступ под "челку"
+                    .background(
+                        ZStack {
+                            Color.black.opacity(0.8)
+                            Rectangle()
+                                .fill(.ultraThinMaterial)
+                        }
+                    )
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
-                .background(
-                    ZStack {
-                        Capsule()
-                            .fill(Color.black.opacity(0.45))
-                        Capsule()
-                            .fill(.ultraThinMaterial)
-                    }
-                    .shadow(color: Color.black.opacity(0.3), radius: 10, y: 5)
-                )
-                .overlay(
-                    Capsule()
-                        .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
-                )
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .transition(.move(edge: .bottom))
             }
         }
         .background(Color.black.edgesIgnoringSafeArea(.all))
@@ -438,22 +431,19 @@ struct SearchNavigationBar: View {
                     }
                 }) {
                     Text(category)
-                        .font(.system(size: 13, weight: selectedCategory == category ? .bold : .medium))
-                        .minimumScaleFactor(0.8)
+                        .font(.system(size: 12, weight: selectedCategory == category ? .bold : .medium))
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
                         .foregroundColor(selectedCategory == category ? .white : .gray)
-                        .padding(.vertical, 10)
-                        .padding(.horizontal, 4)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 10)
                         .frame(maxWidth: .infinity)
                         .background(
                             ZStack {
                                 if selectedCategory == category {
                                     Capsule()
-                                        .fill(Color.white.opacity(0.12))
+                                        .fill(Color.white.opacity(0.15))
                                         .matchedGeometryEffect(id: "activeTab", in: animation)
-                                        .overlay(
-                                            Capsule()
-                                                .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
-                                        )
                                 }
                             }
                         )
@@ -463,12 +453,8 @@ struct SearchNavigationBar: View {
         }
         .padding(4)
         .background(
-            ZStack {
-                Capsule()
-                    .fill(Color.black.opacity(0.6))
-                Capsule()
-                    .fill(.ultraThinMaterial)
-            }
+            Capsule()
+                .fill(Color(red: 0.1, green: 0.1, blue: 0.1)) // Темно-серый/черный овал
         )
         .padding(.horizontal, 16)
     }
