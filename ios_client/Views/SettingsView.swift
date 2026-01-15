@@ -35,7 +35,7 @@ struct SettingsView: View {
                         .padding(.top, 15)
                         
                         // Секция профиля (Аватар + Тег + Номер + Имя)
-                        VStack(spacing: 4) { // Минимальный отступ между аватаром и текстом
+                        VStack(spacing: 12) { // Увеличил отступ между аватаром и текстом (был 4)
                             ZStack {
                                 Circle()
                                     .fill(LinearGradient(
@@ -45,7 +45,7 @@ struct SettingsView: View {
                                     ))
                                     .frame(width: 120, height: 120)
                                     .background(
-                                        // Мягкое свечение теперь в фоне и не раздувает ZStack
+                                        // Мягкое свечение
                                         RadialGradient(
                                             colors: [
                                                 Color.white.opacity(0.12),
@@ -63,7 +63,7 @@ struct SettingsView: View {
                                     .font(.system(size: 48, weight: .bold))
                                     .foregroundColor(.white)
                             }
-                            .padding(.top, -100) // Поднимаем аватарку максимально высоко к кнопкам
+                            .padding(.top, -35) // Опустил аватарку ниже (было -100)
                             
                             VStack(spacing: 2) {
                                 Text("@\(username)")
@@ -89,7 +89,7 @@ struct SettingsView: View {
                             let minY = geo.frame(in: .global).minY
                             Color(white: 0.1)
                                 .offset(y: minY > 0 ? -minY : 0)
-                                .frame(height: minY > 0 ? 180 + minY : 180) // Еще уменьшил высоту фона для плотности
+                                .frame(height: minY > 0 ? 250 + minY : 250) // Продлил заливку вниз (было 180)
                         }
                     )
                     
