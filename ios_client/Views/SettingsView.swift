@@ -2,6 +2,7 @@ import SwiftUI
 
 @available(iOS 15.0, *)
 struct SettingsView: View {
+    @Binding var isAuthenticated: Bool
     @State private var username: String = UserDefaults.standard.string(forKey: "saved_username") ?? "problem"
     @State private var phoneNumber: String = "+7 (999) 123-45-67"
     @State private var isEditingProfile = false
@@ -146,8 +147,11 @@ struct SettingsView: View {
                         // Группа выхода
                         SettingsGroup {
                             Button(action: {
+                                withAnimation {
+                                    isAuthenticated = false
+                                }
                                 UserDefaults.standard.set(false, forKey: "is_authenticated")
-                                // Перезапускаем приложение или меняем состояние через NotificationCenter
+                                // Опционально: очистка других данных сессии
                                 NotificationCenter.default.post(name: NSNotification.Name("LogOut"), object: nil)
                             }) {
                                 SettingsRow(icon: "rectangle.portrait.and.arrow.right", iconColor: .red, title: "Выйти", textColor: .red, showArrow: false)
@@ -161,10 +165,7 @@ struct SettingsView: View {
             
             if isEditingProfile {
                 EditProfileView(isPresented: $isEditingProfile)
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .trailing),
-                        removal: .move(edge: .trailing)
-                    ))
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
                     .zIndex(1)
             }
         }

@@ -225,9 +225,9 @@ struct ChatListView: View {
             .tag(Tab.chats)
 
             // Вкладка Настройки
-            SettingsView()
+            SettingsView(isAuthenticated: $isAuthenticated)
                 .tabItem {
-                    Label("Настройки", systemImage: "gear")
+                    Label("Настройки", systemImage: "gearshape.fill")
                 }
                 .tag(Tab.settings)
         }
