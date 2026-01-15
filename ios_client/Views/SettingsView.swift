@@ -15,8 +15,7 @@ struct SettingsView: View {
                     ZStack(alignment: .top) {
                         // Сплошной серый цвет фона (вместо синеватого)
                         Color(white: 0.1)
-                            .frame(height: 270) // Уменьшил высоту (было 320)
-                            .edgesIgnoringSafeArea(.top)
+                            .frame(height: 250) // Еще немного уменьшил высоту для компактности
                         
                         // Мягкое растушеванное белое свечение вокруг аватарки
                         RadialGradient(
@@ -30,13 +29,13 @@ struct SettingsView: View {
                             endRadius: 140
                         )
                         .frame(width: 350, height: 350)
-                        .offset(y: -60) // Центрируем свечение по аватарке
+                        .offset(y: -80) // Поднял свечение выше
                         
                         VStack(spacing: 0) {
                             // Верхняя панель кнопок
                             HStack {
                                 Button(action: {}) {
-                                    Image(systemName: "square.grid.2x2") // Убрал .fill
+                                    Image(systemName: "square.grid.2x2")
                                         .font(.system(size: 20))
                                 }
                                 .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 12, paddingVertical: 12))
@@ -55,7 +54,7 @@ struct SettingsView: View {
                             .padding(.top, 15)
                             
                             // Секция профиля (Аватар + Тег + Номер + Имя)
-                            VStack(spacing: 8) { // Уменьшил отступ между аватаркой и текстом
+                            VStack(spacing: 8) {
                                 ZStack {
                                     Circle()
                                         .fill(LinearGradient(
@@ -63,15 +62,15 @@ struct SettingsView: View {
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
                                         ))
-                                        .frame(width: 100, height: 100) // Немного уменьшил аватар для компактности
+                                        .frame(width: 100, height: 100)
                                     
                                     Text(String(username.prefix(1)).uppercased())
                                         .font(.system(size: 40, weight: .bold))
                                         .foregroundColor(.white)
                                 }
-                                .padding(.top, -25) // Поднял аватарку еще выше
+                                .padding(.top, -35) // Поднял аватарку еще выше (было -25)
                                 
-                                VStack(spacing: 2) { // Еще плотнее текст
+                                VStack(spacing: 2) {
                                     Text("@\(username)")
                                         .font(.system(size: 24, weight: .bold))
                                         .foregroundColor(.white)
@@ -89,7 +88,8 @@ struct SettingsView: View {
                             .padding(.top, 5)
                         }
                     }
-                    .padding(.bottom, -50) // Значительно уменьшил расстояние до начала групп (было -20)
+                    .background(Color(white: 0.1)) // Заливаем все пространство выше хедера тем же серым цветом
+                    .padding(.bottom, -70) // Сократил расстояние до кнопок в 2 раза (было -50, теперь еще плотнее)
                     
                     // Группы настроек
                     VStack(spacing: 20) {

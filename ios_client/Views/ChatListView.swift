@@ -107,63 +107,62 @@ struct ChatListView: View {
                     // Верхняя панель (Хедер + Поиск) с темно-серой заливкой
                     VStack(spacing: 0) {
                         // Кастомный заголовок (как в ТГ)
-                        HStack {
-                            Button(action: {}) {
-                                Text("Изм.")
-                                    .font(.system(size: 16, weight: .medium))
-                            }
-                            .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 20, paddingVertical: 10))
+                        ZStack {
+                            // Центрированный заголовок
+                            Text("Чаты")
+                                .font(.system(size: 18, weight: .bold))
+                                .foregroundColor(.white)
                             
-                            Spacer()
-                            
-                            HStack(spacing: 4) {
-                                Text("Чаты")
-                            }
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.white)
-                            
-                            Spacer()
-                            
-                            // Правая группа кнопок в одном овале
-                            HStack(spacing: 25) { // Увеличил расстояние между иконками
+                            HStack {
                                 Button(action: {}) {
-                                    Image(systemName: "plus.circle")
-                                        .font(.system(size: 22))
-                                        .foregroundColor(isPlusPressed ? .blue : .white)
+                                    Text("Изм.")
+                                        .font(.system(size: 16, weight: .medium))
                                 }
-                                .buttonStyle(PressDetectorStyle(isPressed: $isPlusPressed))
+                                .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 16, paddingVertical: 8))
                                 
-                                Button(action: {}) {
-                                    Image(systemName: "square.and.pencil")
-                                        .font(.system(size: 22))
-                                        .foregroundColor(isPencilPressed ? .blue : .white)
+                                Spacer()
+                                
+                                // Правая группа кнопок в одном овале
+                                HStack(spacing: 15) { // Уменьшил расстояние между иконками (было 25)
+                                    Button(action: {}) {
+                                        Image(systemName: "plus.circle")
+                                            .font(.system(size: 22))
+                                            .foregroundColor(isPlusPressed ? .blue : .white)
+                                    }
+                                    .buttonStyle(PressDetectorStyle(isPressed: $isPlusPressed))
+                                    
+                                    Button(action: {}) {
+                                        Image(systemName: "square.and.pencil")
+                                            .font(.system(size: 22))
+                                            .foregroundColor(isPencilPressed ? .blue : .white)
+                                    }
+                                    .buttonStyle(PressDetectorStyle(isPressed: $isPencilPressed))
                                 }
-                                .buttonStyle(PressDetectorStyle(isPressed: $isPencilPressed))
-                            }
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 10)
-                            .background(
-                                ZStack {
-                                    Capsule()
-                                        .fill(Color.black.opacity(0.4))
-                                    Capsule()
-                                        .fill(.thinMaterial)
-                                }
-                                .overlay(
-                                    Capsule()
-                                        .stroke(
-                                            LinearGradient(
-                                                colors: [.white.opacity(0.15), .white.opacity(0.05)],
-                                                startPoint: .topLeading,
-                                                endPoint: .bottomTrailing
-                                            ),
-                                            lineWidth: 0.5
-                                        )
+                                .padding(.horizontal, 14) // Уменьшил отступы формы (было 20)
+                                .padding(.vertical, 8)   // Уменьшил отступы формы (было 10)
+                                .background(
+                                    ZStack {
+                                        Capsule()
+                                            .fill(Color.black.opacity(0.4))
+                                        Capsule()
+                                            .fill(.thinMaterial)
+                                    }
+                                    .overlay(
+                                        Capsule()
+                                            .stroke(
+                                                LinearGradient(
+                                                    colors: [.white.opacity(0.15), .white.opacity(0.05)],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                ),
+                                                lineWidth: 0.5
+                                            )
+                                    )
+                                    .scaleEffect((isPlusPressed || isPencilPressed) ? 1.12 : 1.0)
+                                    .offset(y: (isPlusPressed || isPencilPressed) ? 1 : 0)
                                 )
-                                .scaleEffect((isPlusPressed || isPencilPressed) ? 1.12 : 1.0)
-                                .offset(y: (isPlusPressed || isPencilPressed) ? 1 : 0)
-                            )
-                            .animation(.spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0), value: isPlusPressed || isPencilPressed)
+                                .animation(.spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0), value: isPlusPressed || isPencilPressed)
+                            }
                         }
                         .padding(.horizontal)
                         .padding(.top, 10)
