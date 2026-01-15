@@ -1,5 +1,21 @@
 import SwiftUI
 
+// Вспомогательная структура для создания AnyShape
+@available(iOS 15.0, *)
+struct AnyShape: Shape {
+    private let _path: (CGRect) -> Path
+
+    init<S: Shape>(_ shape: S) {
+        _path = { rect in
+            shape.path(in: rect)
+        }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        _path(rect)
+    }
+}
+
 @available(iOS 15.0, *)
 struct SettingsView: View {
     @Binding var isAuthenticated: Bool
@@ -26,37 +42,24 @@ struct SettingsView: View {
         ZStack(alignment: .top) {
             Color.black.edgesIgnoringSafeArea(.all)
             
-            // Расширенная аватарка (FullScreen overlay при клике)
-            if isAvatarExpanded, let image = avatarImage {
-                ZStack {
-                    Color.black.edgesIgnoringSafeArea(.all)
-                    
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .onTapGesture {
-                            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                                isAvatarExpanded = false
-                            }
-                        }
-                }
-                .transition(.opacity.combined(with: .scale(scale: 0.9)))
-                .zIndex(20)
-            }
-            
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
-                    // Верхняя часть с градиентным фоном и информацией
+                    // Геометрия для отслеживания скролла
+                    GeometryReader { geo in
+                        Color.clear.preference(key: ScrollOffsetKey.self, value: geo.frame(in: .global).minY)
+                    }
+                    .frame(height: 0)
+
+                    // Верхняя часть с анимированной аватаркой
                     ZStack(alignment: .bottom) {
-                        // Фоновый градиент или размытое фото как в Telegram
-                        if let image = avatarImage {
+                        // Фон (размытие для объема, когда расширена)
+                        if isAvatarExpanded, let image = avatarImage {
                             Image(uiImage: image)
                                 .resizable()
                                 .scaledToFill()
-                                .frame(height: 320)
-                                .blur(radius: 50)
-                                .opacity(0.3)
+                                .frame(height: isAvatarExpanded ? expandedAvatarHeight : 320)
+                                .blur(radius: 40)
+                                .opacity(0.4)
                         } else {
                             LinearGradient(
                                 colors: [Color(red: 0.1, green: 0.1, blue: 0.15), .black],
@@ -66,12 +69,12 @@ struct SettingsView: View {
                             .frame(height: 320)
                         }
                         
-                        // Контент профиля (Имя, телефон/тег)
-                        VStack(spacing: 16) {
+                        // Контент профиля
+                        VStack(spacing: isAvatarExpanded ? 0 : 16) {
                             // Аватарка
                             Button(action: {
-                                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                                    isAvatarExpanded = true
+                                withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+                                    isAvatarExpanded.toggle()
                                 }
                             }) {
                                 ZStack {
@@ -79,8 +82,11 @@ struct SettingsView: View {
                                         Image(uiImage: image)
                                             .resizable()
                                             .scaledToFill()
-                                            .frame(width: collapsedAvatarSize, height: collapsedAvatarSize)
-                                            .clipShape(Circle())
+                                            .frame(
+                                                width: isAvatarExpanded ? UIScreen.main.bounds.width : collapsedAvatarSize,
+                                                height: isAvatarExpanded ? expandedAvatarHeight : collapsedAvatarSize
+                                            )
+                                            .clipShape(isAvatarExpanded ? AnyShape(Rectangle()) : AnyShape(Circle()))
                                     } else {
                                         Circle()
                                             .fill(LinearGradient(
@@ -96,31 +102,50 @@ struct SettingsView: View {
                                             )
                                     }
                                 }
-                                .overlay(
-                                    Circle()
-                                        .stroke(Color.black.opacity(0.1), lineWidth: 1)
-                                )
-                                .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
+                                .shadow(color: .black.opacity(isAvatarExpanded ? 0 : 0.3), radius: 10, x: 0, y: 5)
                             }
-                            .buttonStyle(PressDetectorStyle(isPressed: .constant(false))) // Используем стиль для нажатия без анимации
+                            .buttonStyle(PressDetectorStyle(isPressed: .constant(false)))
                             
-                            VStack(spacing: 4) {
-                                Text(fullName)
-                                    .font(.system(size: 28, weight: .bold))
-                                    .foregroundColor(.white)
-                                
-                                Text(tag.isEmpty ? phoneNumber : "@\(tag)")
-                                    .font(.system(size: 16))
-                                    .foregroundColor(.white.opacity(0.5))
+                            // Информация под аватаркой (скрывается или сдвигается при расширении)
+                            if !isAvatarExpanded {
+                                VStack(spacing: 4) {
+                                    Text(fullName)
+                                        .font(.system(size: 28, weight: .bold))
+                                        .foregroundColor(.white)
+                                    
+                                    Text(tag.isEmpty ? phoneNumber : "@\(tag)")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.white.opacity(0.5))
+                                }
+                                .transition(.opacity.combined(with: .move(edge: .bottom)))
+                                .padding(.bottom, 40)
                             }
                         }
-                        .padding(.bottom, 40)
                     }
-                    .frame(height: 320)
+                    .frame(height: isAvatarExpanded ? expandedAvatarHeight : 320)
                     .clipShape(Rectangle())
                     
                     // Группы настроек
                     VStack(spacing: 20) {
+                        if isAvatarExpanded {
+                            // Имя и телефон внутри списка, когда аватарка расширена (как в ТГ)
+                            SettingsGroup {
+                                HStack(spacing: 15) {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(fullName)
+                                            .font(.system(size: 20, weight: .bold))
+                                            .foregroundColor(.white)
+                                        Text(tag.isEmpty ? phoneNumber : "@\(tag)")
+                                            .font(.system(size: 14))
+                                            .foregroundColor(.gray)
+                                    }
+                                    Spacer()
+                                }
+                                .padding()
+                            }
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                        }
+
                         SettingsGroup {
                             SettingsRow(icon: "face.smiling", iconColor: .blue, title: "Сменить эмодзи-статус", textColor: .blue, noIconBackground: true)
                             Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
@@ -176,6 +201,12 @@ struct SettingsView: View {
                 }
             }
             .onPreferenceChange(ScrollOffsetKey.self) { value in
+                let threshold: CGFloat = -20
+                if value < threshold && isAvatarExpanded {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                        isAvatarExpanded = false
+                    }
+                }
                 scrollOffset = value
             }
             
