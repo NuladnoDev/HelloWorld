@@ -133,10 +133,10 @@ struct ChatListView: View {
                                 HStack(spacing: 10) {
                                     ZStack {
                                         RoundedRectangle(cornerRadius: 18)
-                                            .fill(Color.black) // Установил чисто черный фон для поиска
+                                            .fill(isSearchActive ? Color.black : Color(red: 0.12, green: 0.12, blue: 0.13)) // Серый фон в обычном состоянии, черный при поиске
                                             .overlay(
                                                 RoundedRectangle(cornerRadius: 18)
-                                                    .stroke(Color.white.opacity(0.1), lineWidth: 1) // Тонкая обводка, чтобы видеть границы на черном
+                                                    .stroke(isSearchActive ? Color.white.opacity(0.1) : Color.clear, lineWidth: 1) // Обводка только при поиске
                                             )
                                             .frame(height: 36)
                                         
