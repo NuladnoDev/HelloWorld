@@ -13,8 +13,9 @@ struct SettingsView: View {
     
     // Состояние для расширяемой аватарки
     @State private var scrollOffset: CGFloat = 0
+    @State private var isAvatarExpanded = false
     private let collapsedAvatarSize: CGFloat = 110
-    private let expandedAvatarHeight: CGFloat = 400
+    private let expandedAvatarHeight: CGFloat = 450
     
     var fullName: String {
         let name = "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
@@ -25,118 +26,120 @@ struct SettingsView: View {
         ZStack(alignment: .top) {
             Color.black.edgesIgnoringSafeArea(.all)
             
-            // Расширенная аватарка с градиентом (фон)
-            if let image = avatarImage {
-                GeometryReader { geo in
-                    let offset = scrollOffset
-                    let height = expandedAvatarHeight + (offset > 0 ? offset : 0)
+            // Расширенная аватарка (FullScreen overlay при клике)
+            if isAvatarExpanded, let image = avatarImage {
+                ZStack {
+                    Color.black.edgesIgnoringSafeArea(.all)
                     
-                    ZStack(alignment: .bottom) {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: geo.size.width, height: height)
-                            .clipped()
-                        
-                        // Градиент для плавного перехода к контенту
-                        LinearGradient(
-                            colors: [.clear, .black.opacity(0.8), .black],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                        .frame(height: 150)
-                    }
-                    .offset(y: offset > 0 ? 0 : offset * 0.5) // Параллакс эффект
-                    .opacity(avatarOpacity)
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .onTapGesture {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                isAvatarExpanded = false
+                            }
+                        }
                 }
-                .edgesIgnoringSafeArea(.top)
-                .frame(height: expandedAvatarHeight)
+                .transition(.opacity.combined(with: .scale(scale: 0.9)))
+                .zIndex(20)
             }
             
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
-                    // Прозрачный спейсер для скролла над большой аватаркой
-                    Color.clear
-                        .frame(height: expandedAvatarHeight - 100)
-                    
-                    VStack(spacing: 0) {
+                    // Верхняя часть с градиентным фоном и информацией
+                    ZStack(alignment: .bottom) {
+                        // Фоновый градиент или размытое фото как в Telegram
+                        if let image = avatarImage {
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(height: 320)
+                                .blur(radius: 50)
+                                .opacity(0.3)
+                        } else {
+                            LinearGradient(
+                                colors: [Color(red: 0.1, green: 0.1, blue: 0.15), .black],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            .frame(height: 320)
+                        }
+                        
                         // Контент профиля (Имя, телефон/тег)
-                        VStack(spacing: 12) {
-                            // Маленькая круглая аватарка (появляется при скролле вниз)
-                            ZStack {
-                                if let image = avatarImage {
-                                    Image(uiImage: image)
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: collapsedAvatarSize, height: collapsedAvatarSize)
-                                        .clipShape(Circle())
-                                } else {
-                                    Circle()
-                                        .fill(LinearGradient(
-                                            colors: [Color(red: 0.3, green: 0.7, blue: 1.0), .blue],
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        ))
-                                        .frame(width: collapsedAvatarSize, height: collapsedAvatarSize)
-                                        .overlay(
-                                            ZStack {
-                                                Color.black.opacity(0.3)
+                        VStack(spacing: 16) {
+                            // Аватарка
+                            Button(action: {
+                                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                    isAvatarExpanded = true
+                                }
+                            }) {
+                                ZStack {
+                                    if let image = avatarImage {
+                                        Image(uiImage: image)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: collapsedAvatarSize, height: collapsedAvatarSize)
+                                            .clipShape(Circle())
+                                    } else {
+                                        Circle()
+                                            .fill(LinearGradient(
+                                                colors: [Color(red: 0.3, green: 0.7, blue: 1.0), .blue],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ))
+                                            .frame(width: collapsedAvatarSize, height: collapsedAvatarSize)
+                                            .overlay(
                                                 Image(systemName: "camera.fill")
                                                     .font(.system(size: 30))
                                                     .foregroundColor(.white)
-                                            }
-                                            .clipShape(Circle())
-                                        )
+                                            )
+                                    }
                                 }
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color.black.opacity(0.1), lineWidth: 1)
+                                )
+                                .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
                             }
-                            .scaleEffect(collapsedAvatarScale)
-                            .opacity(collapsedAvatarOpacity)
-                            .onTapGesture {
-                                withAnimation(.spring()) {
-                                    // Можно добавить скролл к самому верху
-                                }
-                            }
+                            .buttonStyle(PressDetectorStyle(isPressed: .constant(false))) // Используем стиль для нажатия без анимации
                             
-                            VStack(spacing: 2) {
+                            VStack(spacing: 4) {
                                 Text(fullName)
-                                    .font(.system(size: 24, weight: .bold))
+                                    .font(.system(size: 28, weight: .bold))
                                     .foregroundColor(.white)
-                                    .shadow(radius: scrollOffset > -100 ? 5 : 0)
                                 
-                                HStack(spacing: 2) {
-                                    Image(systemName: tag.isEmpty ? "info.circle" : "at")
-                                        .font(.system(size: 13))
-                                        .foregroundColor(.white.opacity(0.5))
-                                    Text(tag.isEmpty ? phoneNumber : tag)
-                                        .font(.system(size: 14))
-                                        .foregroundColor(.white.opacity(0.5))
-                                }
+                                Text(tag.isEmpty ? phoneNumber : "@\(tag)")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.white.opacity(0.5))
                             }
                         }
-                        .padding(.top, 5)
-                        .padding(.bottom, 30)
-                        
-                        // Группы настроек
-                        VStack(spacing: 20) {
-                            SettingsGroup {
-                                SettingsRow(icon: "face.smiling", iconColor: .blue, title: "Сменить эмодзи-статус", textColor: .blue, noIconBackground: true)
+                        .padding(.bottom, 40)
+                    }
+                    .frame(height: 320)
+                    .clipShape(Rectangle())
+                    
+                    // Группы настроек
+                    VStack(spacing: 20) {
+                        SettingsGroup {
+                            SettingsRow(icon: "face.smiling", iconColor: .blue, title: "Сменить эмодзи-статус", textColor: .blue, noIconBackground: true)
+                            Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
+                            SettingsRow(icon: "wand.and.stars", iconColor: .blue, title: "Изменить цвет профиля", textColor: .blue, noIconBackground: true)
+                            Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
+                            SettingsRow(icon: "camera", iconColor: .blue, title: "Выбрать фотографию", textColor: .blue, noIconBackground: true) {
+                                isEditingProfile = true
+                            }
+                            
+                            if tag.isEmpty {
                                 Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                                SettingsRow(icon: "wand.and.stars", iconColor: .blue, title: "Изменить цвет профиля", textColor: .blue, noIconBackground: true)
-                                Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                                SettingsRow(icon: "camera", iconColor: .blue, title: "Выбрать фотографию", textColor: .blue, noIconBackground: true) {
-                                    isEditingProfile = true
-                                }
-                                
-                                if tag.isEmpty {
-                                    Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                                    SettingsRow(icon: "at", iconColor: .blue, title: "Выбрать имя пользователя", textColor: .blue, noIconBackground: true) {
-                                        withAnimation(.easeInOut(duration: 0.3)) {
-                                            isEditingProfile = true
-                                        }
+                                SettingsRow(icon: "at", iconColor: .blue, title: "Выбрать имя пользователя", textColor: .blue, noIconBackground: true) {
+                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                        isEditingProfile = true
                                     }
                                 }
                             }
-                            .padding(.top, 15)
+                        }
+                        .padding(.top, 10)
                             
                             SettingsGroup {
                                 SettingsRow(icon: "person.circle.fill", iconColor: .green, title: username, showArrow: false)
@@ -170,15 +173,8 @@ struct SettingsView: View {
                         }
                         .padding(.horizontal)
                         .padding(.bottom, 30)
-                        .background(Color.black)
                     }
-                    .background(Color.black)
                 }
-                .background(
-                    GeometryReader { geo in
-                        Color.clear.preference(key: ScrollOffsetKey.self, value: geo.frame(in: .global).minY)
-                    }
-                )
             }
             .onPreferenceChange(ScrollOffsetKey.self) { value in
                 scrollOffset = value
@@ -226,25 +222,6 @@ struct SettingsView: View {
                 refreshData()
             }
         }
-    }
-    
-    // Логика прозрачности и масштаба для анимаций
-    private var avatarOpacity: Double {
-        if scrollOffset >= 0 { return 1.0 }
-        let progress = -scrollOffset / (expandedAvatarHeight - 150)
-        return Double(max(0, 1 - progress))
-    }
-    
-    private var collapsedAvatarOpacity: Double {
-        if scrollOffset >= 0 { return 0.0 }
-        let progress = -scrollOffset / (expandedAvatarHeight - 200)
-        return Double(min(1, progress))
-    }
-    
-    private var collapsedAvatarScale: CGFloat {
-        if scrollOffset >= 0 { return 0.5 }
-        let progress = -scrollOffset / (expandedAvatarHeight - 200)
-        return 0.5 + (min(1, progress) * 0.5)
     }
     
     private func refreshData() {
