@@ -195,6 +195,7 @@ struct ChatListView: View {
                         .background(Color.black.edgesIgnoringSafeArea(.top))
                         
                         ZStack(alignment: .bottom) {
+                            Color.black.edgesIgnoringSafeArea(.all)
                             ScrollView {
                                 if isSearchActive {
                                     // Контент режима поиска
@@ -262,6 +263,7 @@ struct ChatListView: View {
                         VStack(spacing: 4) {
                             Image(systemName: tab.icon)
                                 .font(.system(size: 22))
+                                .symbolVariant(selectedTab == tab ? .fill : .none)
                             Text(tab.rawValue)
                                 .font(.system(size: 10, weight: .medium))
                         }
@@ -270,21 +272,25 @@ struct ChatListView: View {
                     }
                 }
             }
-            .padding(.top, 12)
-            .padding(.bottom, 34) // Отступ для Home Indicator
+            .padding(.horizontal, 20)
+            .padding(.vertical, 10)
             .background(
                 ZStack {
-                    Color.black.opacity(0.4)
-                    BlurView(style: .systemThinMaterialDark)
+                    Capsule()
+                        .fill(Color.black.opacity(0.45))
+                    Capsule()
+                        .fill(.ultraThinMaterial)
                 }
-                .overlay(
-                    Rectangle()
-                        .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
-                        .padding(.top, 0)
-                )
+                .shadow(color: Color.black.opacity(0.3), radius: 10, y: 5)
             )
-            .ignoresSafeArea()
+            .overlay(
+                Capsule()
+                    .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
+            )
+            .padding(.horizontal, 20)
+            .padding(.bottom, 20)
         }
+        .background(Color.black.edgesIgnoringSafeArea(.all))
         .accentColor(.blue)
     }
 }
@@ -427,9 +433,11 @@ struct SearchNavigationBar: View {
                     }
                 }) {
                     Text(category)
-                        .font(.system(size: 14, weight: selectedCategory == category ? .bold : .medium))
+                        .font(.system(size: 13, weight: selectedCategory == category ? .bold : .medium))
+                        .minimumScaleFactor(0.8)
                         .foregroundColor(selectedCategory == category ? .white : .gray)
                         .padding(.vertical, 10)
+                        .padding(.horizontal, 4)
                         .frame(maxWidth: .infinity)
                         .background(
                             ZStack {
