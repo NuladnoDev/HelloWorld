@@ -169,10 +169,11 @@ struct SettingsView: View {
                                 SettingsRow(icon: "bubble.left.and.bubble.right.fill", iconColor: .cyan, title: "Вопросы о HelloWorld")
                                 Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
                                 SettingsRow(icon: "lightbulb.fill", iconColor: .yellow, title: "Возможности HelloWorld")
+                            }
                         }
+                        .padding(.horizontal)
+                        .padding(.bottom, 30)
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, 30)
                 }
             }
             .onPreferenceChange(ScrollOffsetKey.self) { value in
@@ -186,7 +187,7 @@ struct SettingsView: View {
                         Image(systemName: "square.grid.2x2")
                             .font(.system(size: 20))
                     }
-                    .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 12, paddingVertical: 8))
+                    .buttonStyle(SettingsButtonStyle())
                     
                     Spacer()
                     
@@ -198,7 +199,7 @@ struct SettingsView: View {
                         Text("Изм.")
                             .font(.system(size: 16, weight: .medium))
                     }
-                    .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 16, paddingVertical: 8))
+                    .buttonStyle(SettingsButtonStyle())
                 }
                 .padding(.horizontal)
                 .padding(.top, 10)
