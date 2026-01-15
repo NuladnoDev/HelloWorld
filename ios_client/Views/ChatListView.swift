@@ -58,7 +58,8 @@ struct ChatListView: View {
     @State private var isPlusPressed = false
     @State private var isPencilPressed = false
     
-    init() {
+    init(isAuthenticated: Binding<Bool>) {
+        self._isAuthenticated = isAuthenticated
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = UIColor(red: 0.07, green: 0.07, blue: 0.07, alpha: 1.0)
