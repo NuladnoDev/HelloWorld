@@ -354,13 +354,23 @@ struct ChatView: View {
     @FocusState private var isTextFieldFocused: Bool
     
     @State private var messages: [ChatMessage] = [
-        ChatMessage(text: "Привет! Как дела?", isMe: false, time: "10:00", hasTail: true),
-        ChatMessage(text: "Привет! Все отлично, работаю над новым проектом. А у тебя?", isMe: true, time: "10:01", hasTail: true),
-        ChatMessage(text: "Тоже неплохо. Помнишь, я говорил про тот дизайн?", isMe: false, time: "10:02", hasTail: true),
-        ChatMessage(text: "Да, конечно. Есть какие-то наработки?", isMe: true, time: "10:03", hasTail: true),
-        ChatMessage(text: "Да, вот посмотри скриншот.", isMe: false, time: "10:04", hasTail: true),
-        ChatMessage(text: "", isMe: false, time: "10:04", hasTail: true, image: UIImage(systemName: "photo.artframe"), isPhoto: true)
+        ChatMessage(text: "Спасибо за принятие приглашения на бета-тест", isMe: false, time: "10:00", hasTail: true)
     ]
+    
+    @State private var isOnline: Bool = Bool.random()
+    @State private var lastSeenMinutes: Int = Int.random(in: 1...59)
+    
+    private var statusText: String {
+        if isOnline {
+            return "В сети"
+        } else {
+            return "был(а) \(lastSeenMinutes) мин. назад"
+        }
+    }
+    
+    private var statusColor: Color {
+        isOnline ? .blue : .white.opacity(0.6)
+    }
     
     var body: some View {
         ZStack {
@@ -420,6 +430,7 @@ struct ChatView: View {
             }
         }
         .navigationBarHidden(true)
+        .edgesIgnoringSafeArea(.bottom) // Игнорируем отступ снизу, так как TabBar скрыт
         .toolbar(.hidden, for: .tabBar)
         .photosPicker(isPresented: $showMediaPicker, selection: $selectedMediaItem, matching: .any(of: [.images, .videos]))
         .onChange(of: selectedMediaItem) { newItem in
@@ -507,7 +518,7 @@ struct ChatView: View {
             }
             .padding(.horizontal, 10)
             .padding(.top, 8)
-            .padding(.bottom, 20)
+            .padding(.bottom, showCustomKeyboard ? 0 : 34) // 34 - стандартный отступ Safe Area для iPhone без челки
             .background(Color.black.opacity(0.3))
         }
     }
@@ -530,12 +541,17 @@ struct ChatView: View {
             
             LiquidGlassView(cornerRadius: 20) {
                 VStack(spacing: 2) {
-                    Text("hikka")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
-                    Text("был(а) недавно")
+                    HStack(spacing: 4) {
+                        Text("HelloWorld")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
+                        Image(systemName: "checkmark.seal.fill")
+                            .font(.system(size: 14))
+                            .foregroundColor(.blue)
+                    }
+                    Text(statusText)
                         .font(.system(size: 12))
-                        .foregroundColor(.white.opacity(0.6))
+                        .foregroundColor(statusColor)
                 }
                 .padding(.vertical, 6)
                 .padding(.horizontal, 20)
