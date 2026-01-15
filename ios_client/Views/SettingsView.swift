@@ -40,73 +40,92 @@ struct SettingsView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            Color.black.edgesIgnoringSafeArea(.all)
-            
+            // Фоновая заливка с учетом Safe Area
+            Color(red: 0.05, green: 0.05, blue: 0.06)
+                .edgesIgnoringSafeArea(.all)
+             
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 0) {
-                    // Геометрия для отслеживания скролла
+                ZStack(alignment: .top) {
+                    // Прозрачный слой для отслеживания скролла
                     GeometryReader { geo in
-                        Color.clear.preference(key: ScrollOffsetKey.self, value: geo.frame(in: .global).minY)
+                        let yOffset = geo.frame(in: .global).minY
+                        Color.clear.preference(key: ScrollOffsetKey.self, value: yOffset)
                     }
-                    .frame(height: 0)
-
-                    // Верхняя часть с анимированной аватаркой
-                    ZStack(alignment: .bottom) {
-                        // Фон (размытие для объема, когда расширена)
-                        if isAvatarExpanded, let image = avatarImage {
-                            Image(uiImage: image)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(height: isAvatarExpanded ? expandedAvatarHeight : 320)
-                                .blur(radius: 40)
-                                .opacity(0.4)
-                        } else {
-                            LinearGradient(
-                                colors: [Color(red: 0.1, green: 0.1, blue: 0.15), .black],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                            .frame(height: 320)
-                        }
-                        
-                        // Контент профиля
-                        VStack(spacing: isAvatarExpanded ? 0 : 16) {
-                            // Аватарка
-                            Button(action: {
-                                withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
-                                    isAvatarExpanded.toggle()
-                                }
-                            }) {
-                                ZStack {
-                                    if let image = avatarImage {
-                                        Image(uiImage: image)
-                                            .resizable()
-                                            .scaledToFill()
-                                            .frame(
-                                                width: isAvatarExpanded ? UIScreen.main.bounds.width : collapsedAvatarSize,
-                                                height: isAvatarExpanded ? expandedAvatarHeight : collapsedAvatarSize
+                    
+                    VStack(spacing: 0) {
+                        // Верхняя часть с анимированной аватаркой
+                        ZStack(alignment: .bottom) {
+                            // Сама аватарка или фон
+                            ZStack(alignment: .bottom) {
+                                if let image = avatarImage {
+                                    Image(uiImage: image)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(
+                                            width: isAvatarExpanded ? UIScreen.main.bounds.width : collapsedAvatarSize,
+                                            height: isAvatarExpanded ? expandedAvatarHeight : 320
+                                        )
+                                        .clipShape(isAvatarExpanded ? AnyShape(Rectangle()) : AnyShape(Circle()))
+                                        .onTapGesture {
+                                            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+                                                isAvatarExpanded.toggle()
+                                            }
+                                        }
+                                    
+                                    // Размытый оверлей с информацией (только когда расширена)
+                                    if isAvatarExpanded {
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(fullName)
+                                                .font(.system(size: 26, weight: .bold))
+                                                .foregroundColor(.white)
+                                            
+                                            HStack(spacing: 4) {
+                                                Image(systemName: "checkmark.shield.fill")
+                                                    .font(.system(size: 12))
+                                                Text(tag.isEmpty ? phoneNumber : "@\(tag)")
+                                            }
+                                            .font(.system(size: 16))
+                                            .foregroundColor(.white.opacity(0.8))
+                                        }
+                                        .padding(.horizontal, 24)
+                                        .padding(.top, 20)
+                                        .padding(.bottom, 30)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .background(
+                                            LinearGradient(
+                                                colors: [.clear, .black.opacity(0.3), .black.opacity(0.5)],
+                                                startPoint: .top,
+                                                endPoint: .bottom
                                             )
-                                            .clipShape(isAvatarExpanded ? AnyShape(Rectangle()) : AnyShape(Circle()))
-                                    } else {
-                                        Circle()
-                                            .fill(LinearGradient(
-                                                colors: [Color(red: 0.3, green: 0.7, blue: 1.0), .blue],
-                                                startPoint: .topLeading,
-                                                endPoint: .bottomTrailing
-                                            ))
-                                            .frame(width: collapsedAvatarSize, height: collapsedAvatarSize)
-                                            .overlay(
-                                                Image(systemName: "camera.fill")
-                                                    .font(.system(size: 30))
-                                                    .foregroundColor(.white)
-                                            )
+                                        )
+                                        .background(.ultraThinMaterial)
+                                        .transition(.opacity.combined(with: .move(edge: .bottom)))
                                     }
+                                } else {
+                                    // Заглушка, если нет фото
+                                    Circle()
+                                        .fill(LinearGradient(
+                                            colors: [Color(red: 0.3, green: 0.7, blue: 1.0), .blue],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ))
+                                        .frame(width: collapsedAvatarSize, height: collapsedAvatarSize)
+                                        .overlay(
+                                            Image(systemName: "camera.fill")
+                                                .font(.system(size: 30))
+                                                .foregroundColor(.white)
+                                        )
+                                        .onTapGesture {
+                                            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+                                                isAvatarExpanded.toggle()
+                                            }
+                                        }
                                 }
-                                .shadow(color: .black.opacity(isAvatarExpanded ? 0 : 0.3), radius: 10, x: 0, y: 5)
                             }
-                            .buttonStyle(PressDetectorStyle(isPressed: .constant(false)))
+                            .frame(height: isAvatarExpanded ? expandedAvatarHeight : 320)
+                            .frame(maxWidth: .infinity)
                             
-                            // Информация под аватаркой (скрывается или сдвигается при расширении)
+                            // Информация под маленькой аватаркой
                             if !isAvatarExpanded {
                                 VStack(spacing: 4) {
                                     Text(fullName)
@@ -117,54 +136,34 @@ struct SettingsView: View {
                                         .font(.system(size: 16))
                                         .foregroundColor(.white.opacity(0.5))
                                 }
-                                .transition(.opacity.combined(with: .move(edge: .bottom)))
                                 .padding(.bottom, 40)
+                                .transition(.opacity)
                             }
                         }
-                    }
-                    .frame(height: isAvatarExpanded ? expandedAvatarHeight : 320)
-                    .clipShape(Rectangle())
-                    
-                    // Группы настроек
-                    VStack(spacing: 20) {
-                        if isAvatarExpanded {
-                            // Имя и телефон внутри списка, когда аватарка расширена (как в ТГ)
+                        .frame(height: isAvatarExpanded ? expandedAvatarHeight : 320)
+                        .clipShape(Rectangle())
+                        
+                        // Группы настроек
+                        VStack(spacing: 20) {
                             SettingsGroup {
-                                HStack(spacing: 15) {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(fullName)
-                                            .font(.system(size: 20, weight: .bold))
-                                            .foregroundColor(.white)
-                                        Text(tag.isEmpty ? phoneNumber : "@\(tag)")
-                                            .font(.system(size: 14))
-                                            .foregroundColor(.gray)
-                                    }
-                                    Spacer()
-                                }
-                                .padding()
-                            }
-                            .transition(.move(edge: .top).combined(with: .opacity))
-                        }
-
-                        SettingsGroup {
-                            SettingsRow(icon: "face.smiling", iconColor: .blue, title: "Сменить эмодзи-статус", textColor: .blue, noIconBackground: true)
-                            Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                            SettingsRow(icon: "wand.and.stars", iconColor: .blue, title: "Изменить цвет профиля", textColor: .blue, noIconBackground: true)
-                            Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                            SettingsRow(icon: "camera", iconColor: .blue, title: "Выбрать фотографию", textColor: .blue, noIconBackground: true) {
-                                isEditingProfile = true
-                            }
-                            
-                            if tag.isEmpty {
+                                SettingsRow(icon: "face.smiling", iconColor: .blue, title: "Сменить эмодзи-статус", textColor: .blue, noIconBackground: true)
                                 Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                                SettingsRow(icon: "at", iconColor: .blue, title: "Выбрать имя пользователя", textColor: .blue, noIconBackground: true) {
-                                    withAnimation(.easeInOut(duration: 0.3)) {
-                                        isEditingProfile = true
+                                SettingsRow(icon: "wand.and.stars", iconColor: .blue, title: "Изменить цвет профиля", textColor: .blue, noIconBackground: true)
+                                Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
+                                SettingsRow(icon: "camera", iconColor: .blue, title: "Выбрать фотографию", textColor: .blue, noIconBackground: true) {
+                                    isEditingProfile = true
+                                }
+                                
+                                if tag.isEmpty {
+                                    Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
+                                    SettingsRow(icon: "at", iconColor: .blue, title: "Выбрать имя пользователя", textColor: .blue, noIconBackground: true) {
+                                        withAnimation(.easeInOut(duration: 0.3)) {
+                                            isEditingProfile = true
+                                        }
                                     }
                                 }
                             }
-                        }
-                        .padding(.top, 10)
+                            .padding(.top, 10)
                             
                             SettingsGroup {
                                 SettingsRow(icon: "person.circle.fill", iconColor: .green, title: username, showArrow: false)
@@ -197,7 +196,8 @@ struct SettingsView: View {
                             }
                         }
                         .padding(.horizontal)
-                    .padding(.bottom, 30)
+                        .padding(.bottom, 30)
+                    }
                 }
             }
             .onPreferenceChange(ScrollOffsetKey.self) { value in
@@ -232,10 +232,11 @@ struct SettingsView: View {
                     .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 16, paddingVertical: 8))
                 }
                 .padding(.horizontal)
-                .padding(.top, 10)
+                .padding(.top, 50) // Достаточно места для статус-бара
                 
                 Spacer()
             }
+            .ignoresSafeArea() // Позволяем кнопкам быть выше основной контентной области, если нужно
             
             if isEditingProfile {
                 EditProfileView(isPresented: $isEditingProfile, isAuthenticated: $isAuthenticated)
