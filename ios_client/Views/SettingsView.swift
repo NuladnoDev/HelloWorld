@@ -26,7 +26,7 @@ struct SettingsView: View {
                             Spacer()
                             
                             Button(action: {
-                                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                withAnimation(.easeInOut(duration: 0.3)) {
                                     isEditingProfile = true
                                 }
                             }) {
@@ -164,8 +164,8 @@ struct SettingsView: View {
             }
             
             if isEditingProfile {
-                EditProfileView(isPresented: $isEditingProfile)
-                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                EditProfileView(isPresented: $isEditingProfile, isAuthenticated: $isAuthenticated)
+                    .transition(.opacity)
                     .zIndex(1)
             }
         }

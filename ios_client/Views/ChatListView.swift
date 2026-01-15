@@ -283,23 +283,13 @@ struct ChatListView: View {
                         }
                         
                         if isSearchActive {
-                            // Категории внизу (как в ТГ на скрине)
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 12) {
-                                    SearchCategoryTab(title: "Чаты", isSelected: searchCategory == "Чаты") { searchCategory = "Чаты" }
-                                    SearchCategoryTab(title: "Каналы", isSelected: searchCategory == "Каналы") { searchCategory = "Каналы" }
-                                    SearchCategoryTab(title: "Приложения", isSelected: searchCategory == "Приложения") { searchCategory = "Приложения" }
-                                    SearchCategoryTab(title: "Медиа", isSelected: searchCategory == "Медиа") { searchCategory = "Медиа" }
-                                }
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 12)
-                            }
-                            .background(
-                                Color.black.opacity(0.8)
-                                    .background(.ultraThinMaterial)
-                                    .edgesIgnoringSafeArea(.bottom)
-                            )
-                            .transition(.move(edge: .bottom))
+                            // Категории внизу (как в ТГ на скрине) - Одно меню навигации
+                            SearchNavigationBar(selectedCategory: $searchCategory)
+                                .padding(.bottom, 10)
+                                .transition(.asymmetric(
+                                    insertion: .move(edge: .bottom).combined(with: .opacity),
+                                    removal: .opacity.animation(.none) // Мгновенное исчезновение без анимации
+                                ))
                         }
                     }
                 }
@@ -444,23 +434,51 @@ struct RecentContactItem: View {
 }
 
 @available(iOS 15.0, *)
-struct SearchCategoryTab: View {
-    let title: String
-    let isSelected: Bool
-    let action: () -> Void
+struct SearchNavigationBar: View {
+    @Binding var selectedCategory: String
+    let categories = ["Чаты", "Каналы", "Приложения", "Медиа"]
+    @Namespace private var animation
     
     var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 14, weight: isSelected ? .bold : .medium))
+        HStack(spacing: 0) {
+            ForEach(categories, id: \.self) { category in
+                Button(action: {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                        selectedCategory = category
+                    }
+                }) {
+                    Text(category)
+                        .font(.system(size: 14, weight: selectedCategory == category ? .bold : .medium))
+                        .foregroundColor(selectedCategory == category ? .white : .gray)
+                        .padding(.vertical, 10)
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            ZStack {
+                                if selectedCategory == category {
+                                    Capsule()
+                                        .fill(Color.white.opacity(0.12))
+                                        .matchedGeometryEffect(id: "activeTab", in: animation)
+                                        .overlay(
+                                            Capsule()
+                                                .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
+                                        )
+                                }
+                            }
+                        )
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
         }
-        .buttonStyle(LiquidGlassButtonStyle(
-            paddingHorizontal: 16, 
-            paddingVertical: 8
-        ))
-        .opacity(isSelected ? 1.0 : 0.6)
-        .scaleEffect(isSelected ? 1.05 : 1.0)
-        .animation(.spring(), value: isSelected)
+        .padding(4)
+        .background(
+            ZStack {
+                Capsule()
+                    .fill(Color.black.opacity(0.6))
+                Capsule()
+                    .fill(.ultraThinMaterial)
+            }
+        )
+        .padding(.horizontal, 16)
     }
 }
 

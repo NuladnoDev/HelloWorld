@@ -3,13 +3,13 @@ import SwiftUI
 @available(iOS 15.0, *)
 struct EditProfileView: View {
     @Binding var isPresented: Bool
+    @Binding var isAuthenticated: Bool
     @State private var firstName: String = ""
     @State private var lastName: String = ""
     @State private var bio: String = ""
     @State private var username: String = UserDefaults.standard.string(forKey: "saved_username") ?? ""
     @State private var phoneNumber: String = "+7 (999) 123-45-67"
     @State private var birthDate = Date()
-    @State private var showDatePicker = false
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -18,66 +18,73 @@ struct EditProfileView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
                     // Хедер с кнопками Отмена и Готово
-                    HStack {
-                        Button(action: {
-                            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                                isPresented = false
+                    VStack(spacing: 0) {
+                        HStack {
+                            Button(action: {
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    isPresented = false
+                                }
+                            }) {
+                                Text("Отмена")
+                                    .font(.system(size: 17))
+                                    .foregroundColor(.white)
                             }
-                        }) {
-                            Text("Отмена")
-                                .font(.system(size: 17))
-                                .foregroundColor(.white)
-                        }
-                        .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 20, paddingVertical: 10))
-                        
-                        Spacer()
-                        
-                        Button(action: {
-                            // Сохранение и выход
-                            UserDefaults.standard.set(username, forKey: "saved_username")
-                            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                                isPresented = false
+                            .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 20, paddingVertical: 10))
+                            
+                            Spacer()
+                            
+                            Button(action: {
+                                // Сохранение и выход
+                                UserDefaults.standard.set(username, forKey: "saved_username")
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    isPresented = false
+                                }
+                            }) {
+                                Text("Готово")
+                                    .font(.system(size: 17, weight: .bold))
+                                    .foregroundColor(.white)
                             }
-                        }) {
-                            Text("Готово")
-                                .font(.system(size: 17, weight: .bold))
-                                .foregroundColor(.white)
+                            .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 20, paddingVertical: 10))
                         }
-                        .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 20, paddingVertical: 10))
-                    }
-                    .padding(.horizontal)
-                    .padding(.top, 15)
-                    .padding(.bottom, 20)
-                    
-                    // Аватарка (синхронизирована с SettingsView)
-                    VStack(spacing: 12) {
-                        ZStack {
-                            Circle()
-                                .fill(LinearGradient(
-                                    colors: [Color(red: 0.3, green: 0.7, blue: 1.0), .blue],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ))
-                                .frame(width: 110, height: 110)
-                                .overlay(
-                                    ZStack {
-                                        Color.black.opacity(0.3)
-                                        Image(systemName: "camera.fill")
-                                            .font(.system(size: 30))
-                                            .foregroundColor(.white)
-                                    }
-                                    .clipShape(Circle())
-                                )
-                        }
-                        .padding(.top, 12) // Позиция совпадает с SettingsView (-35 от хедера + отступы)
+                        .padding(.horizontal)
+                        .padding(.top, 15)
                         
-                        Button(action: {}) {
-                            Text("Выбрать фотографию")
-                                .font(.system(size: 17))
-                                .foregroundColor(.blue)
+                        // Аватарка (синхронизирована с SettingsView)
+                        VStack(spacing: 12) {
+                            ZStack {
+                                Circle()
+                                    .fill(LinearGradient(
+                                        colors: [Color(red: 0.3, green: 0.7, blue: 1.0), .blue],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ))
+                                    .frame(width: 110, height: 110)
+                                    .overlay(
+                                        ZStack {
+                                            Color.black.opacity(0.3)
+                                            Image(systemName: "camera.fill")
+                                                .font(.system(size: 30))
+                                                .foregroundColor(.white)
+                                        }
+                                        .clipShape(Circle())
+                                    )
+                            }
+                            .padding(.top, -35) // Точное совпадение с SettingsView
+                            
+                            Button(action: {}) {
+                                Text("Выбрать фотографию")
+                                    .font(.system(size: 17))
+                                    .foregroundColor(.blue)
+                            }
                         }
+                        .padding(.top, 5) // Совпадает с Profile VStack padding в SettingsView
+                        .padding(.bottom, 24)
                     }
-                    .padding(.bottom, 24)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        Color(white: 0.1) // Тот же фон, что и в SettingsView
+                            .edgesIgnoringSafeArea(.top)
+                    )
                     
                     VStack(spacing: 24) {
                         // Поля Имя и Фамилия
@@ -120,21 +127,17 @@ struct EditProfileView: View {
                         // День рождения
                         VStack(alignment: .leading, spacing: 8) {
                             SettingsGroup {
-                                Button(action: {
-                                    withAnimation(.spring()) {
-                                        showDatePicker.toggle()
-                                    }
-                                }) {
-                                    HStack {
-                                        Text("День рождения")
-                                            .foregroundColor(.white)
-                                        Spacer()
-                                        Text(formatDate(birthDate))
-                                            .foregroundColor(.white.opacity(0.5))
-                                    }
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 12)
+                                HStack {
+                                    Text("День рождения")
+                                        .foregroundColor(.white)
+                                    Spacer()
+                                    DatePicker("", selection: $birthDate, displayedComponents: .date)
+                                        .datePickerStyle(.compact)
+                                        .labelsHidden()
+                                        .colorScheme(.dark)
                                 }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
                             }
                             
                             Text("Ваш день рождения могут видеть только контакты. Изменить >")
@@ -171,62 +174,46 @@ struct EditProfileView: View {
                                         .padding(.trailing, 40)
                                 , alignment: .trailing)
                         }
+                        
+                        // Кнопка Выйти
+                        SettingsGroup {
+                            Button(action: {
+                                withAnimation {
+                                    isAuthenticated = false
+                                    isPresented = false
+                                }
+                                UserDefaults.standard.set(false, forKey: "is_authenticated")
+                            }) {
+                                HStack {
+                                    Image(systemName: "rectangle.portrait.and.arrow.right")
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundColor(.red)
+                                        .frame(width: 28, height: 28)
+                                    
+                                    Text("Выйти")
+                                        .font(.system(size: 17))
+                                        .foregroundColor(.red)
+                                    
+                                    Spacer()
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
+                            }
+                        }
                         .padding(.bottom, 30)
                     }
                     .padding(.horizontal)
                 }
             }
-            
-            // Меню выбора даты (как в ТГ)
-            if showDatePicker {
-                ZStack(alignment: .bottom) {
-                    Color.black.opacity(0.4)
-                        .edgesIgnoringSafeArea(.all)
-                        .onTapGesture {
-                            withAnimation(.spring()) {
-                                showDatePicker = false
-                            }
-                        }
-                    
-                    VStack(spacing: 0) {
-                        HStack {
-                            Spacer()
-                            Button("Готово") {
-                                withAnimation(.spring()) {
-                                    showDatePicker = false
-                                }
-                            }
-                            .font(.headline)
-                            .padding()
-                        }
-                        .background(Color(white: 0.15))
-                        
-                        DatePicker("", selection: $birthDate, displayedComponents: .date)
-                            .datePickerStyle(.wheel)
-                            .labelsHidden()
-                            .background(Color(white: 0.15))
-                            .colorScheme(.dark)
-                    }
-                    .transition(.move(edge: .bottom))
-                }
-                .zIndex(2)
-            }
         }
         .navigationBarHidden(true)
-    }
-    
-    private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ru_RU")
-        formatter.dateFormat = "d MMM yyyy"
-        return formatter.string(from: date)
     }
 }
 
 @available(iOS 15.0, *)
 struct EditProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        EditProfileView(isPresented: .constant(true))
+        EditProfileView(isPresented: .constant(true), isAuthenticated: .constant(true))
             .preferredColorScheme(.dark)
     }
 }
