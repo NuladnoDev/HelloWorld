@@ -35,34 +35,35 @@ struct SettingsView: View {
                         .padding(.top, 15)
                         
                         // Секция профиля (Аватар + Тег + Номер + Имя)
-                        VStack(spacing: 8) {
+                        VStack(spacing: 4) { // Минимальный отступ между аватаром и текстом
                             ZStack {
-                                // Мягкое растушеванное белое свечение вокруг аватарки
-                                RadialGradient(
-                                    colors: [
-                                        Color.white.opacity(0.1),
-                                        Color.white.opacity(0.05),
-                                        Color.clear
-                                    ],
-                                    center: .center,
-                                    startRadius: 20,
-                                    endRadius: 150
-                                )
-                                .frame(width: 380, height: 380)
-                                
                                 Circle()
                                     .fill(LinearGradient(
                                         colors: [Color(red: 0.3, green: 0.7, blue: 1.0), .blue],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     ))
-                                    .frame(width: 120, height: 120) // Увеличил аватарку (было 100)
+                                    .frame(width: 120, height: 120)
+                                    .background(
+                                        // Мягкое свечение теперь в фоне и не раздувает ZStack
+                                        RadialGradient(
+                                            colors: [
+                                                Color.white.opacity(0.12),
+                                                Color.white.opacity(0.06),
+                                                Color.clear
+                                            ],
+                                            center: .center,
+                                            startRadius: 20,
+                                            endRadius: 100
+                                        )
+                                        .frame(width: 300, height: 300)
+                                    )
                                 
                                 Text(String(username.prefix(1)).uppercased())
-                                    .font(.system(size: 48, weight: .bold)) // Увеличил букву
+                                    .font(.system(size: 48, weight: .bold))
                                     .foregroundColor(.white)
                             }
-                            .padding(.top, -65) // Поднял аватарку значительно выше (было -35)
+                            .padding(.top, -100) // Поднимаем аватарку максимально высоко к кнопкам
                             
                             VStack(spacing: 2) {
                                 Text("@\(username)")
@@ -78,10 +79,9 @@ struct SettingsView: View {
                                         .foregroundColor(.white.opacity(0.5))
                                 }
                             }
-                            .padding(.top, -5) // Подтянул текст еще ближе к аватарке
                         }
                         .padding(.top, 5)
-                        .padding(.bottom, 40)
+                        .padding(.bottom, 30)
                     }
                     .frame(maxWidth: .infinity)
                     .background(
@@ -89,7 +89,7 @@ struct SettingsView: View {
                             let minY = geo.frame(in: .global).minY
                             Color(white: 0.1)
                                 .offset(y: minY > 0 ? -minY : 0)
-                                .frame(height: minY > 0 ? 220 + minY : 220) // Немного уменьшил базовую высоту фона
+                                .frame(height: minY > 0 ? 180 + minY : 180) // Еще уменьшил высоту фона для плотности
                         }
                     )
                     
