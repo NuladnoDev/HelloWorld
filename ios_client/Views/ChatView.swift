@@ -1,4 +1,6 @@
 import SwiftUI
+import PhotosUI
+import AVKit
 
 @available(iOS 15.0, *)
 struct ChatMessage: Identifiable {
@@ -7,43 +9,81 @@ struct ChatMessage: Identifiable {
     let isMe: Bool
     let time: String
     let hasTail: Bool
-    var image: String? = nil
+    var image: UIImage? = nil
+    var videoURL: URL? = nil
     var isVideo: Bool = false
     var isPhoto: Bool = false
     var isEmoji: Bool = false
 }
 
 @available(iOS 15.0, *)
-struct LiquidGlassView<Content: View>: View {
-    let content: Content
-    var cornerRadius: CGFloat = 28
-    
-    init(cornerRadius: CGFloat = 28, @ViewBuilder content: () -> Content) {
-        self.cornerRadius = cornerRadius
-        self.content = content()
-    }
+struct MediaViewer: View {
+    let message: ChatMessage
+    @Binding var isPresented: Bool
+    @State private var offset: CGSize = .zero
+    @State private var scale: CGFloat = 1.0
     
     var body: some View {
-        content
-            .background(
-                ZStack {
-                    RoundedRectangle(cornerRadius: cornerRadius)
-                        .fill(Color.black.opacity(0.4))
-                    RoundedRectangle(cornerRadius: cornerRadius)
-                        .fill(.thinMaterial)
+        ZStack {
+            Color.black.edgesIgnoringSafeArea(.all)
+                .opacity(Double(1.0 - (abs(offset.height) / 500)))
+            
+            VStack {
+                HStack {
+                    Button(action: { isPresented = false }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Circle().fill(Color.black.opacity(0.5)))
+                    }
+                    Spacer()
+                    
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(message.isMe ? "Вы" : "hikka")
+                            .font(.system(size: 16, weight: .bold))
+                        Text(message.time)
+                            .font(.system(size: 12))
+                            .opacity(0.7)
+                    }
+                    .foregroundColor(.white)
+                    .padding(.trailing)
                 }
-                .overlay(
-                    RoundedRectangle(cornerRadius: cornerRadius)
-                        .stroke(
-                            LinearGradient(
-                                colors: [.white.opacity(0.15), .white.opacity(0.05)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 0.5
+                .padding(.top, 50)
+                
+                Spacer()
+                
+                if let videoURL = message.videoURL {
+                    VideoPlayer(player: AVPlayer(url: videoURL))
+                        .frame(maxWidth: .infinity)
+                        .aspectRatio(contentMode: .fit)
+                } else if let image = message.image {
+                    Image(uiImage: image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .scaleEffect(scale)
+                        .offset(offset)
+                        .gesture(
+                            DragGesture()
+                                .onChanged { value in
+                                    offset = value.translation
+                                }
+                                .onEnded { value in
+                                    if abs(offset.height) > 150 {
+                                        isPresented = false
+                                    } else {
+                                        withAnimation(.spring()) {
+                                            offset = .zero
+                                        }
+                                    }
+                                }
                         )
-                )
-            )
+                }
+                
+                Spacer()
+            }
+        }
+        .transition(.move(edge: .bottom))
     }
 }
 
@@ -51,21 +91,16 @@ struct LiquidGlassView<Content: View>: View {
 struct ChatView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var messageText: String = ""
+    @State private var showMediaPicker = false
+    @State private var selectedMediaItem: PhotosPickerItem? = nil
+    @State private var selectedViewerMessage: ChatMessage? = nil
+    
     @State private var messages: [ChatMessage] = [
         ChatMessage(text: "Привет! Как дела?", isMe: false, time: "10:00", hasTail: true),
         ChatMessage(text: "Привет! Все отлично, работаю над новым проектом. А у тебя?", isMe: true, time: "10:01", hasTail: true),
         ChatMessage(text: "Тоже неплохо. Помнишь, я говорил про тот дизайн?", isMe: false, time: "10:02", hasTail: true),
         ChatMessage(text: "Да, конечно. Есть какие-то наработки?", isMe: true, time: "10:03", hasTail: true),
-        ChatMessage(text: "Да, вот посмотри скриншот.", isMe: false, time: "10:04", hasTail: true),
-        ChatMessage(text: "", isMe: false, time: "10:04", hasTail: true, image: "avatar_placeholder", isPhoto: true),
-        ChatMessage(text: "Ого, выглядит очень круто! Мне нравится цветовая схема.", isMe: true, time: "10:05", hasTail: true),
-        ChatMessage(text: "Спасибо! Я еще хочу добавить пару деталей.", isMe: false, time: "10:06", hasTail: true),
-        ChatMessage(text: "Давай, жду обновлений.", isMe: true, time: "10:07", hasTail: true),
-        ChatMessage(text: "Кстати, ты видел новые функции в приложении?", isMe: false, time: "10:08", hasTail: true),
-        ChatMessage(text: "Пока нет, сейчас гляну.", isMe: true, time: "10:09", hasTail: true),
-        ChatMessage(text: "Там добавили очень удобный поиск и фильтры.", isMe: false, time: "10:10", hasTail: true),
-        ChatMessage(text: "Это как раз то, чего не хватало!", isMe: true, time: "10:11", hasTail: true),
-        ChatMessage(text: "Согласен, теперь пользоваться одно удовольствие.", isMe: false, time: "10:12", hasTail: true)
+        ChatMessage(text: "Да, вот посмотри скриншот.", isMe: false, time: "10:04", hasTail: true)
     ]
     
     var body: some View {
@@ -81,8 +116,12 @@ struct ChatView: View {
                         VStack(spacing: 12) {
                             Spacer(minLength: 10)
                             ForEach(messages) { msg in
-                                MessageBubble(message: msg)
-                                    .id(msg.id)
+                                MessageBubble(message: msg) {
+                                    if msg.isPhoto || msg.isVideo {
+                                        selectedViewerMessage = msg
+                                    }
+                                }
+                                .id(msg.id)
                             }
                         }
                         .padding(.horizontal, 10)
@@ -104,65 +143,42 @@ struct ChatView: View {
                 
                 inputBar
             }
+            
+            if let msg = selectedViewerMessage {
+                MediaViewer(message: msg, isPresented: Binding(
+                    get: { selectedViewerMessage != nil },
+                    set: { if !$0 { selectedViewerMessage = nil } }
+                ))
+                .zIndex(10)
+            }
         }
         .navigationBarHidden(true)
+        .photosPicker(isPresented: $showMediaPicker, selection: $selectedMediaItem, matching: .any(of: [.images, .videos]))
+        .onChange(of: selectedMediaItem) { newItem in
+            Task {
+                if let data = try? await newItem?.loadTransferable(type: Data.self),
+                   let uiImage = UIImage(data: data) {
+                    await MainActor.run {
+                        messages.append(ChatMessage(text: "", isMe: true, time: getCurrentTime(), hasTail: true, image: uiImage, isPhoto: true))
+                    }
+                } else if let movie = try? await newItem?.loadTransferable(type: VideoModel.self) {
+                    await MainActor.run {
+                        messages.append(ChatMessage(text: "", isMe: true, time: getCurrentTime(), hasTail: true, videoURL: movie.url, isVideo: true))
+                    }
+                }
+                selectedMediaItem = nil
+            }
+        }
         .onAppear {
-            // Включаем свайп назад даже при скрытом navigation bar
             UINavigationController.enableSwipeBack()
         }
-    }
-    
-    private var chatHeader: some View {
-        HStack(spacing: 8) {
-            // Кнопка назад
-            Button(action: {
-                presentationMode.wrappedValue.dismiss()
-            }) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 18, weight: .bold))
-            }
-            .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 12, paddingVertical: 10))
-            
-            // Инфо-панель
-            LiquidGlassView(cornerRadius: 20) {
-                HStack(spacing: 0) {
-                    Spacer()
-                    VStack(alignment: .center, spacing: 2) {
-                        Text("hikka")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.white)
-                        Text("был(а) недавно")
-                            .font(.system(size: 12))
-                            .foregroundColor(.white.opacity(0.6))
-                    }
-                    Spacer()
-                }
-                .padding(.vertical, 6)
-            }
-            
-            // Аватарка
-            Button(action: {}) {
-                Circle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 36, height: 36)
-                    .overlay(
-                        Image(systemName: "person.fill")
-                            .font(.system(size: 18))
-                            .foregroundColor(.white.opacity(0.8))
-                    )
-            }
-            .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 4, paddingVertical: 4))
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 10)
-        .background(Color.black.opacity(0.3))
     }
     
     private var inputBar: some View {
         VStack(spacing: 0) {
             HStack(spacing: 8) {
                 // Кнопка скрепки
-                Button(action: {}) {
+                Button(action: { showMediaPicker = true }) {
                     Image(systemName: "paperclip")
                         .font(.system(size: 20))
                 }
@@ -219,27 +235,87 @@ struct ChatView: View {
         formatter.dateFormat = "HH:mm"
         return formatter.string(from: Date())
     }
+    
+    private var chatHeader: some View {
+        HStack(spacing: 8) {
+            Button(action: { presentationMode.wrappedValue.dismiss() }) {
+                Image(systemName: "chevron.left").font(.system(size: 18, weight: .bold))
+            }.buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 12, paddingVertical: 10))
+            
+            LiquidGlassView(cornerRadius: 20) {
+                HStack {
+                    Spacer()
+                    VStack(spacing: 2) {
+                        Text("hikka").font(.system(size: 16, weight: .bold)).foregroundColor(.white)
+                        Text("был(а) недавно").font(.system(size: 12)).foregroundColor(.white.opacity(0.6))
+                    }
+                    Spacer()
+                }.padding(.vertical, 6)
+            }
+            
+            Button(action: {}) {
+                Circle().fill(Color.gray.opacity(0.3)).frame(width: 36, height: 36)
+                    .overlay(Image(systemName: "person.fill").font(.system(size: 18)).foregroundColor(.white.opacity(0.8)))
+            }.buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 4, paddingVertical: 4))
+        }.padding(.horizontal, 8).padding(.vertical, 10).background(Color.black.opacity(0.3))
+    }
 }
 
-// Расширение для включения свайпа назад при скрытом навигейшн баре
-extension UINavigationController: UIGestureRecognizerDelegate {
-    override open func viewDidLoad() {
-        super.viewDidLoad()
-        interactivePopGestureRecognizer?.delegate = self
-    }
-
-    public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        return viewControllers.count > 1
+@available(iOS 15.0, *)
+struct LiquidGlassView<Content: View>: View {
+    let content: Content
+    var cornerRadius: CGFloat = 28
+    
+    init(cornerRadius: CGFloat = 28, @ViewBuilder content: () -> Content) {
+        self.cornerRadius = cornerRadius
+        self.content = content()
     }
     
-    static func enableSwipeBack() {
-        // Пустой метод для вызова, инициализация происходит в viewDidLoad
+    var body: some View {
+        content
+            .background(
+                ZStack {
+                    RoundedRectangle(cornerRadius: cornerRadius)
+                        .fill(Color.black.opacity(0.4))
+                    RoundedRectangle(cornerRadius: cornerRadius)
+                        .fill(.thinMaterial)
+                }
+                .overlay(
+                    RoundedRectangle(cornerRadius: cornerRadius)
+                        .stroke(
+                            LinearGradient(
+                                colors: [.white.opacity(0.15), .white.opacity(0.05)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 0.5
+                        )
+                )
+            )
+    }
+}
+
+// Модель для загрузки видео
+struct VideoModel: Transferable {
+    let url: URL
+    static var transferRepresentation: some TransferRepresentation {
+        FileRepresentation(contentType: .movie) { movie in
+            SentTransferredFile(movie.url)
+        } importing: { received in
+            let copy = FileManager.default.temporaryDirectory.appendingPathComponent(received.file.lastPathComponent)
+            if FileManager.default.fileExists(atPath: copy.path) {
+                try? FileManager.default.removeItem(at: copy)
+            }
+            try FileManager.default.copyItem(at: received.file, to: copy)
+            return VideoModel(url: copy)
+        }
     }
 }
 
 @available(iOS 15.0, *)
 struct MessageBubble: View {
     let message: ChatMessage
+    var onMediaTap: (() -> Void)? = nil
     
     var body: some View {
         HStack(alignment: .bottom, spacing: 0) {
@@ -247,80 +323,48 @@ struct MessageBubble: View {
             
             VStack(alignment: message.isMe ? .trailing : .leading, spacing: 4) {
                 if message.isEmoji {
-                    Text(message.text)
-                        .font(.system(size: 80))
-                    Text(message.time)
-                        .font(.system(size: 11))
-                        .foregroundColor(.white.opacity(0.5))
-                        .padding(.horizontal, 4)
-                } else if message.isPhoto {
-                    ZStack(alignment: .bottomTrailing) {
-                        Image("avatar_placeholder") // Заглушка для фото
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(maxWidth: 250, maxHeight: 300)
-                            .clipShape(RoundedRectangle(cornerRadius: 18))
-                        
-                        HStack(spacing: 4) {
-                            Text(message.time)
-                                .font(.system(size: 11))
-                            if message.isMe {
-                                TelegramCheckmarks()
+                    Text(message.text).font(.system(size: 80))
+                    Text(message.time).font(.system(size: 11)).foregroundColor(.white.opacity(0.5)).padding(.horizontal, 4)
+                } else if message.isPhoto || message.isVideo {
+                    Button(action: { onMediaTap?() }) {
+                        ZStack(alignment: .bottomTrailing) {
+                            if let image = message.image {
+                                Image(uiImage: image)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(maxWidth: 250, maxHeight: 300)
+                                    .clipShape(RoundedRectangle(cornerRadius: 18))
+                            } else {
+                                RoundedRectangle(cornerRadius: 18)
+                                    .fill(Color(white: 0.15))
+                                    .frame(width: 250, height: 250)
+                                    .overlay(Image(systemName: message.isVideo ? "play.fill" : "photo").font(.system(size: 40)).foregroundColor(.white.opacity(0.3)))
                             }
+                            
+                            HStack(spacing: 4) {
+                                if message.isVideo { Image(systemName: "play.fill").font(.system(size: 10)) }
+                                Text(message.time).font(.system(size: 11))
+                                if message.isMe { TelegramCheckmarks() }
+                            }
+                            .foregroundColor(.white).padding(.horizontal, 8).padding(.vertical, 4)
+                            .background(Color.black.opacity(0.4)).cornerRadius(10).padding(8)
                         }
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.black.opacity(0.4))
-                        .cornerRadius(10)
-                        .padding(8)
                     }
-                } else if message.isVideo {
-                    ZStack(alignment: .bottomTrailing) {
-                        Circle()
-                            .fill(Color(white: 0.2))
-                            .frame(width: 250, height: 250)
-                            .overlay(
-                                Image(systemName: "play.fill")
-                                    .font(.system(size: 40))
-                                    .foregroundColor(.white.opacity(0.3))
-                            )
-                        
-                        HStack(spacing: 4) {
-                            Text("0:28")
-                                .font(.system(size: 11))
-                            Image(systemName: "speaker.slash.fill")
-                                .font(.system(size: 10))
-                            Text(message.time)
-                                .font(.system(size: 11))
-                        }
-                        .foregroundColor(.white)
-                        .padding(6)
-                        .background(Color.black.opacity(0.4))
-                        .cornerRadius(10)
-                        .padding(15)
-                    }
+                    .buttonStyle(PlainButtonStyle())
                 } else {
                     HStack(alignment: .bottom, spacing: 8) {
-                        Text(message.text)
-                            .font(.system(size: 16))
-                        
+                        Text(message.text).font(.system(size: 16))
                         HStack(spacing: 2) {
-                            Text(message.time)
-                                .font(.system(size: 11))
-                            if message.isMe {
-                                TelegramCheckmarks()
-                            }
+                            Text(message.time).font(.system(size: 11))
+                            if message.isMe { TelegramCheckmarks() }
                         }
                         .foregroundColor(message.isMe ? .white.opacity(0.7) : .white.opacity(0.5))
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
+                    .padding(.horizontal, 12).padding(.vertical, 8)
                     .background(message.isMe ? Color(red: 0.4, green: 0.3, blue: 0.8) : Color(white: 0.15))
                     .cornerRadius(18)
                 }
             }
-            
             if !message.isMe { Spacer() }
         }
     }
@@ -335,5 +379,22 @@ struct TelegramCheckmarks: View {
             Image(systemName: "checkmark")
                 .font(.system(size: 7, weight: .bold))
         }
+    }
+}
+
+// Расширение для поддержки свайпа назад при скрытом navigationBar
+extension UINavigationController: UIGestureRecognizerDelegate {
+    override open func viewDidLoad() {
+        super.viewDidLoad()
+        interactivePopGestureRecognizer?.delegate = self
+    }
+    
+    public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        return viewControllers.count > 1
+    }
+    
+    // Статический метод для инициализации (вызывается в onAppear)
+    static func enableSwipeBack() {
+        // Метод пустой, так как viewDidLoad делает всю работу
     }
 }
