@@ -8,6 +8,7 @@ struct SettingsView: View {
     @State private var lastName: String = UserDefaults.standard.string(forKey: "saved_lastName") ?? ""
     @State private var tag: String = UserDefaults.standard.string(forKey: "saved_tag") ?? ""
     @State private var phoneNumber: String = UserDefaults.standard.string(forKey: "saved_phone") ?? "+7 (999) 123-45-67"
+    @State private var avatarImage: UIImage? = nil
     @State private var isEditingProfile = false
     
     var fullName: String {
@@ -49,31 +50,21 @@ struct SettingsView: View {
                         // Секция профиля (Аватар + Тег + Номер + Имя)
                         VStack(spacing: 12) { // Увеличил отступ между аватаром и текстом (был 4)
                             ZStack {
-                                Circle()
-                                    .fill(LinearGradient(
-                                        colors: [Color(red: 0.3, green: 0.7, blue: 1.0), .blue],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ))
-                                    .frame(width: 110, height: 110)
-                                    .background(
-                                        // Мягкое свечение
-                                        RadialGradient(
-                                            colors: [
-                                                Color.white.opacity(0.12),
-                                                Color.white.opacity(0.06),
-                                                Color.clear
-                                            ],
-                                            center: .center,
-                                            startRadius: 20,
-                                            endRadius: 90 // Уменьшил радиус свечения
-                                        )
-                                        .frame(width: 280, height: 280) // Уменьшил рамку свечения
-                                    )
-                                
-                                Text(String(username.prefix(1)).uppercased())
-                                    .font(.system(size: 44, weight: .bold))
-                                    .foregroundColor(.white)
+                                if let image = avatarImage {
+                                    Image(uiImage: image)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 110, height: 110)
+                                        .clipShape(Circle())
+                                } else {
+                                    Circle()
+                                        .fill(LinearGradient(
+                                            colors: [Color(red: 0.3, green: 0.7, blue: 1.0), .blue],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ))
+                                        .frame(width: 110, height: 110)
+                                }
                             }
                             .padding(.top, -35) // Опустил аватарку ниже (было -100)
                             
@@ -82,7 +73,7 @@ struct SettingsView: View {
                                     .font(.system(size: 24, weight: .bold))
                                     .foregroundColor(.white)
                                 
-                                HStack(spacing: 6) {
+                                HStack(spacing: 2) {
                                     Image(systemName: tag.isEmpty ? "info.circle" : "at")
                                         .font(.system(size: 13))
                                         .foregroundColor(.white.opacity(0.5))
@@ -113,16 +104,16 @@ struct SettingsView: View {
                             Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
                             SettingsRow(icon: "wand.and.stars", iconColor: .blue, title: "Изменить цвет профиля", textColor: .blue, noIconBackground: true)
                             Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                            SettingsRow(icon: "camera", iconColor: .blue, title: "Выбрать фотографию", textColor: .blue, noIconBackground: true)
+                            SettingsRow(icon: "camera", iconColor: .blue, title: "Выбрать фотографию", textColor: .blue, noIconBackground: true) {
+                                isEditingProfile = true
+                            }
                             
                             if tag.isEmpty {
                                 Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                                Button(action: {
+                                SettingsRow(icon: "at", iconColor: .blue, title: "Выбрать имя пользователя", textColor: .blue, noIconBackground: true) {
                                     withAnimation(.easeInOut(duration: 0.3)) {
                                         isEditingProfile = true
                                     }
-                                }) {
-                                    SettingsRow(icon: "at", iconColor: .blue, title: "Выбрать имя пользователя", textColor: .blue, noIconBackground: true)
                                 }
                             }
                         }
@@ -189,6 +180,12 @@ struct SettingsView: View {
         lastName = UserDefaults.standard.string(forKey: "saved_lastName") ?? ""
         tag = UserDefaults.standard.string(forKey: "saved_tag") ?? ""
         phoneNumber = UserDefaults.standard.string(forKey: "saved_phone") ?? "+7 (999) 123-45-67"
+        
+        if let base64 = UserDefaults.standard.string(forKey: "saved_avatar"),
+           let data = Data(base64Encoded: base64),
+           let image = UIImage(data: data) {
+            avatarImage = image
+        }
     }
 }
 
@@ -218,9 +215,10 @@ struct SettingsRow: View {
     var textColor: Color = .white
     var showArrow: Bool = true
     var noIconBackground: Bool = false
+    var action: (() -> Void)? = nil
     
     var body: some View {
-        Button(action: {}) {
+        Button(action: { action?() }) {
             HStack(spacing: 16) {
                 ZStack {
                     if !noIconBackground {
@@ -249,7 +247,18 @@ struct SettingsRow: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
+            .contentShape(Rectangle())
         }
+        .buttonStyle(SettingsButtonStyle())
+    }
+}
+
+@available(iOS 15.0, *)
+struct SettingsButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .background(configuration.isPressed ? Color.white.opacity(0.1) : Color.clear)
+            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 

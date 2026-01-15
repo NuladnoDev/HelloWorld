@@ -9,5 +9,6 @@ pub struct CoreUser {
     pub public_key_base64: String,
     pub tag: Option<String>,
     pub phone_number: Option<String>,
+    pub avatar_base64: Option<String>,
 }
 

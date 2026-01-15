@@ -7,10 +7,16 @@ struct EditProfileView: View {
     @State private var firstName: String = UserDefaults.standard.string(forKey: "saved_firstName") ?? ""
     @State private var lastName: String = UserDefaults.standard.string(forKey: "saved_lastName") ?? ""
     @State private var tag: String = UserDefaults.standard.string(forKey: "saved_tag") ?? ""
-    @State private var bio: String = ""
+    @State private var bio: String = UserDefaults.standard.string(forKey: "saved_bio") ?? ""
     @State private var username: String = UserDefaults.standard.string(forKey: "saved_username") ?? ""
     @State private var phoneNumber: String = UserDefaults.standard.string(forKey: "saved_phone") ?? "+7 (999) 123-45-67"
     @State private var birthDate = Date()
+    @State private var avatarImage: UIImage? = nil
+    @State private var tempImage: UIImage? = nil
+    @State private var showImagePicker = false
+    @State private var showCropper = false
+    @State private var showEditTag = false
+    @State private var showEditBio = false
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -39,7 +45,16 @@ struct EditProfileView: View {
                                 UserDefaults.standard.set(firstName, forKey: "saved_firstName")
                                 UserDefaults.standard.set(lastName, forKey: "saved_lastName")
                                 UserDefaults.standard.set(tag, forKey: "saved_tag")
+                                UserDefaults.standard.set(bio, forKey: "saved_bio")
                                 UserDefaults.standard.set(username, forKey: "saved_username")
+                                
+                                if let image = avatarImage {
+                                    if let imageData = image.jpegData(compressionQuality: 0.5) {
+                                        let base64String = imageData.base64EncodedString()
+                                        UserDefaults.standard.set(base64String, forKey: "saved_avatar")
+                                    }
+                                }
+                                
                                 withAnimation(.easeInOut(duration: 0.3)) {
                                     isPresented = false
                                 }
@@ -56,26 +71,39 @@ struct EditProfileView: View {
                         // Аватарка (синхронизирована с SettingsView)
                         VStack(spacing: 12) {
                             ZStack {
-                                Circle()
-                                    .fill(LinearGradient(
-                                        colors: [Color(red: 0.3, green: 0.7, blue: 1.0), .blue],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ))
-                                    .frame(width: 110, height: 110)
-                                    .overlay(
-                                        ZStack {
-                                            Color.black.opacity(0.3)
-                                            Image(systemName: "camera.fill")
-                                                .font(.system(size: 30))
-                                                .foregroundColor(.white)
-                                        }
+                                if let image = avatarImage {
+                                    Image(uiImage: image)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 110, height: 110)
                                         .clipShape(Circle())
-                                    )
+                                } else {
+                                    Circle()
+                                        .fill(LinearGradient(
+                                            colors: [Color(red: 0.3, green: 0.7, blue: 1.0), .blue],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ))
+                                        .frame(width: 110, height: 110)
+                                        .overlay(
+                                            ZStack {
+                                                Color.black.opacity(0.3)
+                                                Image(systemName: "camera.fill")
+                                                    .font(.system(size: 30))
+                                                    .foregroundColor(.white)
+                                            }
+                                            .clipShape(Circle())
+                                        )
+                                }
                             }
                             .padding(.top, -35) // Точное совпадение с SettingsView
+                            .onTapGesture {
+                                showImagePicker = true
+                            }
                             
-                            Button(action: {}) {
+                            Button(action: {
+                                showImagePicker = true
+                            }) {
                                 Text("Выбрать фотографию")
                                     .font(.system(size: 17))
                                     .foregroundColor(.blue)
@@ -98,6 +126,7 @@ struct EditProfileView: View {
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 12)
                                     .foregroundColor(.white)
+                                    .tint(.white)
                                 
                                 Divider().background(Color.white.opacity(0.1)).padding(.leading, 16)
                                 
@@ -105,6 +134,7 @@ struct EditProfileView: View {
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 12)
                                     .foregroundColor(.white)
+                                    .tint(.white)
                             }
                             
                             Text("Укажите имя и, если хотите, добавьте фотографию для Вашего профиля.")
@@ -116,13 +146,26 @@ struct EditProfileView: View {
                         // Поле BIO
                         VStack(alignment: .leading, spacing: 8) {
                             SettingsGroup {
-                                TextField("", text: $bio, prompt: Text("bio").foregroundColor(.white.opacity(0.3)))
+                                Button(action: {
+                                    showEditBio = true
+                                }) {
+                                    HStack {
+                                        if bio.isEmpty {
+                                            Text("bio")
+                                                .foregroundColor(.white.opacity(0.3))
+                                        } else {
+                                            Text(bio)
+                                                .foregroundColor(.white)
+                                        }
+                                        Spacer()
+                                    }
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 12)
-                                    .foregroundColor(.white)
+                                }
+                                .buttonStyle(SettingsButtonStyle())
                             }
                             
-                            Text("Вы можете добавить несколько строк о себе. В настроиках можно выбрать, кому они будут видны.")
+                            Text("Вы можете добавить несколько строк о себе. В настройках можно выбрать, кому они будут видны.")
                                 .font(.system(size: 13))
                                 .foregroundColor(.white.opacity(0.4))
                                 .padding(.horizontal, 16)
@@ -156,19 +199,20 @@ struct EditProfileView: View {
                                 .overlay(
                                     Text(phoneNumber)
                                         .font(.system(size: 16))
-                                        .foregroundColor(.white.opacity(0.5))
+                                        .foregroundColor(.white)
                                         .padding(.trailing, 40)
                                 , alignment: .trailing)
                             
                             Divider().background(Color.white.opacity(0.1)).padding(.leading, 50)
                             
                             SettingsRow(icon: "at", iconColor: .blue, title: "Имя пользователя", showArrow: true)
+                                .onTapGesture {
+                                    showEditTag = true
+                                }
                                 .overlay(
-                                    TextField("", text: $tag, prompt: Text("Установить тег").foregroundColor(.white.opacity(0.3)))
-                                        .autocapitalization(.none)
-                                        .disableAutocorrection(true)
-                                        .multilineTextAlignment(.trailing)
-                                        .foregroundColor(.white.opacity(0.5))
+                                    Text(tag.isEmpty ? "Установить тег" : "@\(tag)")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(tag.isEmpty ? .white.opacity(0.3) : .white)
                                         .padding(.trailing, 40)
                                 , alignment: .trailing)
                             
@@ -182,7 +226,7 @@ struct EditProfileView: View {
                                 .overlay(
                                     Text("Добавить")
                                         .font(.system(size: 16))
-                                        .foregroundColor(.white.opacity(0.5))
+                                        .foregroundColor(.white)
                                         .padding(.trailing, 40)
                                 , alignment: .trailing)
                         }
@@ -210,7 +254,9 @@ struct EditProfileView: View {
                                 }
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 12)
+                                .contentShape(Rectangle())
                             }
+                            .buttonStyle(SettingsButtonStyle())
                         }
                         .padding(.bottom, 30)
                     }
@@ -219,6 +265,37 @@ struct EditProfileView: View {
             }
         }
         .navigationBarHidden(true)
+        .sheet(isPresented: $showImagePicker) {
+            ImagePicker(image: $tempImage)
+        }
+        .fullScreenCover(isPresented: $showCropper) {
+            if #available(iOS 15.0, *) {
+                ImageCropperView(image: $tempImage, isPresented: $showCropper)
+                    .onDisappear {
+                        if let cropped = tempImage {
+                            avatarImage = cropped
+                        }
+                    }
+            }
+        }
+        .fullScreenCover(isPresented: $showEditTag) {
+            EditTagView(tag: $tag)
+        }
+        .fullScreenCover(isPresented: $showEditBio) {
+            EditBioView(bio: $bio)
+        }
+        .onChange(of: tempImage) { newValue in
+            if newValue != nil && !showCropper {
+                showCropper = true
+            }
+        }
+        .onAppear {
+            if let base64 = UserDefaults.standard.string(forKey: "saved_avatar"),
+               let data = Data(base64Encoded: base64),
+               let image = UIImage(data: data) {
+                avatarImage = image
+            }
+        }
     }
 }
 

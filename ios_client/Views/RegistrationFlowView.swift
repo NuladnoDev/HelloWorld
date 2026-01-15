@@ -48,6 +48,13 @@ struct RegistrationFlowView: View {
         UserDefaults.standard.set(tag, forKey: "saved_tag")
         UserDefaults.standard.set(phoneNumber, forKey: "saved_phone")
         
+        if let image = selectedImage {
+            if let imageData = image.jpegData(compressionQuality: 0.5) {
+                let base64String = imageData.base64EncodedString()
+                UserDefaults.standard.set(base64String, forKey: "saved_avatar")
+            }
+        }
+        
         withAnimation {
             isAuthenticated = true
         }
@@ -242,6 +249,10 @@ struct AvatarStepView: View {
     var finish: () -> Void
     var skipStep: () -> Void
     
+    @State private var showImagePicker = false
+    @State private var showCropper = false
+    @State private var tempImage: UIImage? = nil
+    
     var body: some View {
         VStack(spacing: 30) {
             HStack {
@@ -253,12 +264,6 @@ struct AvatarStepView: View {
                 }
                 .padding()
             }
-            
-            // Большая иконка (SVG стиль)
-            Image(systemName: "person.crop.circle.badge.plus")
-                .font(.system(size: 80))
-                .foregroundColor(.blue)
-                .padding(.bottom, 20)
             
             Text("Фотография профиля")
                 .font(.system(size: 24, weight: .bold))
@@ -288,22 +293,36 @@ struct AvatarStepView: View {
                 }
             }
             .onTapGesture {
-                // В реальности здесь открытие ImagePicker
+                showImagePicker = true
             }
             
             Spacer()
             
             Button(action: finish) {
-                Text("Готово")
-                    .font(.system(size: 18, weight: .bold))
+                Image(systemName: "arrow.right")
+                    .font(.system(size: 24, weight: .bold))
                     .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 56)
+                    .frame(width: 60, height: 60)
                     .background(Color.blue)
-                    .cornerRadius(16)
+                    .clipShape(Circle())
             }
-            .padding(.horizontal, 40)
             .padding(.bottom, 50)
+        }
+        .sheet(isPresented: $showImagePicker) {
+            ImagePicker(image: $tempImage)
+        }
+        .fullScreenCover(isPresented: $showCropper) {
+            ImageCropperView(image: $tempImage, isPresented: $showCropper)
+                .onDisappear {
+                    if let cropped = tempImage {
+                        selectedImage = cropped
+                    }
+                }
+        }
+        .onChange(of: tempImage) { newValue in
+            if newValue != nil && !showCropper {
+                showCropper = true
+            }
         }
     }
 }
