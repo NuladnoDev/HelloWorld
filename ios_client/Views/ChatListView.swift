@@ -28,7 +28,7 @@ struct ChatListView: View {
         appearance.shadowColor = UIColor.white.withAlphaComponent(0.12)
         
         UITabBar.appearance().standardAppearance = appearance
-        if #available(iOS 15.0, *) {
+        if #available(iOS 16.0, *) {
             UITabBar.appearance().scrollEdgeAppearance = appearance
         }
     }

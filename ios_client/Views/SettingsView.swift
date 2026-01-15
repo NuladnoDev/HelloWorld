@@ -1,7 +1,7 @@
 import SwiftUI
 
 // Вспомогательная структура для создания AnyShape
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct AnyShape: Shape {
     private let _path: @Sendable (CGRect) -> Path
 
@@ -303,7 +303,7 @@ struct ScrollOffsetKey: PreferenceKey {
     }
 }
 
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
         SettingsView(isAuthenticated: .constant(true))

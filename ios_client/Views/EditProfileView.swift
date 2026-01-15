@@ -268,14 +268,12 @@ struct EditProfileView: View {
             ImagePicker(image: $tempImage)
         }
         .fullScreenCover(isPresented: $showCropper) {
-            if #available(iOS 15.0, *) {
-                ImageCropperView(image: $tempImage, isPresented: $showCropper)
-                    .onDisappear {
-                        if let cropped = tempImage {
-                            avatarImage = cropped
-                        }
+            ImageCropperView(image: $tempImage, isPresented: $showCropper)
+                .onDisappear {
+                    if let cropped = tempImage {
+                        avatarImage = cropped
                     }
-            }
+                }
         }
         .sheet(isPresented: $showEditTag) {
             EditTagView(tag: $tag)
@@ -298,7 +296,7 @@ struct EditProfileView: View {
     }
 }
 
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct EditProfileView_Previews: PreviewProvider {
     static var previews: some View {
         EditProfileView(isPresented: .constant(true), isAuthenticated: .constant(true))

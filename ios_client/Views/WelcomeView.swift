@@ -56,7 +56,7 @@ struct WelcomeView: View {
     }
 }
 
-@available(iOS 15.0, *)
+@available(iOS 16.0, *)
 struct WelcomeView_Previews: PreviewProvider {
     static var previews: some View {
         WelcomeView(showLogin: .constant(false))
