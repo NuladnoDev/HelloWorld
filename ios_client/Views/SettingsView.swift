@@ -43,7 +43,7 @@ struct SettingsView: View {
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     ))
-                                    .frame(width: 120, height: 120)
+                                    .frame(width: 110, height: 110)
                                     .background(
                                         // Мягкое свечение
                                         RadialGradient(
@@ -54,13 +54,13 @@ struct SettingsView: View {
                                             ],
                                             center: .center,
                                             startRadius: 20,
-                                            endRadius: 100
+                                            endRadius: 90 // Уменьшил радиус свечения
                                         )
-                                        .frame(width: 300, height: 300)
+                                        .frame(width: 280, height: 280) // Уменьшил рамку свечения
                                     )
                                 
                                 Text(String(username.prefix(1)).uppercased())
-                                    .font(.system(size: 48, weight: .bold))
+                                    .font(.system(size: 44, weight: .bold))
                                     .foregroundColor(.white)
                             }
                             .padding(.top, -35) // Опустил аватарку ниже (было -100)
@@ -89,7 +89,7 @@ struct SettingsView: View {
                             let minY = geo.frame(in: .global).minY
                             Color(white: 0.1)
                                 .offset(y: minY > 0 ? -minY : 0)
-                                .frame(height: minY > 0 ? 250 + minY : 250) // Продлил заливку вниз (было 180)
+                                .frame(height: minY > 0 ? 215 + minY : 215) // Уменьшил высоту заливки (было 250)
                         }
                     )
                     
@@ -105,7 +105,7 @@ struct SettingsView: View {
                             Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
                             SettingsRow(icon: "at", iconColor: .blue, title: "Выбрать имя пользователя", textColor: .blue, noIconBackground: true)
                         }
-                        .padding(.top, -50) // Подтягиваем первую группу вверх
+                        .padding(.top, 15) // Добавил отступ сверху вместо отрицательного, чтобы не наезжало на тег
                         
                         // Группа аккаунтов
                         SettingsGroup {
@@ -173,7 +173,7 @@ struct SettingsGroup<Content: View>: View {
             content
         }
         .background(Color(white: 0.12))
-        .clipShape(RoundedRectangle(cornerRadius: 18)) // Увеличил скругление
+        .clipShape(RoundedRectangle(cornerRadius: 22)) // Еще больше увеличил скругление (было 18)
     }
 }
 
