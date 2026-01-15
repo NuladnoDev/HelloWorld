@@ -22,6 +22,9 @@ struct MediaViewer: View {
     @Binding var isPresented: Bool
     @State private var offset: CGSize = .zero
     @State private var scale: CGFloat = 1.0
+    @State private var isPlaying = false
+    @State private var currentTime: Double = 0
+    @State private var duration: Double = 0.1
     
     var body: some View {
         ZStack {
@@ -29,38 +32,33 @@ struct MediaViewer: View {
                 .opacity(Double(1.0 - (abs(offset.height) / 500)))
             
             // Основной контент (фото или видео)
-            VStack {
-                Spacer()
-                
-                if let videoURL = message.videoURL {
-                    VideoPlayer(player: AVPlayer(url: videoURL))
-                        .frame(maxWidth: .infinity)
-                        .aspectRatio(contentMode: .fit)
+            Group {
+                if message.isVideo, let videoURL = message.videoURL {
+                    VideoPlayerView(url: videoURL, isPlaying: $isPlaying, currentTime: $currentTime, duration: $duration)
+                        .edgesIgnoringSafeArea(.all)
                 } else if let image = message.image {
                     Image(uiImage: image)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .scaleEffect(scale)
                         .offset(offset)
-                        .gesture(
-                            DragGesture()
-                                .onChanged { value in
-                                    offset = value.translation
-                                }
-                                .onEnded { value in
-                                    if abs(offset.height) > 150 {
-                                        isPresented = false
-                                    } else {
-                                        withAnimation(.spring()) {
-                                            offset = .zero
-                                        }
-                                    }
-                                }
-                        )
                 }
-                
-                Spacer()
             }
+            .gesture(
+                DragGesture()
+                    .onChanged { value in
+                        offset = value.translation
+                    }
+                    .onEnded { value in
+                        if abs(offset.height) > 150 {
+                            isPresented = false
+                        } else {
+                            withAnimation(.spring()) {
+                                offset = .zero
+                            }
+                        }
+                    }
+            )
             
             // Верхняя панель
             VStack {
@@ -78,7 +76,7 @@ struct MediaViewer: View {
                     
                     Spacer()
                     
-                    Text("1 из 1") // В реальном приложении здесь будет индекс
+                    Text("137 из 137")
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundColor(.white)
                     
@@ -86,7 +84,13 @@ struct MediaViewer: View {
                     
                     HStack(spacing: 20) {
                         Button(action: {}) {
-                            Image(systemName: "text.viewfinder")
+                            Image(systemName: "rectangle.portrait.and.arrow.right")
+                                .font(.system(size: 20))
+                                .foregroundColor(.white)
+                        }
+                        
+                        Button(action: {}) {
+                            Image(systemName: "gearshape")
                                 .font(.system(size: 20))
                                 .foregroundColor(.white)
                         }
@@ -103,7 +107,7 @@ struct MediaViewer: View {
                 .padding(.bottom, 20)
                 .background(
                     LinearGradient(
-                        colors: [.black.opacity(0.4), .clear],
+                        colors: [.black.opacity(0.6), .clear],
                         startPoint: .top,
                         endPoint: .bottom
                     )
@@ -116,34 +120,63 @@ struct MediaViewer: View {
             VStack {
                 Spacer()
                 
-                HStack {
-                    Button(action: {}) {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.system(size: 22))
+                VStack(spacing: 0) {
+                    if message.isVideo {
+                        // Слайдер времени
+                        VStack(spacing: 8) {
+                            Slider(value: $currentTime, in: 0...duration)
+                                .accentColor(.white)
+                                .padding(.horizontal, 10)
+                            
+                            HStack {
+                                Text(formatTime(currentTime))
+                                Spacer()
+                                Text(formatTime(duration))
+                            }
+                            .font(.system(size: 12))
                             .foregroundColor(.white)
+                            .padding(.horizontal, 10)
+                        }
+                        .padding(.bottom, 10)
                     }
-                    .padding(.leading, 20)
                     
-                    Spacer()
-                    
-                    Text("вчера в \(message.time)")
-                        .font(.system(size: 15))
-                        .foregroundColor(.white)
-                    
-                    Spacer()
-                    
-                    Button(action: {}) {
-                        Image(systemName: "pencil.tip.crop.circle") // Заглушка для иконки редактирования/A
-                            .font(.system(size: 22))
-                            .foregroundColor(.white)
+                    HStack {
+                        Button(action: {}) {
+                            Image(systemName: "arrowshape.turn.up.right")
+                                .font(.system(size: 22))
+                                .foregroundColor(.white)
+                        }
+                        .padding(.leading, 20)
+                        
+                        Spacer()
+                        
+                        if message.isVideo {
+                            Button(action: { isPlaying.toggle() }) {
+                                Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                                    .font(.system(size: 28))
+                                    .foregroundColor(.white)
+                            }
+                        } else {
+                            Text("вчера в \(message.time)")
+                                .font(.system(size: 15))
+                                .foregroundColor(.white)
+                        }
+                        
+                        Spacer()
+                        
+                        Button(action: {}) {
+                            Image(systemName: "trash")
+                                .font(.system(size: 22))
+                                .foregroundColor(.white)
+                        }
+                        .padding(.trailing, 20)
                     }
-                    .padding(.trailing, 20)
+                    .padding(.bottom, 40)
+                    .padding(.top, message.isVideo ? 10 : 20)
                 }
-                .padding(.bottom, 40)
-                .padding(.top, 20)
                 .background(
                     LinearGradient(
-                        colors: [.clear, .black.opacity(0.4)],
+                        colors: [.clear, .black.opacity(0.6)],
                         startPoint: .top,
                         endPoint: .bottom
                     )
@@ -152,6 +185,161 @@ struct MediaViewer: View {
         }
         .transition(.opacity)
         .edgesIgnoringSafeArea(.all)
+    }
+    
+    private func formatTime(_ seconds: Double) -> String {
+        let mins = Int(seconds) / 60
+        let secs = Int(seconds) % 60
+        return String(format: "%d:%02d", mins, secs)
+    }
+}
+
+@available(iOS 16.0, *)
+struct VideoPlayerView: UIViewControllerRepresentable {
+    let url: URL
+    @Binding var isPlaying: Bool
+    @Binding var currentTime: Double
+    @Binding var duration: Double
+    
+    func makeUIViewController(context: Context) -> AVPlayerViewController {
+        let controller = AVPlayerViewController()
+        let player = AVPlayer(url: url)
+        controller.player = player
+        controller.showsPlaybackControls = false
+        controller.videoGravity = .resizeAspect
+        
+        // Отслеживание времени
+        player.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.5, preferredTimescale: 600), queue: .main) { time in
+            currentTime = time.seconds
+            if let durationTime = player.currentItem?.duration.seconds, !durationTime.isNaN {
+                duration = durationTime
+            }
+        }
+        
+        return controller
+    }
+    
+    func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
+        if isPlaying {
+            uiViewController.player?.play()
+        } else {
+            uiViewController.player?.pause()
+        }
+    }
+}
+
+@available(iOS 16.0, *)
+struct CustomKeyboard: View {
+    @Binding var text: String
+    @Binding var isPresented: Bool
+    @State private var selectedTab: Int = 2 // 0: GIF, 1: Стикеры, 2: Эмодзи
+    
+    let emojis = [
+        "😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "😊", "😇",
+        "🙂", "🙃", "😉", "😌", "😍", "🥰", "😘", "😗", "😙", "😚",
+        "😋", "😛", "😝", "😜", "🤪", "🤨", "🧐", "🤓", "😎", "🤩",
+        "🥳", "😏", "😒", "😞", "😔", "😟", "😕", "🙁", "☹️", "😣",
+        "😖", "😫", "😩", "🥺", "😢", "😭", "😤", "😠", "😡", "🤬"
+    ]
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Верхняя панель категорий (как на скрине)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 20) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 18))
+                        .foregroundColor(.white.opacity(0.6))
+                    Image(systemName: "bookmark")
+                        .font(.system(size: 18))
+                        .foregroundColor(.white.opacity(0.6))
+                    Image(systemName: "clock")
+                        .font(.system(size: 18))
+                        .foregroundColor(.white.opacity(0.6))
+                    
+                    // Заглушки для стикеров
+                    ForEach(0..<8) { _ in
+                        Circle()
+                            .fill(Color.gray.opacity(0.3))
+                            .frame(width: 24, height: 24)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+            }
+            .background(Color.black.opacity(0.4))
+            
+            // Сетка контента
+            if selectedTab == 2 {
+                ScrollView {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 15) {
+                        ForEach(emojis, id: \.self) { emoji in
+                            Button(action: { text += emoji }) {
+                                Text(emoji)
+                                    .font(.system(size: 32))
+                            }
+                        }
+                    }
+                    .padding(16)
+                }
+                .frame(maxHeight: .infinity)
+            } else {
+                VStack {
+                    Spacer()
+                    Text(selectedTab == 0 ? "GIF не реализованы" : "Стикеры не реализованы")
+                        .foregroundColor(.white.opacity(0.5))
+                    Spacer()
+                }
+                .frame(maxHeight: .infinity)
+            }
+            
+            // Нижняя панель переключения
+            HStack(spacing: 0) {
+                HStack(spacing: 10) {
+                    Button(action: { selectedTab = 0 }) {
+                        Text("GIF")
+                            .font(.system(size: 14, weight: .bold))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(selectedTab == 0 ? Color.white.opacity(0.2) : Color.clear)
+                            .cornerRadius(15)
+                    }
+                    Button(action: { selectedTab = 1 }) {
+                        Text("Стикеры")
+                            .font(.system(size: 14, weight: .bold))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(selectedTab == 1 ? Color.white.opacity(0.2) : Color.clear)
+                            .cornerRadius(15)
+                    }
+                    Button(action: { selectedTab = 2 }) {
+                        Text("Эмодзи")
+                            .font(.system(size: 14, weight: .bold))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(selectedTab == 2 ? Color.white.opacity(0.2) : Color.clear)
+                            .cornerRadius(15)
+                    }
+                }
+                .padding(4)
+                .background(Color.black.opacity(0.5))
+                .cornerRadius(20)
+                
+                Spacer()
+                
+                Button(action: {}) {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 20))
+                        .foregroundColor(.white.opacity(0.6))
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(Color.black.opacity(0.4))
+        }
+        .frame(height: 300)
+        .background(Color(white: 0.1))
+        .transition(.move(edge: .bottom))
     }
 }
 
@@ -162,6 +350,8 @@ struct ChatView: View {
     @State private var showMediaPicker = false
     @State private var selectedMediaItem: PhotosPickerItem? = nil
     @State private var selectedViewerMessage: ChatMessage? = nil
+    @State private var showCustomKeyboard = false
+    @FocusState private var isTextFieldFocused: Bool
     
     @State private var messages: [ChatMessage] = [
         ChatMessage(text: "Привет! Как дела?", isMe: false, time: "10:00", hasTail: true),
@@ -215,6 +405,10 @@ struct ChatView: View {
                 }
                 
                 inputBar
+                
+                if showCustomKeyboard {
+                    CustomKeyboard(text: $messageText, isPresented: $showCustomKeyboard)
+                }
             }
             
             if let msg = selectedViewerMessage {
@@ -250,14 +444,14 @@ struct ChatView: View {
     
     private var inputBar: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 8) {
-                // Кнопка скрепки
+            HStack(spacing: 10) {
+                // Левая кнопка (скрепка)
                 Button(action: { showMediaPicker = true }) {
-                    Image(systemName: "paperclip.circle.fill")
-                        .font(.system(size: 26))
-                        .symbolRenderingMode(.hierarchical)
+                    Image(systemName: "plus")
+                        .font(.system(size: 22, weight: .medium))
+                        .foregroundColor(.white)
                 }
-                .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 10, paddingVertical: 8))
+                .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 12, paddingVertical: 10))
                 
                 // Поле ввода
                 LiquidGlassView(cornerRadius: 28) {
@@ -266,43 +460,51 @@ struct ChatView: View {
                             .foregroundColor(.white)
                             .font(.system(size: 16))
                             .padding(.leading, 16)
-                        
-                        Button(action: {}) {
-                            Image(systemName: "face.smiling")
-                                .font(.system(size: 22))
-                                .foregroundColor(.white.opacity(0.5))
-                        }
-                        .padding(.trailing, messageText.isEmpty ? 12 : 4)
-                        
-                        if !messageText.isEmpty {
-                            Button(action: {
-                                if !messageText.isEmpty {
-                                    messages.append(ChatMessage(text: messageText, isMe: true, time: getCurrentTime(), hasTail: true))
-                                    messageText = ""
+                            .focused($isTextFieldFocused)
+                            .onTapGesture {
+                                withAnimation {
+                                    showCustomKeyboard = false
                                 }
-                            }) {
-                                Image(systemName: "arrow.up.circle.fill")
-                                    .font(.system(size: 28))
-                                    .foregroundColor(.blue)
                             }
-                            .padding(.trailing, 8)
+                        
+                        // Смайлик в конце поля ввода
+                        Button(action: {
+                            withAnimation {
+                                if showCustomKeyboard {
+                                    isTextFieldFocused = true
+                                    showCustomKeyboard = false
+                                } else {
+                                    isTextFieldFocused = false
+                                    showCustomKeyboard = true
+                                }
+                            }
+                        }) {
+                            Image(systemName: showCustomKeyboard ? "keyboard" : "face.smiling.fill")
+                                .font(.system(size: 22))
+                                .foregroundColor(.white.opacity(0.6))
                         }
+                        .padding(.trailing, 12)
                     }
                     .frame(height: 44)
                 }
                 
-                // Кнопка микрофона (если текст пустой)
-                if messageText.isEmpty {
-                    Button(action: {}) {
-                        Image(systemName: "mic")
-                            .font(.system(size: 20))
+                // Правая кнопка (микрофон или отправить)
+                Button(action: {
+                    if !messageText.isEmpty {
+                        messages.append(ChatMessage(text: messageText, isMe: true, time: getCurrentTime(), hasTail: true))
+                        messageText = ""
                     }
-                    .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 12, paddingVertical: 10))
+                }) {
+                    Image(systemName: messageText.isEmpty ? "mic" : "arrow.up.circle.fill")
+                        .font(.system(size: messageText.isEmpty ? 22 : 28))
+                        .foregroundColor(messageText.isEmpty ? .white : .blue)
                 }
+                .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 12, paddingVertical: messageText.isEmpty ? 10 : 6))
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 8)
-            .background(Color.black.opacity(0.2))
+            .padding(.horizontal, 10)
+            .padding(.top, 8)
+            .padding(.bottom, 20)
+            .background(Color.black.opacity(0.3))
         }
     }
     
@@ -343,9 +545,9 @@ struct ChatView: View {
             }.buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 4, paddingVertical: 4))
         }
         .padding(.horizontal, 8)
-        .padding(.top, 44) // Увеличенный отступ сверху
-        .padding(.bottom, 10)
-        .background(Color.black.opacity(0.3))
+            .padding(.top, 22) // Уменьшено в 2 раза (было 44)
+            .padding(.bottom, 10)
+            .background(Color.black.opacity(0.3))
     }
 }
 

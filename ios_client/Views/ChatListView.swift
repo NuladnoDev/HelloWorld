@@ -214,6 +214,7 @@ struct ChatListView: View {
                     Label(Tab.chats.rawValue, systemImage: Tab.chats.icon)
                 }
                 .tag(Tab.chats)
+                .toolbar(.visible, for: .tabBar)
                 
                 // Вкладка Звонки
                 if isCallsVisible {
