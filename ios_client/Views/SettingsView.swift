@@ -236,7 +236,7 @@ struct SettingsRow: View {
 @available(iOS 15.0, *)
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
-        SettingsView()
+        SettingsView(isAuthenticated: .constant(true))
             .preferredColorScheme(.dark)
     }
 }

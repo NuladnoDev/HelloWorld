@@ -11,7 +11,7 @@ struct HelloWorldApp: App {
         WindowGroup {
             Group {
                 if isAuthenticated {
-                    ChatListView()
+                    ChatListView(isAuthenticated: $isAuthenticated)
                 } else if hasSeenWelcome {
                     LoginView(isAuthenticated: $isAuthenticated)
                         .transition(.move(edge: .trailing))
