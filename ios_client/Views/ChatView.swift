@@ -226,6 +226,9 @@ struct ChatView: View {
             }
         }
         .navigationBarHidden(true)
+        .toolbar(isPresented: .constant(true), content: {
+            // Пустой тулбар для корректной работы скрытия
+        })
         .toolbar(.hidden, for: .tabBar)
         .photosPicker(isPresented: $showMediaPicker, selection: $selectedMediaItem, matching: .any(of: [.images, .videos]))
         .onChange(of: selectedMediaItem) { newItem in
@@ -253,10 +256,11 @@ struct ChatView: View {
             HStack(spacing: 8) {
                 // Кнопка скрепки
                 Button(action: { showMediaPicker = true }) {
-                    Image(systemName: "paperclip")
-                        .font(.system(size: 20))
+                    Image(systemName: "paperclip.circle.fill")
+                        .font(.system(size: 26))
+                        .symbolRenderingMode(.hierarchical)
                 }
-                .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 12, paddingVertical: 10))
+                .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 10, paddingVertical: 8))
                 
                 // Поле ввода
                 LiquidGlassView(cornerRadius: 28) {
@@ -313,7 +317,9 @@ struct ChatView: View {
     
     private var chatHeader: some View {
         HStack(spacing: 8) {
-            Button(action: { presentationMode.wrappedValue.dismiss() }) {
+            Button(action: { 
+                presentationMode.wrappedValue.dismiss() 
+            }) {
                 Image(systemName: "chevron.left").font(.system(size: 18, weight: .bold))
             }.buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 12, paddingVertical: 10))
             
