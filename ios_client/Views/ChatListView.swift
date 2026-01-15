@@ -21,19 +21,14 @@ struct ChatListView: View {
         // Настройка внешнего вида системного таббара согласно гайду (Liquid Glass)
         let appearance = UITabBarAppearance()
         appearance.configureWithDefaultBackground()
-        
-        // Используем темный блюр как основу
         appearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
         appearance.backgroundColor = UIColor.black.withAlphaComponent(0.4)
         
         // Цвет обводки сверху таббара
         appearance.shadowColor = UIColor.white.withAlphaComponent(0.12)
         
-        // Применяем ко всем состояниям
         UITabBar.appearance().standardAppearance = appearance
-        if #available(iOS 15.0, *) {
-            UITabBar.appearance().scrollEdgeAppearance = appearance
-        }
+        UITabBar.appearance().scrollEdgeAppearance = appearance
     }
     
     enum Tab: String, CaseIterable {
@@ -209,13 +204,16 @@ struct ChatListView: View {
                                                     ChatRow(chat: chat)
                                                 }
                                                 .buttonStyle(PlainButtonStyle())
+                                                .onAppear {
+                                                    // Гарантируем видимость таббара при возврате в список
+                                                    UITabBar.setTabBarVisible(true, animated: true)
+                                                }
                                                 
                                                 Divider()
                                                     .background(Color.white.opacity(0.1))
                                                     .padding(.leading, 76)
                                             }
                                         }
-                                        .padding(.bottom, 90) // Отступ, чтобы список не перекрывался таб-баром
                                     }
                                 }
                             }

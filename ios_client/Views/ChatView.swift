@@ -384,20 +384,93 @@ struct CustomKeyboard: View {
 }
 
 @available(iOS 16.0, *)
+struct ActionButton: View {
+    let icon: String
+    let label: String
+    
+    var body: some View {
+        VStack(spacing: 6) {
+            LiquidGlassView(cornerRadius: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 20))
+                    .foregroundColor(.white)
+                    .frame(width: 65, height: 46)
+            }
+            
+            Text(label)
+                .font(.system(size: 11))
+                .foregroundColor(.white.opacity(0.6))
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+@available(iOS 16.0, *)
+struct CategoryBar: View {
+    @State private var selectedTab: Int = 0
+    let tabs = ["Публикации", "Подарки", "Медиа"]
+    
+    var body: some View {
+        LiquidGlassView(cornerRadius: 25) {
+            HStack(spacing: 0) {
+                ForEach(0..<tabs.count, id: \.self) { index in
+                    Button(action: {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                            selectedTab = index
+                        }
+                    }) {
+                        Text(tabs[index])
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(selectedTab == index ? .white : .white.opacity(0.5))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 40)
+                            .background(
+                                ZStack {
+                                    if selectedTab == index {
+                                        RoundedRectangle(cornerRadius: 20)
+                                            .fill(Color.white.opacity(0.15))
+                                            .matchedGeometryEffect(id: "activeTab", in: profileNamespace)
+                                    }
+                                }
+                            )
+                    }
+                }
+            }
+            .padding(4)
+        }
+    }
+    @Namespace private var profileNamespace
+}
+
+@available(iOS 16.0, *)
 struct UserProfileView: View {
     @Environment(\.presentationMode) var presentationMode
     let isOnline: Bool
     let lastSeenMinutes: Int
     
     private var statusText: String {
-        isOnline ? "В сети" : "был(а) \(lastSeenMinutes) мин. назад"
+        "был(а) вчера в 20:39"
     }
     
     var body: some View {
         ZStack {
             Color.black.edgesIgnoringSafeArea(.all)
             
-            // Фон с эффектом (как на скрине - темный градиент или просто черный)
+            // Фоновые звезды (как на скрине)
+            GeometryReader { geo in
+                ZStack {
+                    ForEach(0..<20) { _ in
+                        Image(systemName: "plus")
+                            .font(.system(size: 8))
+                            .foregroundColor(.white.opacity(0.1))
+                            .position(
+                                x: CGFloat.random(in: 0...geo.size.width),
+                                y: CGFloat.random(in: 0...geo.size.height)
+                            )
+                    }
+                }
+            }
+            
             VStack(spacing: 0) {
                 // Хедер с кнопкой назад
                 HStack {
@@ -411,44 +484,52 @@ struct UserProfileView: View {
                     Spacer()
                 }
                 .padding(.horizontal, 16)
-                .padding(.top, 0) // Убираем лишний паддинг сверху
+                .padding(.top, 50) // Добавил отступ сверху, чтобы не было слишком высоко
                 
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 25) {
+                    VStack(spacing: 20) {
                         // Аватарка и имя
-                        VStack(spacing: 15) {
-                            Circle()
-                                .fill(Color.gray.opacity(0.3))
-                                .frame(width: 120, height: 120)
-                                .overlay(
-                                    Image(systemName: "star.fill") // Как на скрине синяя звезда
-                                        .font(.system(size: 60))
-                                        .foregroundColor(.blue)
-                                )
-                                .background(
-                                    Circle()
-                                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                                )
+                        VStack(spacing: 12) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.black)
+                                    .frame(width: 120, height: 120)
+                                    .overlay(
+                                        Image(systemName: "star.fill")
+                                            .font(.system(size: 60))
+                                            .foregroundColor(.blue)
+                                            .shadow(color: .blue.opacity(0.5), radius: 10)
+                                    )
+                                    .background(
+                                        Circle()
+                                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                                    )
+                            }
                             
                             VStack(spacing: 4) {
                                 HStack(spacing: 6) {
-                                    Text("HelloWorld")
+                                    Text("ancor")
                                         .font(.system(size: 28, weight: .bold))
                                         .foregroundColor(.white)
-                                    Image(systemName: "checkmark.seal.fill")
+                                    Image(systemName: "star.fill") // Синяя звезда как на скрине
                                         .font(.system(size: 20))
                                         .foregroundColor(.blue)
                                 }
                                 
-                                Text(statusText)
-                                    .font(.system(size: 16))
-                                    .foregroundColor(isOnline ? .blue : .white.opacity(0.5))
+                                HStack(spacing: 4) {
+                                    Image(systemName: "shield.fill")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.white.opacity(0.5))
+                                    Text(statusText)
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.white.opacity(0.5))
+                                }
                             }
                         }
                         .padding(.top, 10)
                         
-                        // Кнопки действий (звонок, видео и тд)
-                        HStack(spacing: 15) {
+                        // Кнопки действий
+                        HStack(spacing: 10) {
                             ActionButton(icon: "phone.fill", label: "звонок")
                             ActionButton(icon: "video.fill", label: "видео")
                             ActionButton(icon: "bell.slash.fill", label: "звук")
@@ -457,13 +538,32 @@ struct UserProfileView: View {
                         }
                         .padding(.horizontal, 16)
                         
+                        // Музыкальный бар (как на скрине)
+                        HStack {
+                            Image(systemName: "music.note")
+                            Text("9 - Drake")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                        }
+                        .font(.system(size: 14))
+                        .foregroundColor(.white.opacity(0.6))
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        
                         // Инфо блок
                         VStack(alignment: .leading, spacing: 0) {
-                            InfoRow(title: "имя пользователя", value: "@helloworld", isBlue: true)
+                            HStack {
+                                InfoRow(title: "имя пользователя", value: "@ancorrrr", isBlue: true)
+                                Spacer()
+                                Image(systemName: "qrcode")
+                                    .foregroundColor(.blue)
+                                    .padding(.trailing, 16)
+                            }
+                            
                             Divider().background(Color.white.opacity(0.1)).padding(.leading, 16)
-                            InfoRow(title: "день рождения", value: "16 янв 1876 (150 лет)")
+                            InfoRow(title: "день рождения", value: "31 дек 1875 (150 лет)")
                             Divider().background(Color.white.opacity(0.1)).padding(.leading, 16)
-                            InfoRow(title: "о себе", value: "./gmd creatop\nOfficial HelloWorld bot for beta testing.")
+                            InfoRow(title: "о себе", value: "Official HelloWorld bot for beta testing.")
                             
                             Divider().background(Color.white.opacity(0.1)).padding(.leading, 16)
                             
@@ -487,46 +587,20 @@ struct UserProfileView: View {
                         .cornerRadius(20)
                         .padding(.horizontal, 16)
                         
-                        // Табы (Публикации, Подарки, Медиа)
-                        HStack(spacing: 10) {
-                            ProfileTab(title: "Публикации", isSelected: true)
-                            ProfileTab(title: "Подарки 🎄🚀🚀", isSelected: false)
-                            ProfileTab(title: "Медиа", isSelected: false)
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 30)
+                        // Кастомный бар категорий
+                        CategoryBar()
+                            .padding(.horizontal, 16)
+                            .padding(.bottom, 30)
                     }
                 }
             }
         }
         .navigationBarHidden(true)
-        .ignoresSafeArea(.all) // Игнорируем safe areas, чтобы не было пустых полос
+        .ignoresSafeArea(.all)
         .toolbar(.hidden, for: .tabBar)
         .onAppear {
             UITabBar.setTabBarVisible(false, animated: false)
         }
-    }
-}
-
-@available(iOS 16.0, *)
-struct ActionButton: View {
-    let icon: String
-    let label: String
-    
-    var body: some View {
-        VStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.system(size: 20))
-                .foregroundColor(.white)
-                .frame(width: 60, height: 40)
-                .background(Color.white.opacity(0.1))
-                .cornerRadius(12)
-            
-            Text(label)
-                .font(.system(size: 12))
-                .foregroundColor(.white.opacity(0.7))
-        }
-        .frame(maxWidth: .infinity)
     }
 }
 
@@ -548,24 +622,6 @@ struct InfoRow: View {
         .padding(.vertical, 12)
         .padding(.horizontal, 16)
         .frame(maxWidth: .infinity, alignment: .leading)
-    }
-}
-
-@available(iOS 16.0, *)
-struct ProfileTab: View {
-    let title: String
-    let isSelected: Bool
-    
-    var body: some View {
-        LiquidGlassView(cornerRadius: 15) {
-            Text(title)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(isSelected ? .white : .white.opacity(0.6))
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(isSelected ? Color.white.opacity(0.1) : Color.clear)
-                .cornerRadius(15)
-        }
     }
 }
 
@@ -610,7 +666,7 @@ struct ChatView: View {
                 ScrollViewReader { proxy in
                     ScrollView(showsIndicators: false) {
                         VStack(spacing: 12) {
-                            Spacer(minLength: 10)
+                            Spacer(minLength: 40) // Увеличил отступ сверху до первого сообщения
                             ForEach(messages) { msg in
                                 MessageBubble(message: msg) {
                                     if msg.isPhoto || msg.isVideo {
@@ -658,7 +714,7 @@ struct ChatView: View {
         }
         .navigationBarHidden(true)
         .toolbar(.hidden, for: .tabBar)
-        .ignoresSafeArea(.all) // Игнорируем все safe areas, включая низ
+        .ignoresSafeArea(.all, edges: .top) // Игнорируем только верх
         .photosPicker(isPresented: $showMediaPicker, selection: $selectedMediaItem, matching: .any(of: [.images, .videos]))
         .fullScreenCover(isPresented: $showProfile) {
             UserProfileView(isOnline: isOnline, lastSeenMinutes: lastSeenMinutes)
@@ -748,7 +804,7 @@ struct ChatView: View {
             }
             .padding(.horizontal, 10)
             .padding(.top, 8)
-            .padding(.bottom, showCustomKeyboard ? 0 : (isTextFieldFocused ? 8 : 34))
+            .padding(.bottom, showCustomKeyboard ? 0 : (isTextFieldFocused ? 8 : 10))
             .background(Color(white: 0.05).ignoresSafeArea())
         }
     }
@@ -797,7 +853,7 @@ struct ChatView: View {
             }.buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 4, paddingVertical: 4))
         }
         .padding(.horizontal, 8)
-            .padding(.top, 22) // Уменьшено в 2 раза (было 44)
+            .padding(.top, 44) // Вернул нормальный отступ сверху (было 22)
             .padding(.bottom, 10)
             .background(Color.black)
     }
