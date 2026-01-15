@@ -384,6 +384,190 @@ struct CustomKeyboard: View {
 }
 
 @available(iOS 16.0, *)
+struct UserProfileView: View {
+    @Environment(\.presentationMode) var presentationMode
+    let isOnline: Bool
+    let lastSeenMinutes: Int
+    
+    private var statusText: String {
+        isOnline ? "В сети" : "был(а) \(lastSeenMinutes) мин. назад"
+    }
+    
+    var body: some View {
+        ZStack {
+            Color.black.edgesIgnoringSafeArea(.all)
+            
+            // Фон с эффектом (как на скрине - темный градиент или просто черный)
+            VStack(spacing: 0) {
+                // Хедер с кнопкой назад
+                HStack {
+                    Button(action: { presentationMode.wrappedValue.dismiss() }) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(12)
+                            .background(Circle().fill(Color.white.opacity(0.1)))
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 20)
+                
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 25) {
+                        // Аватарка и имя
+                        VStack(spacing: 15) {
+                            Circle()
+                                .fill(Color.gray.opacity(0.3))
+                                .frame(width: 120, height: 120)
+                                .overlay(
+                                    Image(systemName: "star.fill") // Как на скрине синяя звезда
+                                        .font(.system(size: 60))
+                                        .foregroundColor(.blue)
+                                )
+                                .background(
+                                    Circle()
+                                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                                )
+                            
+                            VStack(spacing: 4) {
+                                HStack(spacing: 6) {
+                                    Text("HelloWorld")
+                                        .font(.system(size: 28, weight: .bold))
+                                        .foregroundColor(.white)
+                                    Image(systemName: "checkmark.seal.fill")
+                                        .font(.system(size: 20))
+                                        .foregroundColor(.blue)
+                                }
+                                
+                                Text(statusText)
+                                    .font(.system(size: 16))
+                                    .foregroundColor(isOnline ? .blue : .white.opacity(0.5))
+                            }
+                        }
+                        .padding(.top, 10)
+                        
+                        // Кнопки действий (звонок, видео и тд)
+                        HStack(spacing: 15) {
+                            ActionButton(icon: "phone.fill", label: "звонок")
+                            ActionButton(icon: "video.fill", label: "видео")
+                            ActionButton(icon: "bell.slash.fill", label: "звук")
+                            ActionButton(icon: "magnifyingglass", label: "поиск")
+                            ActionButton(icon: "ellipsis", label: "ещё")
+                        }
+                        .padding(.horizontal, 16)
+                        
+                        // Инфо блок
+                        VStack(alignment: .leading, spacing: 0) {
+                            InfoRow(title: "имя пользователя", value: "@helloworld", isBlue: true)
+                            Divider().background(Color.white.opacity(0.1)).padding(.leading, 16)
+                            InfoRow(title: "день рождения", value: "16 янв 1876 (150 лет)")
+                            Divider().background(Color.white.opacity(0.1)).padding(.leading, 16)
+                            InfoRow(title: "о себе", value: "./gmd creatop\nOfficial HelloWorld bot for beta testing.")
+                            
+                            Divider().background(Color.white.opacity(0.1)).padding(.leading, 16)
+                            
+                            Button(action: {}) {
+                                Text("Добавить в контакты")
+                                    .foregroundColor(.blue)
+                                    .padding(.vertical, 14)
+                                    .padding(.horizontal, 16)
+                            }
+                            
+                            Divider().background(Color.white.opacity(0.1)).padding(.leading, 16)
+                            
+                            Button(action: {}) {
+                                Text("Заблокировать")
+                                    .foregroundColor(.red)
+                                    .padding(.vertical, 14)
+                                    .padding(.horizontal, 16)
+                            }
+                        }
+                        .background(Color(white: 0.1))
+                        .cornerRadius(20)
+                        .padding(.horizontal, 16)
+                        
+                        // Табы (Публикации, Подарки, Медиа)
+                        HStack(spacing: 10) {
+                            ProfileTab(title: "Публикации", isSelected: true)
+                            ProfileTab(title: "Подарки 🎄🚀🚀", isSelected: false)
+                            ProfileTab(title: "Медиа", isSelected: false)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 30)
+                    }
+                }
+            }
+        }
+        .navigationBarHidden(true)
+        .toolbar(.hidden, for: .tabBar)
+        .onAppear {
+            UITabBar.setTabBarVisible(false, animated: false)
+        }
+    }
+}
+
+@available(iOS 16.0, *)
+struct ActionButton: View {
+    let icon: String
+    let label: String
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 20))
+                .foregroundColor(.white)
+                .frame(width: 60, height: 40)
+                .background(Color.white.opacity(0.1))
+                .cornerRadius(12)
+            
+            Text(label)
+                .font(.system(size: 12))
+                .foregroundColor(.white.opacity(0.7))
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+@available(iOS 16.0, *)
+struct InfoRow: View {
+    let title: String
+    let value: String
+    var isBlue: Bool = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.system(size: 14))
+                .foregroundColor(.white.opacity(0.6))
+            Text(value)
+                .font(.system(size: 17))
+                .foregroundColor(isBlue ? .blue : .white)
+        }
+        .padding(.vertical, 12)
+        .padding(.horizontal, 16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+@available(iOS 16.0, *)
+struct ProfileTab: View {
+    let title: String
+    let isSelected: Bool
+    
+    var body: some View {
+        LiquidGlassView(cornerRadius: 15) {
+            Text(title)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(isSelected ? .white : .white.opacity(0.6))
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(isSelected ? Color.white.opacity(0.1) : Color.clear)
+                .cornerRadius(15)
+        }
+    }
+}
+
 struct ChatView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var messageText: String = ""
@@ -391,6 +575,7 @@ struct ChatView: View {
     @State private var selectedMediaItem: PhotosPickerItem? = nil
     @State private var selectedViewerMessage: ChatMessage? = nil
     @State private var showCustomKeyboard = false
+    @State private var showProfile = false
     @FocusState private var isTextFieldFocused: Bool
     
     @State private var messages: [ChatMessage] = [
@@ -474,6 +659,9 @@ struct ChatView: View {
         .ignoresSafeArea(.all, edges: .top) // Игнорируем верх для хедера
         .ignoresSafeArea(.keyboard, edges: .bottom) // Позволяем клавиатуре самой двигать контент (стандартное поведение)
         .photosPicker(isPresented: $showMediaPicker, selection: $selectedMediaItem, matching: .any(of: [.images, .videos]))
+        .fullScreenCover(isPresented: $showProfile) {
+            UserProfileView(isOnline: isOnline, lastSeenMinutes: lastSeenMinutes)
+        }
         .onChange(of: selectedMediaItem) { newItem in
             Task {
                 if let data = try? await newItem?.loadTransferable(type: Data.self),
@@ -560,7 +748,7 @@ struct ChatView: View {
             .padding(.horizontal, 10)
             .padding(.top, 8)
             .padding(.bottom, showCustomKeyboard ? 0 : (isTextFieldFocused ? 8 : 34))
-            .background(Color.black.opacity(0.3))
+            .background(Color(white: 0.05))
         }
     }
     
@@ -580,27 +768,29 @@ struct ChatView: View {
             
             Spacer()
             
-            LiquidGlassView(cornerRadius: 20) {
-                VStack(spacing: 2) {
-                    HStack(spacing: 4) {
-                        Text("HelloWorld")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.white)
-                        Image(systemName: "checkmark.seal.fill")
-                            .font(.system(size: 14))
-                            .foregroundColor(.blue)
+            Button(action: { showProfile = true }) {
+                LiquidGlassView(cornerRadius: 20) {
+                    VStack(spacing: 2) {
+                        HStack(spacing: 4) {
+                            Text("HelloWorld")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.white)
+                            Image(systemName: "checkmark.seal.fill")
+                                .font(.system(size: 14))
+                                .foregroundColor(.blue)
+                        }
+                        Text(statusText)
+                            .font(.system(size: 12))
+                            .foregroundColor(statusColor)
                     }
-                    Text(statusText)
-                        .font(.system(size: 12))
-                        .foregroundColor(statusColor)
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 20)
                 }
-                .padding(.vertical, 6)
-                .padding(.horizontal, 20)
             }
             
             Spacer()
             
-            Button(action: {}) {
+            Button(action: { showProfile = true }) {
                 Circle().fill(Color.gray.opacity(0.3)).frame(width: 36, height: 36)
                     .overlay(Image(systemName: "person.fill").font(.system(size: 18)).foregroundColor(.white.opacity(0.8)))
             }.buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 4, paddingVertical: 4))
@@ -608,7 +798,7 @@ struct ChatView: View {
         .padding(.horizontal, 8)
             .padding(.top, 22) // Уменьшено в 2 раза (было 44)
             .padding(.bottom, 10)
-            .background(Color.black.opacity(0.3))
+            .background(Color.black)
     }
 }
 
@@ -720,12 +910,12 @@ struct MessageBubble: View {
                                 Image(uiImage: image)
                                     .resizable()
                                     .aspectRatio(contentMode: .fit)
-                                    .frame(maxWidth: 280, maxHeight: 400)
+                                    .frame(maxWidth: UIScreen.main.bounds.width * 0.75, maxHeight: 400)
                                     .clipShape(RoundedRectangle(cornerRadius: 18))
                             } else {
                                 RoundedRectangle(cornerRadius: 18)
                                     .fill(Color(white: 0.15))
-                                    .frame(width: 250, height: 250)
+                                    .frame(width: UIScreen.main.bounds.width * 0.7, height: 250)
                                     .overlay(Image(systemName: message.isVideo ? "play.fill" : "photo").font(.system(size: 40)).foregroundColor(.white.opacity(0.3)))
                             }
                             
@@ -749,8 +939,9 @@ struct MessageBubble: View {
                         .foregroundColor(message.isMe ? .white.opacity(0.7) : .white.opacity(0.5))
                     }
                     .padding(.horizontal, 12).padding(.vertical, 8)
-                    .background(message.isMe ? Color.blue : Color(white: 0.15))
+                    .background(message.isMe ? Color(red: 0.1, green: 0.15, blue: 0.3) : Color(white: 0.1))
                     .cornerRadius(18)
+                    .frame(maxWidth: UIScreen.main.bounds.width * 0.75, alignment: message.isMe ? .trailing : .leading)
                 }
             }
             if !message.isMe { Spacer() }

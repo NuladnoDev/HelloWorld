@@ -48,7 +48,8 @@ struct ChatListView: View {
     }
 
     let chats = [
-        Chat(name: "HelloWorld", lastMessage: "привет мальчонке", time: "12:00", unreadCount: 1, isVerified: true)
+        Chat(name: "HelloWorld", lastMessage: "Спасибо за принятие приглашения на бета-тест", time: "10:00", unreadCount: 1, isVerified: true, isMe: false),
+        Chat(name: "Артем", lastMessage: "Завтра в силе?", time: "09:45", isMe: true, isRead: true)
     ]
 
     var body: some View {
@@ -131,13 +132,13 @@ struct ChatListView: View {
                                 // Поиск
                                 HStack(spacing: 10) {
                                     ZStack {
-                                        RoundedRectangle(cornerRadius: 28) // Сделал скругление намного больше (как у кнопок)
-                                            .fill(isSearchActive ? Color.black : Color(white: 0.15))
+                                        RoundedRectangle(cornerRadius: 28)
+                                            .fill(isSearchActive ? Color.black : Color(white: 0.1))
                                             .overlay(
                                                 RoundedRectangle(cornerRadius: 28)
                                                     .stroke(isSearchActive ? Color.white.opacity(0.1) : Color.clear, lineWidth: 1)
                                             )
-                                            .frame(height: 41) // Увеличил высоту на ~1мм (с 38 до 41)
+                                            .frame(height: 41)
                                         
                                         HStack {
                                             Image(systemName: "magnifyingglass")
@@ -168,7 +169,7 @@ struct ChatListView: View {
                                 .padding(.horizontal, 16)
                                 .padding(.bottom, 12)
                             }
-                            .background(Color(red: 12/255, green: 11/255, blue: 13/255)) // Цвет #0c0b0d
+                            .background(Color.black)
                             
                             // Список
                             ScrollView {
@@ -362,16 +363,57 @@ struct ChatRow: View {
                     
                     Spacer()
                     
-                    Text(chat.time)
-                        .font(.system(size: 14))
-                        .foregroundColor(.gray)
+                    HStack(spacing: 3) {
+                        if chat.isMe {
+                            if chat.isRead {
+                                HStack(spacing: -5) {
+                                    Image(systemName: "checkmark")
+                                    Image(systemName: "checkmark")
+                                }
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(.blue)
+                            } else {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                        
+                        Text(chat.time)
+                            .font(.system(size: 14))
+                            .foregroundColor(.gray)
+                    }
                 }
                 
-                HStack {
-                    Text(chat.lastMessage)
-                        .font(.system(size: 15))
-                        .foregroundColor(.gray)
-                        .lineLimit(1)
+                HStack(spacing: 0) {
+                    if chat.isMe {
+                        Text("Вы: ")
+                            .font(.system(size: 15))
+                            .foregroundColor(.white)
+                    }
+                    
+                    if chat.isPhoto {
+                        HStack(spacing: 4) {
+                            Image(systemName: "camera.fill")
+                                .font(.system(size: 12))
+                            Text("Фотография")
+                                .font(.system(size: 15))
+                        }
+                        .foregroundColor(.blue)
+                     } else if chat.isVideo {
+                        HStack(spacing: 4) {
+                            Image(systemName: "video.fill")
+                                .font(.system(size: 12))
+                            Text("Видео")
+                                .font(.system(size: 15))
+                        }
+                        .foregroundColor(.blue)
+                     } else {
+                        Text(chat.lastMessage)
+                            .font(.system(size: 15))
+                            .foregroundColor(.gray)
+                            .lineLimit(1)
+                    }
                     
                     Spacer()
                     
@@ -400,6 +442,10 @@ struct Chat: Identifiable {
     let time: String
     var unreadCount: Int = 0
     var isVerified: Bool = false
+    var isMe: Bool = false
+    var isPhoto: Bool = false
+    var isVideo: Bool = false
+    var isRead: Bool = true
 }
 
 @available(iOS 16.0, *)
@@ -452,7 +498,7 @@ struct SearchNavigationBar: View {
                             ZStack {
                                 if selectedCategory == category {
                                     Capsule()
-                                        .fill(Color.white.opacity(0.15))
+                                        .fill(Color(white: 0.12))
                                         .matchedGeometryEffect(id: "activeTab", in: animation)
                                 }
                             }
@@ -462,7 +508,7 @@ struct SearchNavigationBar: View {
             }
         }
         .padding(4)
-        .background(Color.white.opacity(0.05))
+        .background(Color(white: 0.05))
         .clipShape(Capsule())
         .padding(.horizontal, 16)
     }
