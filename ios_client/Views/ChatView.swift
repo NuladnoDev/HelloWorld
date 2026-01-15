@@ -226,9 +226,6 @@ struct ChatView: View {
             }
         }
         .navigationBarHidden(true)
-        .toolbar(isPresented: .constant(true), content: {
-            // Пустой тулбар для корректной работы скрытия
-        })
         .toolbar(.hidden, for: .tabBar)
         .photosPicker(isPresented: $showMediaPicker, selection: $selectedMediaItem, matching: .any(of: [.images, .videos]))
         .onChange(of: selectedMediaItem) { newItem in
@@ -475,7 +472,7 @@ struct TelegramCheckmarks: View {
 }
 
 // Расширение для поддержки свайпа назад при скрытом navigationBar
-extension UINavigationController: UIGestureRecognizerDelegate {
+extension UINavigationController: @retroactive UIGestureRecognizerDelegate {
     override open func viewDidLoad() {
         super.viewDidLoad()
         interactivePopGestureRecognizer?.delegate = self
