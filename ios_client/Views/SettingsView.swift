@@ -4,6 +4,7 @@ import SwiftUI
 struct SettingsView: View {
     @State private var username: String = UserDefaults.standard.string(forKey: "saved_username") ?? "problem"
     @State private var phoneNumber: String = "+7 (999) 123-45-67"
+    @State private var isEditingProfile = false
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -24,7 +25,9 @@ struct SettingsView: View {
                             Spacer()
                             
                             Button(action: {
-                                UserDefaults.standard.set(false, forKey: "is_authenticated")
+                                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                    isEditingProfile = true
+                                }
                             }) {
                                 Text("Изм.")
                                     .font(.system(size: 16, weight: .medium))
@@ -154,6 +157,15 @@ struct SettingsView: View {
                     .padding(.horizontal)
                     .padding(.bottom, 30)
                 }
+            }
+            
+            if isEditingProfile {
+                EditProfileView(isPresented: $isEditingProfile)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing),
+                        removal: .move(edge: .trailing)
+                    ))
+                    .zIndex(1)
             }
         }
     }

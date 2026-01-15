@@ -10,73 +10,77 @@ struct LoginView: View {
     @State private var errorMessage: String?
     
     var body: some View {
-        ZStack {
-            Color.black.edgesIgnoringSafeArea(.all)
-            
-            VStack(spacing: 40) {
-                Spacer()
+        if isRegistering {
+            RegistrationFlowView(isAuthenticated: $isAuthenticated)
+        } else {
+            ZStack {
+                Color.black.edgesIgnoringSafeArea(.all)
                 
-                // Голубой круг вместо лого ТГ
-                Circle()
-                    .fill(Color.blue)
-                    .frame(width: 100, height: 100)
-                
-                VStack(spacing: 20) {
-                    Text(isRegistering ? "Создать аккаунт" : "Вход")
-                        .font(.title)
-                        .bold()
-                        .foregroundColor(.white)
-                }
-                
-                VStack(spacing: 15) {
-                    TextField("Имя пользователя", text: $username)
-                        .padding()
-                        .background(Color(white: 0.1))
-                        .cornerRadius(10)
-                        .foregroundColor(.white)
-                        .autocapitalization(.none)
+                VStack(spacing: 40) {
+                    Spacer()
                     
-                    SecureField("Пароль", text: $password)
-                        .padding()
-                        .background(Color(white: 0.1))
-                        .cornerRadius(10)
-                        .foregroundColor(.white)
-                }
-                .padding(.horizontal, 30)
-                
-                if let error = errorMessage {
-                    Text(error)
-                        .foregroundColor(.red)
-                        .font(.caption)
-                }
-                
-                Button(action: {
-                    handleAuth()
-                }) {
-                    if isLoading {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                    } else {
-                        Text(isRegistering ? "Зарегистрироваться" : "Продолжить")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
+                    // Голубой круг вместо лого ТГ
+                    Circle()
+                        .fill(Color.blue)
+                        .frame(width: 100, height: 100)
+                    
+                    VStack(spacing: 20) {
+                        Text("Вход")
+                            .font(.title)
+                            .bold()
                             .foregroundColor(.white)
-                            .font(.headline)
-                            .cornerRadius(10)
                     }
+                    
+                    VStack(spacing: 15) {
+                        TextField("Имя пользователя", text: $username)
+                            .padding()
+                            .background(Color(white: 0.1))
+                            .cornerRadius(10)
+                            .foregroundColor(.white)
+                            .autocapitalization(.none)
+                        
+                        SecureField("Пароль", text: $password)
+                            .padding()
+                            .background(Color(white: 0.1))
+                            .cornerRadius(10)
+                            .foregroundColor(.white)
+                    }
+                    .padding(.horizontal, 30)
+                    
+                    if let error = errorMessage {
+                        Text(error)
+                            .foregroundColor(.red)
+                            .font(.caption)
+                    }
+                    
+                    Button(action: {
+                        handleAuth()
+                    }) {
+                        if isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        } else {
+                            Text("Продолжить")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .font(.headline)
+                                .cornerRadius(10)
+                        }
+                    }
+                    .padding(.horizontal, 30)
+                    .disabled(isLoading)
+                    
+                    Button(action: {
+                        isRegistering = true
+                    }) {
+                        Text("Нет аккаунта? Создать")
+                            .foregroundColor(.blue)
+                    }
+                    
+                    Spacer()
                 }
-                .padding(.horizontal, 30)
-                .disabled(isLoading)
-                
-                Button(action: {
-                    isRegistering.toggle()
-                }) {
-                    Text(isRegistering ? "Уже есть аккаунт? Войти" : "Нет аккаунта? Создать")
-                        .foregroundColor(.blue)
-                }
-                
-                Spacer()
             }
         }
     }
