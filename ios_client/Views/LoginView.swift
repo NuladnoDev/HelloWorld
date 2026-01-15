@@ -97,6 +97,8 @@ struct LoginView: View {
                 print("DEBUG: Generated keys for \(username): \(keys.publicKey)")
                 
                 DispatchQueue.main.async {
+                    // Сохраняем имя пользователя для сессии
+                    UserDefaults.standard.set(username, forKey: "saved_username")
                     isLoading = false
                     isAuthenticated = true
                 }

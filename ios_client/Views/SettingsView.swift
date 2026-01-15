@@ -2,7 +2,7 @@ import SwiftUI
 
 @available(iOS 15.0, *)
 struct SettingsView: View {
-    @State private var username: String = "jsoaai"
+    @State private var username: String = UserDefaults.standard.string(forKey: "saved_username") ?? "problem"
     @State private var phoneNumber: String = "+7 (999) 123-45-67"
     
     var body: some View {
@@ -11,20 +11,12 @@ struct SettingsView: View {
             
             ScrollView {
                 VStack(spacing: 0) {
-                    // Хедер с градиентом
+                    // Хедер со сплошной заливкой
                     ZStack(alignment: .top) {
-                        // Темная заливка как на скрине (темнее цвета аватарки)
-                        LinearGradient(
-                            colors: [
-                                Color(red: 0.1, green: 0.15, blue: 0.25).opacity(0.8),
-                                Color(red: 0.05, green: 0.07, blue: 0.12),
-                                .black
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                        .frame(height: 380)
-                        .edgesIgnoringSafeArea(.top)
+                        // Сплошной темно-серый цвет (как на скрине, темнее аватарки)
+                        Color(red: 0.05, green: 0.07, blue: 0.12)
+                            .frame(height: 320)
+                            .edgesIgnoringSafeArea(.top)
                         
                         VStack(spacing: 0) {
                             // Верхняя панель кнопок
@@ -37,14 +29,16 @@ struct SettingsView: View {
                                 
                                 Spacer()
                                 
-                                Button(action: {}) {
+                                Button(action: {
+                                    UserDefaults.standard.set(false, forKey: "is_authenticated")
+                                }) {
                                     Text("Изм.")
                                         .font(.system(size: 16, weight: .medium))
                                 }
                                 .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 20, paddingVertical: 10))
                             }
                             .padding(.horizontal)
-                            .padding(.top, 10)
+                            .padding(.top, 15) // Опустил кнопки на ~1мм (было 10)
                             
                             // Секция профиля (Аватар + Тег + Номер + Имя)
                             VStack(spacing: 12) {
@@ -61,7 +55,7 @@ struct SettingsView: View {
                                         .font(.system(size: 44, weight: .bold))
                                         .foregroundColor(.white)
                                 }
-                                .padding(.top, -5) // Еще выше
+                                .padding(.top, -15) // Поднял аватарку еще выше (было -5)
                                 
                                 VStack(spacing: 4) {
                                     Text("@\(username)")
@@ -78,9 +72,10 @@ struct SettingsView: View {
                                     }
                                 }
                             }
-                            .padding(.top, 10)
+                            .padding(.top, 5)
                         }
                     }
+                    .padding(.bottom, -20) // Уменьшил отступ после профиля до кнопок
                     
                     // Группы настроек
                     VStack(spacing: 20) {
@@ -126,6 +121,17 @@ struct SettingsView: View {
                             SettingsRow(icon: "bubble.left.and.bubble.right.fill", iconColor: .cyan, title: "Вопросы о HelloWorld")
                             Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
                             SettingsRow(icon: "lightbulb.fill", iconColor: .yellow, title: "Возможности HelloWorld")
+                        }
+                        
+                        // Группа выхода
+                        SettingsGroup {
+                            Button(action: {
+                                UserDefaults.standard.set(false, forKey: "is_authenticated")
+                                // Перезапускаем приложение или меняем состояние через NotificationCenter
+                                NotificationCenter.default.post(name: NSNotification.Name("LogOut"), object: nil)
+                            }) {
+                                SettingsRow(icon: "rectangle.portrait.and.arrow.right", iconColor: .red, title: "Выйти", textColor: .red, showArrow: false)
+                            }
                         }
                     }
                     .padding(.horizontal)

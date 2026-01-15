@@ -3,8 +3,8 @@ import SwiftUI
 @available(iOS 15.0, *)
 @main
 struct HelloWorldApp: App {
-    @State private var isAuthenticated = false
-    @State private var hasSeenWelcome = false
+    @State private var isAuthenticated = UserDefaults.standard.bool(forKey: "is_authenticated")
+    @State private var hasSeenWelcome = UserDefaults.standard.bool(forKey: "has_seen_welcome")
     @State private var coreStatus = "Initializing Core..."
 
     var body: some Scene {
@@ -17,7 +17,16 @@ struct HelloWorldApp: App {
             } else {
                 WelcomeView(showLogin: $hasSeenWelcome)
                     .transition(.opacity)
+                    .onChange(of: hasSeenWelcome) { newValue in
+                        UserDefaults.standard.set(newValue, forKey: "has_seen_welcome")
+                    }
             }
+        }
+        .onChange(of: isAuthenticated) { newValue in
+            UserDefaults.standard.set(newValue, forKey: "is_authenticated")
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("LogOut"))) { _ in
+            isAuthenticated = false
         }
     }
 
