@@ -7,17 +7,11 @@ struct SettingsView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            // Глобальный черный фон
             Color.black.edgesIgnoringSafeArea(.all)
             
-            // Фиксированный серый фон хедера, который уходит вверх под челку
-            Color(white: 0.1)
-                .frame(height: 200) // Ограничиваем высоту снизу, чтобы не растягивался вниз
-                .ignoresSafeArea(.all, edges: .top)
-            
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
-                    // Хедер с контентом
+                    // Хедер с контентом и растягивающимся фоном
                     VStack(spacing: 0) {
                         // Верхняя панель кнопок
                         HStack {
@@ -86,8 +80,17 @@ struct SettingsView: View {
                             }
                         }
                         .padding(.top, 5)
+                        .padding(.bottom, 40)
                     }
-                    .padding(.bottom, 30) // Отступ внутри серого блока
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        GeometryReader { geo in
+                            let minY = geo.frame(in: .global).minY
+                            Color(white: 0.1)
+                                .offset(y: minY > 0 ? -minY : 0)
+                                .frame(height: minY > 0 ? 250 + minY : 250)
+                        }
+                    )
                     
                     // Группы настроек
                     VStack(spacing: 20) {
@@ -101,7 +104,7 @@ struct SettingsView: View {
                             Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
                             SettingsRow(icon: "at", iconColor: .blue, title: "Выбрать имя пользователя", textColor: .blue, noIconBackground: true)
                         }
-                        .padding(.top, -50) // Подтягиваем первую группу вверх, чтобы она частично заходила на серый фон
+                        .padding(.top, -50) // Подтягиваем первую группу вверх
                         
                         // Группа аккаунтов
                         SettingsGroup {
