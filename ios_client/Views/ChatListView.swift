@@ -125,25 +125,25 @@ struct ChatListView: View {
                                         }
                                     }
                                     .padding(.horizontal)
-                                    .padding(.top, 10)
+                                    .padding(.top, 25) // Увеличил отступ сверху над "Чаты"
                                     .padding(.bottom, 8)
                                 }
 
                                 // Поиск
                                 HStack(spacing: 10) {
                                     ZStack {
-                                        RoundedRectangle(cornerRadius: 10) // Изменил скругление на 10 как в ТГ
-                                            .fill(isSearchActive ? Color.black : Color(white: 0.15)) // Сделал чуть светлее серый для контраста
+                                        RoundedRectangle(cornerRadius: 28) // Сделал скругление намного больше (как у кнопок)
+                                            .fill(isSearchActive ? Color.black : Color(white: 0.15))
                                             .overlay(
-                                                RoundedRectangle(cornerRadius: 10)
+                                                RoundedRectangle(cornerRadius: 28)
                                                     .stroke(isSearchActive ? Color.white.opacity(0.1) : Color.clear, lineWidth: 1)
                                             )
-                                            .frame(height: 38) // Вернул высоту 38
+                                            .frame(height: 41) // Увеличил высоту на ~1мм (с 38 до 41)
                                         
                                         HStack {
                                             Image(systemName: "magnifyingglass")
                                                 .foregroundColor(.gray)
-                                                .padding(.leading, 10)
+                                                .padding(.leading, 15) // Чуть больше отступ иконки при большом скруглении
                                             
                                             TextField("Поиск", text: $searchText, onEditingChanged: { editing in
                                                 withAnimation(.spring()) {
@@ -151,7 +151,7 @@ struct ChatListView: View {
                                                 }
                                             })
                                             .foregroundColor(.white)
-                                            .font(.system(size: 17)) // Шрифт 17 как в ТГ
+                                            .font(.system(size: 17))
                                         }
                                     }
                                     

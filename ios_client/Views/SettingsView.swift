@@ -162,28 +162,6 @@ struct SettingsView: View {
                                     SettingsRow(icon: "camera", iconColor: .blue, title: "Выбрать фотографию", textColor: .blue, noIconBackground: true) {
                                         showImagePicker = true
                                     }
-                                    
-                                    Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                                    SettingsRow(
-                                        icon: "at",
-                                        iconColor: .blue,
-                                        title: "Имя пользователя",
-                                        textColor: tag.isEmpty ? .blue : .white,
-                                        noIconBackground: tag.isEmpty
-                                    ) {
-                                        showEditTag = true
-                                    }
-                                    .overlay(
-                                        Group {
-                                            if !tag.isEmpty {
-                                                Text("@\(tag)")
-                                                    .font(.system(size: 16))
-                                                    .foregroundColor(.white.opacity(0.5))
-                                                    .padding(.trailing, 40)
-                                            }
-                                        },
-                                        alignment: .trailing
-                                    )
                                 }
                                 .padding(.top, 10)
                                 

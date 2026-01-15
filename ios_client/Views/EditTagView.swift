@@ -23,8 +23,9 @@ struct EditTagView: View {
                     Spacer()
                     
                     Text("Имя пользователя")
-                        .font(.system(size: 17, weight: .bold))
+                        .font(.system(size: 16, weight: .bold)) // Немного уменьшил шрифт заголовка, чтобы влезло
                         .foregroundColor(.white)
+                        .lineLimit(1)
                     
                     Spacer()
                     
@@ -49,17 +50,17 @@ struct EditTagView: View {
                                 .padding(.horizontal, 16)
                             
                             ZStack {
-                                RoundedRectangle(cornerRadius: 12)
+                                RoundedRectangle(cornerRadius: 28) // Увеличил скругление до 28
                                     .fill(Color(white: 0.12))
                                 
                                 TextField("", text: $tempTag, prompt: Text("Имя пользователя").foregroundColor(.white.opacity(0.3)))
                                     .autocapitalization(.none)
                                     .disableAutocorrection(true)
                                     .foregroundColor(.white)
-                                    .padding(.horizontal, 16)
+                                    .padding(.horizontal, 20) // Увеличил паддинг для большого скругления
                                     .padding(.vertical, 12)
                             }
-                            .frame(height: 50)
+                            .frame(height: 54) // Чуть выше для соответствия скруглению 28
                             .padding(.horizontal, 16)
                         }
                         
