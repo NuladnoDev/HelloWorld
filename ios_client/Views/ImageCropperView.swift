@@ -73,7 +73,9 @@ struct ImageCropperView: View {
                     
                     Button("Готово") {
                         cropImage()
-                        isPresented = false
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            isPresented = false
+                        }
                     }
                     .foregroundColor(.white)
                     .font(.system(size: 17, weight: .bold))

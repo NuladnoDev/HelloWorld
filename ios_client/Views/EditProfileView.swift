@@ -206,6 +206,7 @@ struct EditProfileView: View {
                             Divider().background(Color.white.opacity(0.1)).padding(.leading, 50)
                             
                             SettingsRow(icon: "at", iconColor: .blue, title: "Имя пользователя", showArrow: true)
+                                .contentShape(Rectangle())
                                 .onTapGesture {
                                     showEditTag = true
                                 }

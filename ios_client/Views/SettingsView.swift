@@ -11,6 +11,11 @@ struct SettingsView: View {
     @State private var avatarImage: UIImage? = nil
     @State private var isEditingProfile = false
     
+    // Состояние для расширяемой аватарки
+    @State private var scrollOffset: CGFloat = 0
+    private let collapsedAvatarSize: CGFloat = 110
+    private let expandedAvatarHeight: CGFloat = 400
+    
     var fullName: String {
         let name = "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
         return name.isEmpty ? username : name
@@ -20,41 +25,50 @@ struct SettingsView: View {
         ZStack(alignment: .top) {
             Color.black.edgesIgnoringSafeArea(.all)
             
+            // Расширенная аватарка с градиентом (фон)
+            if let image = avatarImage {
+                GeometryReader { geo in
+                    let offset = scrollOffset
+                    let height = expandedAvatarHeight + (offset > 0 ? offset : 0)
+                    
+                    ZStack(alignment: .bottom) {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: geo.size.width, height: height)
+                            .clipped()
+                        
+                        // Градиент для плавного перехода к контенту
+                        LinearGradient(
+                            colors: [.clear, .black.opacity(0.8), .black],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .frame(height: 150)
+                    }
+                    .offset(y: offset > 0 ? 0 : offset * 0.5) // Параллакс эффект
+                    .opacity(avatarOpacity)
+                }
+                .edgesIgnoringSafeArea(.top)
+                .frame(height: expandedAvatarHeight)
+            }
+            
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
-                    // Хедер с контентом и растягивающимся фоном
+                    // Прозрачный спейсер для скролла над большой аватаркой
+                    Color.clear
+                        .frame(height: expandedAvatarHeight - 100)
+                    
                     VStack(spacing: 0) {
-                        // Верхняя панель кнопок
-                        HStack {
-                            Button(action: {}) {
-                                Image(systemName: "square.grid.2x2")
-                                    .font(.system(size: 20))
-                            }
-                            .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 12, paddingVertical: 12))
-                            
-                            Spacer()
-                            
-                            Button(action: {
-                                withAnimation(.easeInOut(duration: 0.3)) {
-                                    isEditingProfile = true
-                                }
-                            }) {
-                                Text("Изм.")
-                                    .font(.system(size: 16, weight: .medium))
-                            }
-                            .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 20, paddingVertical: 10))
-                        }
-                        .padding(.horizontal)
-                        .padding(.top, 15)
-                        
-                        // Секция профиля (Аватар + Тег + Номер + Имя)
-                        VStack(spacing: 12) { // Увеличил отступ между аватаром и текстом (был 4)
+                        // Контент профиля (Имя, телефон/тег)
+                        VStack(spacing: 12) {
+                            // Маленькая круглая аватарка (появляется при скролле вниз)
                             ZStack {
                                 if let image = avatarImage {
                                     Image(uiImage: image)
                                         .resizable()
                                         .scaledToFill()
-                                        .frame(width: 110, height: 110)
+                                        .frame(width: collapsedAvatarSize, height: collapsedAvatarSize)
                                         .clipShape(Circle())
                                 } else {
                                     Circle()
@@ -63,15 +77,31 @@ struct SettingsView: View {
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
                                         ))
-                                        .frame(width: 110, height: 110)
+                                        .frame(width: collapsedAvatarSize, height: collapsedAvatarSize)
+                                        .overlay(
+                                            ZStack {
+                                                Color.black.opacity(0.3)
+                                                Image(systemName: "camera.fill")
+                                                    .font(.system(size: 30))
+                                                    .foregroundColor(.white)
+                                            }
+                                            .clipShape(Circle())
+                                        )
                                 }
                             }
-                            .padding(.top, -35) // Опустил аватарку ниже (было -100)
+                            .scaleEffect(collapsedAvatarScale)
+                            .opacity(collapsedAvatarOpacity)
+                            .onTapGesture {
+                                withAnimation(.spring()) {
+                                    // Можно добавить скролл к самому верху
+                                }
+                            }
                             
                             VStack(spacing: 2) {
                                 Text(fullName)
                                     .font(.system(size: 24, weight: .bold))
                                     .foregroundColor(.white)
+                                    .shadow(radius: scrollOffset > -100 ? 5 : 0)
                                 
                                 HStack(spacing: 2) {
                                     Image(systemName: tag.isEmpty ? "info.circle" : "at")
@@ -85,82 +115,106 @@ struct SettingsView: View {
                         }
                         .padding(.top, 5)
                         .padding(.bottom, 30)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .background(
-                        GeometryReader { geo in
-                            let minY = geo.frame(in: .global).minY
-                            Color(white: 0.1)
-                                .offset(y: minY > 0 ? -minY : 0)
-                                .frame(height: minY > 0 ? 215 + minY : 215) // Уменьшил высоту заливки (было 250)
-                        }
-                    )
-                    
-                    // Группы настроек
-                    VStack(spacing: 20) {
-                        // Первая группа (без фона иконок)
-                        SettingsGroup {
-                            SettingsRow(icon: "face.smiling", iconColor: .blue, title: "Сменить эмодзи-статус", textColor: .blue, noIconBackground: true)
-                            Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                            SettingsRow(icon: "wand.and.stars", iconColor: .blue, title: "Изменить цвет профиля", textColor: .blue, noIconBackground: true)
-                            Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                            SettingsRow(icon: "camera", iconColor: .blue, title: "Выбрать фотографию", textColor: .blue, noIconBackground: true) {
-                                isEditingProfile = true
-                            }
-                            
-                            if tag.isEmpty {
+                        
+                        // Группы настроек
+                        VStack(spacing: 20) {
+                            SettingsGroup {
+                                SettingsRow(icon: "face.smiling", iconColor: .blue, title: "Сменить эмодзи-статус", textColor: .blue, noIconBackground: true)
                                 Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                                SettingsRow(icon: "at", iconColor: .blue, title: "Выбрать имя пользователя", textColor: .blue, noIconBackground: true) {
-                                    withAnimation(.easeInOut(duration: 0.3)) {
-                                        isEditingProfile = true
+                                SettingsRow(icon: "wand.and.stars", iconColor: .blue, title: "Изменить цвет профиля", textColor: .blue, noIconBackground: true)
+                                Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
+                                SettingsRow(icon: "camera", iconColor: .blue, title: "Выбрать фотографию", textColor: .blue, noIconBackground: true) {
+                                    isEditingProfile = true
+                                }
+                                
+                                if tag.isEmpty {
+                                    Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
+                                    SettingsRow(icon: "at", iconColor: .blue, title: "Выбрать имя пользователя", textColor: .blue, noIconBackground: true) {
+                                        withAnimation(.easeInOut(duration: 0.3)) {
+                                            isEditingProfile = true
+                                        }
                                     }
                                 }
                             }
+                            .padding(.top, 15)
+                            
+                            SettingsGroup {
+                                SettingsRow(icon: "person.circle.fill", iconColor: .green, title: username, showArrow: false)
+                                Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
+                                SettingsRow(icon: "plus", iconColor: .blue, title: "Добавить аккаунт", textColor: .blue, showArrow: false)
+                            }
+                            
+                            SettingsGroup {
+                                SettingsRow(icon: "person.crop.circle.badge.exclamationmark", iconColor: .red, title: "Мой профиль")
+                                Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
+                                SettingsRow(icon: "gift.fill", iconColor: .blue, title: "Мальчонка Edition")
+                            }
+                            
+                            SettingsGroup {
+                                SettingsRow(icon: "bell.fill", iconColor: .red, title: "Уведомления и звуки")
+                                Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
+                                SettingsRow(icon: "lock.fill", iconColor: .gray, title: "Конфиденциальность")
+                                Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
+                                SettingsRow(icon: "folder.fill", iconColor: .yellow, title: "Папки с чатами")
+                                Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
+                                SettingsRow(icon: "iphone", iconColor: .green, title: "Устройства")
+                            }
+                            
+                            SettingsGroup {
+                                SettingsRow(icon: "questionmark.circle.fill", iconColor: .orange, title: "Помощь")
+                                Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
+                                SettingsRow(icon: "bubble.left.and.bubble.right.fill", iconColor: .cyan, title: "Вопросы о HelloWorld")
+                                Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
+                                SettingsRow(icon: "lightbulb.fill", iconColor: .yellow, title: "Возможности HelloWorld")
+                            }
                         }
-                        .padding(.top, 15) // Добавил отступ сверху вместо отрицательного, чтобы не наезжало на тег
-                        
-                        // Группа аккаунтов
-                        SettingsGroup {
-                            SettingsRow(icon: "person.circle.fill", iconColor: .green, title: username, showArrow: false)
-                            Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                            SettingsRow(icon: "plus", iconColor: .blue, title: "Добавить аккаунт", textColor: .blue, showArrow: false)
-                        }
-                        
-                        // Группа профиля и подарков
-                        SettingsGroup {
-                            SettingsRow(icon: "person.crop.circle.badge.exclamationmark", iconColor: .red, title: "Мой профиль")
-                            Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                            SettingsRow(icon: "gift.fill", iconColor: .blue, title: "Мальчонка Edition")
-                        }
-                        
-                        // Дополнительные тестовые кнопки
-                        SettingsGroup {
-                            SettingsRow(icon: "bell.fill", iconColor: .red, title: "Уведомления и звуки")
-                            Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                            SettingsRow(icon: "lock.fill", iconColor: .gray, title: "Конфиденциальность")
-                            Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                            SettingsRow(icon: "folder.fill", iconColor: .yellow, title: "Папки с чатами")
-                            Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                            SettingsRow(icon: "iphone", iconColor: .green, title: "Устройства")
-                        }
-                        
-                        SettingsGroup {
-                            SettingsRow(icon: "questionmark.circle.fill", iconColor: .orange, title: "Помощь")
-                            Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                            SettingsRow(icon: "bubble.left.and.bubble.right.fill", iconColor: .cyan, title: "Вопросы о HelloWorld")
-                            Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                            SettingsRow(icon: "lightbulb.fill", iconColor: .yellow, title: "Возможности HelloWorld")
-                        }
+                        .padding(.horizontal)
+                        .padding(.bottom, 30)
+                        .background(Color.black)
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, 30)
+                    .background(Color.black)
                 }
+                .background(
+                    GeometryReader { geo in
+                        Color.clear.preference(key: ScrollOffsetKey.self, value: geo.frame(in: .global).minY)
+                    }
+                )
+            }
+            .onPreferenceChange(ScrollOffsetKey.self) { value in
+                scrollOffset = value
+            }
+            
+            // Верхние кнопки поверх всего
+            VStack(spacing: 0) {
+                HStack {
+                    Button(action: {}) {
+                        Image(systemName: "square.grid.2x2")
+                            .font(.system(size: 20))
+                    }
+                    .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 12, paddingVertical: 8))
+                    
+                    Spacer()
+                    
+                    Button(action: {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            isEditingProfile = true
+                        }
+                    }) {
+                        Text("Изм.")
+                            .font(.system(size: 16, weight: .medium))
+                    }
+                    .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 16, paddingVertical: 8))
+                }
+                .padding(.horizontal)
+                .padding(.top, 10)
+                
+                Spacer()
             }
             
             if isEditingProfile {
                 EditProfileView(isPresented: $isEditingProfile, isAuthenticated: $isAuthenticated)
                     .transition(.opacity)
-                    .zIndex(1)
+                    .zIndex(10)
             }
         }
         .navigationBarHidden(true)
@@ -172,6 +226,25 @@ struct SettingsView: View {
                 refreshData()
             }
         }
+    }
+    
+    // Логика прозрачности и масштаба для анимаций
+    private var avatarOpacity: Double {
+        if scrollOffset >= 0 { return 1.0 }
+        let progress = -scrollOffset / (expandedAvatarHeight - 150)
+        return Double(max(0, 1 - progress))
+    }
+    
+    private var collapsedAvatarOpacity: Double {
+        if scrollOffset >= 0 { return 0.0 }
+        let progress = -scrollOffset / (expandedAvatarHeight - 200)
+        return Double(min(1, progress))
+    }
+    
+    private var collapsedAvatarScale: CGFloat {
+        if scrollOffset >= 0 { return 0.5 }
+        let progress = -scrollOffset / (expandedAvatarHeight - 200)
+        return 0.5 + (min(1, progress) * 0.5)
     }
     
     private func refreshData() {
@@ -189,83 +262,12 @@ struct SettingsView: View {
     }
 }
 
-// Компоненты для настроек
-@available(iOS 15.0, *)
-struct SettingsGroup<Content: View>: View {
-    let content: Content
-    
-    init(@ViewBuilder content: () -> Content) {
-        self.content = content()
-    }
-    
-    var body: some View {
-        VStack(spacing: 0) {
-            content
-        }
-        .background(Color(white: 0.12))
-        .clipShape(RoundedRectangle(cornerRadius: 22)) // Еще больше увеличил скругление (было 18)
+struct ScrollOffsetKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
     }
 }
 
-@available(iOS 15.0, *)
-struct SettingsRow: View {
-    let icon: String
-    let iconColor: Color
-    let title: String
-    var textColor: Color = .white
-    var showArrow: Bool = true
-    var noIconBackground: Bool = false
-    var action: (() -> Void)? = nil
-    
-    var body: some View {
-        Button(action: { action?() }) {
-            HStack(spacing: 16) {
-                ZStack {
-                    if !noIconBackground {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(iconColor)
-                            .frame(width: 28, height: 28)
-                    }
-                    
-                    Image(systemName: icon)
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(noIconBackground ? iconColor : .white)
-                }
-                .frame(width: 28, height: 28)
-                
-                Text(title)
-                    .font(.system(size: 17))
-                    .foregroundColor(textColor)
-                
-                Spacer()
-                
-                if showArrow {
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(Color.white.opacity(0.2))
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(SettingsButtonStyle())
-    }
-}
-
-@available(iOS 15.0, *)
-struct SettingsButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .background(configuration.isPressed ? Color.white.opacity(0.1) : Color.clear)
-            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
-    }
-}
-
-@available(iOS 15.0, *)
-struct SettingsView_Previews: PreviewProvider {
-    static var previews: some View {
-        SettingsView(isAuthenticated: .constant(true))
-            .preferredColorScheme(.dark)
-    }
-}
+// Повторное объявление вспомогательных структур (если они не вынесены в отдельные файлы)
+// В реальном проекте их лучше держать в Common или Styles
