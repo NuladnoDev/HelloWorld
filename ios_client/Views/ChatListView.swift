@@ -233,32 +233,6 @@ struct ChatListView: View {
     }
 }
 
-// Вспомогательные компоненты
-struct LiquidGlassButtonStyle: ButtonStyle {
-    let paddingHorizontal: CGFloat
-    let paddingVertical: CGFloat
-    
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .padding(.horizontal, paddingHorizontal)
-            .padding(.vertical, paddingVertical)
-            .background(.ultraThinMaterial)
-            .cornerRadius(10)
-            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
-            .animation(.spring(), value: configuration.isPressed)
-    }
-}
-
-struct PressDetectorStyle: ButtonStyle {
-    @Binding var isPressed: Bool
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .onChange(of: configuration.isPressed) { newValue in
-                isPressed = newValue
-            }
-    }
-}
-
 @available(iOS 15.0, *)
 struct ChatRow: View {
     let chat: Chat
