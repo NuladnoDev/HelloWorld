@@ -4,11 +4,12 @@ import SwiftUI
 struct EditProfileView: View {
     @Binding var isPresented: Bool
     @Binding var isAuthenticated: Bool
-    @State private var firstName: String = ""
-    @State private var lastName: String = ""
+    @State private var firstName: String = UserDefaults.standard.string(forKey: "saved_firstName") ?? ""
+    @State private var lastName: String = UserDefaults.standard.string(forKey: "saved_lastName") ?? ""
+    @State private var tag: String = UserDefaults.standard.string(forKey: "saved_tag") ?? ""
     @State private var bio: String = ""
     @State private var username: String = UserDefaults.standard.string(forKey: "saved_username") ?? ""
-    @State private var phoneNumber: String = "+7 (999) 123-45-67"
+    @State private var phoneNumber: String = UserDefaults.standard.string(forKey: "saved_phone") ?? "+7 (999) 123-45-67"
     @State private var birthDate = Date()
     
     var body: some View {
@@ -35,6 +36,9 @@ struct EditProfileView: View {
                             
                             Button(action: {
                                 // Сохранение и выход
+                                UserDefaults.standard.set(firstName, forKey: "saved_firstName")
+                                UserDefaults.standard.set(lastName, forKey: "saved_lastName")
+                                UserDefaults.standard.set(tag, forKey: "saved_tag")
                                 UserDefaults.standard.set(username, forKey: "saved_username")
                                 withAnimation(.easeInOut(duration: 0.3)) {
                                     isPresented = false
@@ -82,7 +86,7 @@ struct EditProfileView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .background(
-                        Color(white: 0.1) // Тот же фон, что и в SettingsView
+                        Color.black // Убрал серую заливку, оставил черный фон
                             .edgesIgnoringSafeArea(.top)
                     )
                     
@@ -159,6 +163,14 @@ struct EditProfileView: View {
                             Divider().background(Color.white.opacity(0.1)).padding(.leading, 50)
                             
                             SettingsRow(icon: "at", iconColor: .blue, title: "Имя пользователя", showArrow: true)
+                                .overlay(
+                                    TextField("", text: $tag, prompt: Text("Установить тег").foregroundColor(.white.opacity(0.3)))
+                                        .autocapitalization(.none)
+                                        .disableAutocorrection(true)
+                                        .multilineTextAlignment(.trailing)
+                                        .foregroundColor(.white.opacity(0.5))
+                                        .padding(.trailing, 40)
+                                , alignment: .trailing)
                             
                             Divider().background(Color.white.opacity(0.1)).padding(.leading, 50)
                             

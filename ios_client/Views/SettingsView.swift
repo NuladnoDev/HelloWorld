@@ -4,8 +4,16 @@ import SwiftUI
 struct SettingsView: View {
     @Binding var isAuthenticated: Bool
     @State private var username: String = UserDefaults.standard.string(forKey: "saved_username") ?? "problem"
-    @State private var phoneNumber: String = "+7 (999) 123-45-67"
+    @State private var firstName: String = UserDefaults.standard.string(forKey: "saved_firstName") ?? ""
+    @State private var lastName: String = UserDefaults.standard.string(forKey: "saved_lastName") ?? ""
+    @State private var tag: String = UserDefaults.standard.string(forKey: "saved_tag") ?? ""
+    @State private var phoneNumber: String = UserDefaults.standard.string(forKey: "saved_phone") ?? "+7 (999) 123-45-67"
     @State private var isEditingProfile = false
+    
+    var fullName: String {
+        let name = "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
+        return name.isEmpty ? username : name
+    }
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -70,15 +78,15 @@ struct SettingsView: View {
                             .padding(.top, -35) // Опустил аватарку ниже (было -100)
                             
                             VStack(spacing: 2) {
-                                Text("@\(username)")
+                                Text(fullName)
                                     .font(.system(size: 24, weight: .bold))
                                     .foregroundColor(.white)
                                 
                                 HStack(spacing: 6) {
-                                    Image(systemName: "info.circle")
+                                    Image(systemName: tag.isEmpty ? "info.circle" : "at")
                                         .font(.system(size: 13))
                                         .foregroundColor(.white.opacity(0.5))
-                                    Text(phoneNumber)
+                                    Text(tag.isEmpty ? phoneNumber : tag)
                                         .font(.system(size: 14))
                                         .foregroundColor(.white.opacity(0.5))
                                 }
@@ -106,8 +114,17 @@ struct SettingsView: View {
                             SettingsRow(icon: "wand.and.stars", iconColor: .blue, title: "Изменить цвет профиля", textColor: .blue, noIconBackground: true)
                             Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
                             SettingsRow(icon: "camera", iconColor: .blue, title: "Выбрать фотографию", textColor: .blue, noIconBackground: true)
-                            Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                            SettingsRow(icon: "at", iconColor: .blue, title: "Выбрать имя пользователя", textColor: .blue, noIconBackground: true)
+                            
+                            if tag.isEmpty {
+                                Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
+                                Button(action: {
+                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                        isEditingProfile = true
+                                    }
+                                }) {
+                                    SettingsRow(icon: "at", iconColor: .blue, title: "Выбрать имя пользователя", textColor: .blue, noIconBackground: true)
+                                }
+                            }
                         }
                         .padding(.top, 15) // Добавил отступ сверху вместо отрицательного, чтобы не наезжало на тег
                         
@@ -143,20 +160,6 @@ struct SettingsView: View {
                             Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
                             SettingsRow(icon: "lightbulb.fill", iconColor: .yellow, title: "Возможности HelloWorld")
                         }
-                        
-                        // Группа выхода
-                        SettingsGroup {
-                            Button(action: {
-                                withAnimation {
-                                    isAuthenticated = false
-                                }
-                                UserDefaults.standard.set(false, forKey: "is_authenticated")
-                                // Опционально: очистка других данных сессии
-                                NotificationCenter.default.post(name: NSNotification.Name("LogOut"), object: nil)
-                            }) {
-                                SettingsRow(icon: "rectangle.portrait.and.arrow.right", iconColor: .red, title: "Выйти", textColor: .red, showArrow: false)
-                            }
-                        }
                     }
                     .padding(.horizontal)
                     .padding(.bottom, 30)
@@ -169,6 +172,23 @@ struct SettingsView: View {
                     .zIndex(1)
             }
         }
+        .navigationBarHidden(true)
+        .onAppear {
+            refreshData()
+        }
+        .onChange(of: isEditingProfile) { newValue in
+            if !newValue {
+                refreshData()
+            }
+        }
+    }
+    
+    private func refreshData() {
+        username = UserDefaults.standard.string(forKey: "saved_username") ?? "problem"
+        firstName = UserDefaults.standard.string(forKey: "saved_firstName") ?? ""
+        lastName = UserDefaults.standard.string(forKey: "saved_lastName") ?? ""
+        tag = UserDefaults.standard.string(forKey: "saved_tag") ?? ""
+        phoneNumber = UserDefaults.standard.string(forKey: "saved_phone") ?? "+7 (999) 123-45-67"
     }
 }
 

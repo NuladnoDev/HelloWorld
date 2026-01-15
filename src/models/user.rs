@@ -7,5 +7,7 @@ pub struct CoreUser {
     pub id: UserId,
     pub display_name: String,
     pub public_key_base64: String,
+    pub tag: Option<String>,
+    pub phone_number: Option<String>,
 }
 

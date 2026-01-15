@@ -43,6 +43,9 @@ struct RegistrationFlowView: View {
         // Сохраняем данные
         let finalUsername = tag.isEmpty ? firstName.lowercased() : tag
         UserDefaults.standard.set(finalUsername, forKey: "saved_username")
+        UserDefaults.standard.set(firstName, forKey: "saved_firstName")
+        UserDefaults.standard.set(lastName, forKey: "saved_lastName")
+        UserDefaults.standard.set(tag, forKey: "saved_tag")
         UserDefaults.standard.set(phoneNumber, forKey: "saved_phone")
         
         withAnimation {
@@ -59,7 +62,13 @@ struct PhoneStepView: View {
     
     var body: some View {
         VStack(spacing: 30) {
-            Spacer().frame(height: 50)
+            Spacer().frame(height: 40)
+            
+            // Большая иконка (SVG стиль)
+            Image(systemName: "iphone.radiowaves.left.and.right")
+                .font(.system(size: 80))
+                .foregroundColor(.blue)
+                .padding(.bottom, 20)
             
             Text("Ваш номер телефона")
                 .font(.system(size: 24, weight: .bold))
@@ -82,14 +91,18 @@ struct PhoneStepView: View {
             Spacer()
             
             Button(action: nextStep) {
-                Image(systemName: "arrow.right")
-                    .font(.system(size: 24, weight: .bold))
+                Text("Далее")
+                    .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.white)
-                    .frame(width: 60, height: 60)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 56)
                     .background(Color.blue)
-                    .clipShape(Circle())
+                    .cornerRadius(16)
             }
+            .padding(.horizontal, 40)
             .padding(.bottom, 50)
+            .disabled(phoneNumber.count < 5)
+            .opacity(phoneNumber.count < 5 ? 0.5 : 1.0)
         }
     }
 }
@@ -103,7 +116,13 @@ struct NameStepView: View {
     
     var body: some View {
         VStack(spacing: 30) {
-            Spacer().frame(height: 50)
+            Spacer().frame(height: 40)
+            
+            // Большая иконка (SVG стиль)
+            Image(systemName: "person.text.rectangle")
+                .font(.system(size: 80))
+                .foregroundColor(.blue)
+                .padding(.bottom, 20)
             
             Text("Ваше имя")
                 .font(.system(size: 24, weight: .bold))
@@ -133,13 +152,15 @@ struct NameStepView: View {
             Spacer()
             
             Button(action: nextStep) {
-                Image(systemName: "arrow.right")
-                    .font(.system(size: 24, weight: .bold))
+                Text("Далее")
+                    .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.white)
-                    .frame(width: 60, height: 60)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 56)
                     .background(Color.blue)
-                    .clipShape(Circle())
+                    .cornerRadius(16)
             }
+            .padding(.horizontal, 40)
             .padding(.bottom, 50)
             .disabled(firstName.isEmpty)
             .opacity(firstName.isEmpty ? 0.5 : 1.0)
@@ -165,6 +186,12 @@ struct TagStepView: View {
                 }
                 .padding()
             }
+            
+            // Большая иконка (SVG стиль)
+            Image(systemName: "at.circle.fill")
+                .font(.system(size: 80))
+                .foregroundColor(.blue)
+                .padding(.bottom, 20)
             
             Text("Выбор тега")
                 .font(.system(size: 24, weight: .bold))
@@ -192,13 +219,15 @@ struct TagStepView: View {
             Spacer()
             
             Button(action: nextStep) {
-                Image(systemName: "arrow.right")
-                    .font(.system(size: 24, weight: .bold))
+                Text("Далее")
+                    .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.white)
-                    .frame(width: 60, height: 60)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 56)
                     .background(Color.blue)
-                    .clipShape(Circle())
+                    .cornerRadius(16)
             }
+            .padding(.horizontal, 40)
             .padding(.bottom, 50)
             .disabled(tag.isEmpty)
             .opacity(tag.isEmpty ? 0.5 : 1.0)
@@ -225,6 +254,12 @@ struct AvatarStepView: View {
                 .padding()
             }
             
+            // Большая иконка (SVG стиль)
+            Image(systemName: "person.crop.circle.badge.plus")
+                .font(.system(size: 80))
+                .foregroundColor(.blue)
+                .padding(.bottom, 20)
+            
             Text("Фотография профиля")
                 .font(.system(size: 24, weight: .bold))
                 .foregroundColor(.white)
@@ -240,9 +275,17 @@ struct AvatarStepView: View {
                     .fill(Color(white: 0.1))
                     .frame(width: 150, height: 150)
                 
-                Image(systemName: "camera.fill")
-                    .font(.system(size: 40))
-                    .foregroundColor(.blue)
+                if let image = selectedImage {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 150, height: 150)
+                        .clipShape(Circle())
+                } else {
+                    Image(systemName: "camera.fill")
+                        .font(.system(size: 40))
+                        .foregroundColor(.blue)
+                }
             }
             .onTapGesture {
                 // В реальности здесь открытие ImagePicker
@@ -255,11 +298,11 @@ struct AvatarStepView: View {
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 50)
+                    .frame(height: 56)
                     .background(Color.blue)
-                    .cornerRadius(12)
-                    .padding(.horizontal, 40)
+                    .cornerRadius(16)
             }
+            .padding(.horizontal, 40)
             .padding(.bottom, 50)
         }
     }
