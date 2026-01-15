@@ -13,30 +13,30 @@ struct SettingsView: View {
                 VStack(spacing: 0) {
                     // Хедер со сплошной заливкой и мягким свечением
                     ZStack(alignment: .top) {
-                        // Сплошной темно-серый цвет фона
-                        Color(red: 0.05, green: 0.07, blue: 0.12)
-                            .frame(height: 320)
+                        // Сплошной серый цвет фона (вместо синеватого)
+                        Color(white: 0.1)
+                            .frame(height: 270) // Уменьшил высоту (было 320)
                             .edgesIgnoringSafeArea(.top)
                         
                         // Мягкое растушеванное белое свечение вокруг аватарки
                         RadialGradient(
                             colors: [
-                                Color.white.opacity(0.12),
-                                Color.white.opacity(0.06),
+                                Color.white.opacity(0.1),
+                                Color.white.opacity(0.05),
                                 Color.clear
                             ],
                             center: .center,
                             startRadius: 20,
-                            endRadius: 160
+                            endRadius: 140
                         )
-                        .frame(width: 400, height: 400)
-                        .offset(y: -50) // Центрируем свечение по аватарке
+                        .frame(width: 350, height: 350)
+                        .offset(y: -60) // Центрируем свечение по аватарке
                         
                         VStack(spacing: 0) {
                             // Верхняя панель кнопок
                             HStack {
                                 Button(action: {}) {
-                                    Image(systemName: "square.grid.2x2.fill")
+                                    Image(systemName: "square.grid.2x2") // Убрал .fill
                                         .font(.system(size: 20))
                                 }
                                 .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 12, paddingVertical: 12))
@@ -52,10 +52,10 @@ struct SettingsView: View {
                                 .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 20, paddingVertical: 10))
                             }
                             .padding(.horizontal)
-                            .padding(.top, 15) // Опустил кнопки на ~1мм (было 10)
+                            .padding(.top, 15)
                             
                             // Секция профиля (Аватар + Тег + Номер + Имя)
-                            VStack(spacing: 12) {
+                            VStack(spacing: 8) { // Уменьшил отступ между аватаркой и текстом
                                 ZStack {
                                     Circle()
                                         .fill(LinearGradient(
@@ -63,25 +63,25 @@ struct SettingsView: View {
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
                                         ))
-                                        .frame(width: 110, height: 110)
+                                        .frame(width: 100, height: 100) // Немного уменьшил аватар для компактности
                                     
                                     Text(String(username.prefix(1)).uppercased())
-                                        .font(.system(size: 44, weight: .bold))
+                                        .font(.system(size: 40, weight: .bold))
                                         .foregroundColor(.white)
                                 }
-                                .padding(.top, -15) // Поднял аватарку еще выше (было -5)
+                                .padding(.top, -25) // Поднял аватарку еще выше
                                 
-                                VStack(spacing: 4) {
+                                VStack(spacing: 2) { // Еще плотнее текст
                                     Text("@\(username)")
-                                        .font(.system(size: 26, weight: .bold))
+                                        .font(.system(size: 24, weight: .bold))
                                         .foregroundColor(.white)
                                     
                                     HStack(spacing: 6) {
                                         Image(systemName: "info.circle")
-                                            .font(.system(size: 14))
+                                            .font(.system(size: 13))
                                             .foregroundColor(.white.opacity(0.5))
                                         Text(phoneNumber)
-                                            .font(.system(size: 15))
+                                            .font(.system(size: 14))
                                             .foregroundColor(.white.opacity(0.5))
                                     }
                                 }
@@ -89,7 +89,7 @@ struct SettingsView: View {
                             .padding(.top, 5)
                         }
                     }
-                    .padding(.bottom, -20) // Уменьшил отступ после профиля до кнопок
+                    .padding(.bottom, -50) // Значительно уменьшил расстояние до начала групп (было -20)
                     
                     // Группы настроек
                     VStack(spacing: 20) {
@@ -99,7 +99,7 @@ struct SettingsView: View {
                             Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
                             SettingsRow(icon: "wand.and.stars", iconColor: .blue, title: "Изменить цвет профиля", textColor: .blue, noIconBackground: true)
                             Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                            SettingsRow(icon: "camera.fill", iconColor: .blue, title: "Выбрать фотографию", textColor: .blue, noIconBackground: true)
+                            SettingsRow(icon: "camera", iconColor: .blue, title: "Выбрать фотографию", textColor: .blue, noIconBackground: true)
                             Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
                             SettingsRow(icon: "at", iconColor: .blue, title: "Выбрать имя пользователя", textColor: .blue, noIconBackground: true)
                         }
