@@ -6,12 +6,18 @@ struct SettingsView: View {
     @State private var phoneNumber: String = "+7 (999) 123-45-67"
     
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
+            // Глобальный черный фон
             Color.black.edgesIgnoringSafeArea(.all)
+            
+            // Фиксированный серый фон хедера, который уходит вверх под челку
+            Color(white: 0.1)
+                .frame(height: 200) // Ограничиваем высоту снизу, чтобы не растягивался вниз
+                .ignoresSafeArea(.all, edges: .top)
             
             ScrollView {
                 VStack(spacing: 0) {
-                    // Хедер со сплошной заливкой и мягким свечением
+                    // Хедер с контентом
                     VStack(spacing: 0) {
                         // Верхняя панель кнопок
                         HStack {
@@ -80,13 +86,8 @@ struct SettingsView: View {
                             }
                         }
                         .padding(.top, 5)
-                        .padding(.bottom, 20) // Отступ до конца заливки
                     }
-                    .background(
-                        Color(white: 0.1)
-                            .ignoresSafeArea(.all, edges: .top)
-                    )
-                    .padding(.bottom, -70) // Подтягиваем список вверх к профилю
+                    .padding(.bottom, 30) // Отступ внутри серого блока
                     
                     // Группы настроек
                     VStack(spacing: 20) {
@@ -100,6 +101,7 @@ struct SettingsView: View {
                             Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
                             SettingsRow(icon: "at", iconColor: .blue, title: "Выбрать имя пользователя", textColor: .blue, noIconBackground: true)
                         }
+                        .padding(.top, -50) // Подтягиваем первую группу вверх, чтобы она частично заходила на серый фон
                         
                         // Группа аккаунтов
                         SettingsGroup {
