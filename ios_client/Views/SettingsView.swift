@@ -11,12 +11,26 @@ struct SettingsView: View {
             
             ScrollView {
                 VStack(spacing: 0) {
-                    // Хедер со сплошной заливкой
+                    // Хедер со сплошной заливкой и мягким свечением
                     ZStack(alignment: .top) {
-                        // Сплошной темно-серый цвет (как на скрине, темнее аватарки)
+                        // Сплошной темно-серый цвет фона
                         Color(red: 0.05, green: 0.07, blue: 0.12)
                             .frame(height: 320)
                             .edgesIgnoringSafeArea(.top)
+                        
+                        // Мягкое растушеванное белое свечение вокруг аватарки
+                        RadialGradient(
+                            colors: [
+                                Color.white.opacity(0.12),
+                                Color.white.opacity(0.06),
+                                Color.clear
+                            ],
+                            center: .center,
+                            startRadius: 20,
+                            endRadius: 160
+                        )
+                        .frame(width: 400, height: 400)
+                        .offset(y: -50) // Центрируем свечение по аватарке
                         
                         VStack(spacing: 0) {
                             // Верхняя панель кнопок

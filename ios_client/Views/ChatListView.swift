@@ -47,7 +47,6 @@ struct PressDetectorStyle: ButtonStyle {
     }
 }
 
-@available(iOS 15.0, *)
 struct ChatListView: View {
     @State private var searchText = ""
     @State private var selectedTab: Tab = .chats
@@ -59,15 +58,10 @@ struct ChatListView: View {
     init() {
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
-         appearance.backgroundColor = UIColor(red: 0.07, green: 0.07, blue: 0.07, alpha: 1.0) // Сделал чуть светлее для контраста
-         appearance.shadowColor = UIColor.white.withAlphaComponent(0.15) // Четкая обводка сверху
-         
-         // Настройка цвета иконок
-        appearance.stackedLayoutAppearance.normal.iconColor = .gray
-        appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.gray]
+        appearance.backgroundColor = UIColor(red: 0.07, green: 0.07, blue: 0.07, alpha: 1.0)
         
-        appearance.stackedLayoutAppearance.selected.iconColor = .systemBlue
-        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.systemBlue]
+        // Цвет обводки сверху таббара
+        appearance.shadowColor = UIColor.white.withAlphaComponent(0.15)
         
         UITabBar.appearance().standardAppearance = appearance
         if #available(iOS 15.0, *) {

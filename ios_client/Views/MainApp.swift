@@ -9,24 +9,26 @@ struct HelloWorldApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if isAuthenticated {
-                ChatListView()
-            } else if hasSeenWelcome {
-                LoginView(isAuthenticated: $isAuthenticated)
-                    .transition(.move(edge: .trailing))
-            } else {
-                WelcomeView(showLogin: $hasSeenWelcome)
-                    .transition(.opacity)
-                    .onChange(of: hasSeenWelcome) { newValue in
-                        UserDefaults.standard.set(newValue, forKey: "has_seen_welcome")
-                    }
+            Group {
+                if isAuthenticated {
+                    ChatListView()
+                } else if hasSeenWelcome {
+                    LoginView(isAuthenticated: $isAuthenticated)
+                        .transition(.move(edge: .trailing))
+                } else {
+                    WelcomeView(showLogin: $hasSeenWelcome)
+                        .transition(.opacity)
+                        .onChange(of: hasSeenWelcome) { newValue in
+                            UserDefaults.standard.set(newValue, forKey: "has_seen_welcome")
+                        }
+                }
             }
-        }
-        .onChange(of: isAuthenticated) { newValue in
-            UserDefaults.standard.set(newValue, forKey: "is_authenticated")
-        }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("LogOut"))) { _ in
-            isAuthenticated = false
+            .onChange(of: isAuthenticated) { newValue in
+                UserDefaults.standard.set(newValue, forKey: "is_authenticated")
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("LogOut"))) { _ in
+                isAuthenticated = false
+            }
         }
     }
 
