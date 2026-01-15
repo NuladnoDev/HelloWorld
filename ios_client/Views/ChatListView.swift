@@ -132,13 +132,13 @@ struct ChatListView: View {
                                 // Поиск
                                 HStack(spacing: 10) {
                                     ZStack {
-                                        RoundedRectangle(cornerRadius: 18)
-                                            .fill(isSearchActive ? Color.black : Color(red: 0.12, green: 0.12, blue: 0.13)) // Серый фон в обычном состоянии, черный при поиске
+                                        RoundedRectangle(cornerRadius: 10) // Изменил скругление на 10 как в ТГ
+                                            .fill(isSearchActive ? Color.black : Color(white: 0.15)) // Сделал чуть светлее серый для контраста
                                             .overlay(
-                                                RoundedRectangle(cornerRadius: 18)
-                                                    .stroke(isSearchActive ? Color.white.opacity(0.1) : Color.clear, lineWidth: 1) // Обводка только при поиске
+                                                RoundedRectangle(cornerRadius: 10)
+                                                    .stroke(isSearchActive ? Color.white.opacity(0.1) : Color.clear, lineWidth: 1)
                                             )
-                                            .frame(height: 36)
+                                            .frame(height: 38) // Вернул высоту 38
                                         
                                         HStack {
                                             Image(systemName: "magnifyingglass")
@@ -151,7 +151,7 @@ struct ChatListView: View {
                                                 }
                                             })
                                             .foregroundColor(.white)
-                                            .font(.system(size: 16))
+                                            .font(.system(size: 17)) // Шрифт 17 как в ТГ
                                         }
                                     }
                                     
@@ -167,9 +167,9 @@ struct ChatListView: View {
                                     }
                                 }
                                 .padding(.horizontal, 16)
-                                .padding(.bottom, 10)
+                                .padding(.bottom, 12)
                             }
-                            .background(Color.black)
+                            .background(Color(red: 12/255, green: 11/255, blue: 13/255)) // Цвет #0c0b0d
                             
                             // Список
                             ScrollView {
@@ -277,18 +277,18 @@ struct ChatListView: View {
                             }) {
                                 HStack {
                                     Text("Начать новый звонок")
-                                        .font(.system(size: 17))
+                                        .font(.system(size: 16)) // Чуть меньше текст
                                     Spacer()
                                     Image(systemName: "person.badge.plus")
-                                        .font(.system(size: 20))
+                                        .font(.system(size: 18)) // Чуть меньше иконка
                                 }
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 16)
-                                .padding(.vertical, 14)
+                                .padding(.vertical, 12) // Уменьшил вертикальный паддинг
                             }
                             
                             Divider()
-                                .background(Color.white.opacity(0.15))
+                                .background(Color.white.opacity(0.12))
                             
                             // Кнопка: Скрыть вкладку
                             Button(action: {
@@ -300,20 +300,20 @@ struct ChatListView: View {
                             }) {
                                 HStack {
                                     Text("Скрыть вкладку «Звонки»")
-                                        .font(.system(size: 17))
+                                        .font(.system(size: 16))
                                     Spacer()
                                     Image(systemName: "eye.slash")
-                                        .font(.system(size: 20))
+                                        .font(.system(size: 18))
                                 }
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 16)
-                                .padding(.vertical, 14)
+                                .padding(.vertical, 12)
                             }
                         }
-                        .background(Color(red: 0.12, green: 0.12, blue: 0.13))
-                        .cornerRadius(28) // Увеличил скругление меню до 28
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 110) // Над таббаром
+                        .frame(width: 280) // Ограничил ширину как на скриншоте
+                        .background(Color(white: 0.15)) // Чуть светлее фон меню
+                        .cornerRadius(14) // Вернул скругление 14 для меню (оно меньше чем группы)
+                        .padding(.bottom, 110)
                     }
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }

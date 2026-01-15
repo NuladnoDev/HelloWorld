@@ -31,6 +31,7 @@ struct SettingsView: View {
     @State private var tempImage: UIImage? = nil
     @State private var showImagePicker = false
     @State private var showCropper = false
+    @State private var showEditTag = false
     
     // Состояние для расширяемой аватарки
     @State private var scrollOffset: CGFloat = 0
@@ -162,14 +163,27 @@ struct SettingsView: View {
                                         showImagePicker = true
                                     }
                                     
-                                    if tag.isEmpty {
-                                        Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
-                                        SettingsRow(icon: "at", iconColor: .blue, title: "Выбрать имя пользователя", textColor: .blue, noIconBackground: true) {
-                                            withAnimation(.easeInOut(duration: 0.3)) {
-                                                isEditingProfile = true
-                                            }
-                                        }
+                                    Divider().background(Color.white.opacity(0.05)).padding(.leading, 44)
+                                    SettingsRow(
+                                        icon: "at",
+                                        iconColor: .blue,
+                                        title: "Имя пользователя",
+                                        textColor: tag.isEmpty ? .blue : .white,
+                                        noIconBackground: tag.isEmpty
+                                    ) {
+                                        showEditTag = true
                                     }
+                                    .overlay(
+                                        Group {
+                                            if !tag.isEmpty {
+                                                Text("@\(tag)")
+                                                    .font(.system(size: 16))
+                                                    .foregroundColor(.white.opacity(0.5))
+                                                    .padding(.trailing, 40)
+                                            }
+                                        },
+                                        alignment: .trailing
+                                    )
                                 }
                                 .padding(.top, 10)
                                 
@@ -267,6 +281,12 @@ struct SettingsView: View {
                         }
                     }
                 }
+        }
+        .sheet(isPresented: $showEditTag) {
+            EditTagView(tag: $tag)
+        }
+        .onChange(of: tag) { newValue in
+            UserDefaults.standard.set(newValue, forKey: "saved_tag")
         }
         .onChange(of: tempImage) { newValue in
             if newValue != nil && !showCropper {
