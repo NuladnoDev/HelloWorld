@@ -411,7 +411,7 @@ struct UserProfileView: View {
                     Spacer()
                 }
                 .padding(.horizontal, 16)
-                .padding(.top, 20)
+                .padding(.top, 0) // Убираем лишний паддинг сверху
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 25) {
@@ -500,6 +500,7 @@ struct UserProfileView: View {
             }
         }
         .navigationBarHidden(true)
+        .ignoresSafeArea(.all) // Игнорируем safe areas, чтобы не было пустых полос
         .toolbar(.hidden, for: .tabBar)
         .onAppear {
             UITabBar.setTabBarVisible(false, animated: false)
@@ -657,8 +658,7 @@ struct ChatView: View {
         }
         .navigationBarHidden(true)
         .toolbar(.hidden, for: .tabBar)
-        .ignoresSafeArea(.all, edges: .top) // Игнорируем верх для хедера
-        .ignoresSafeArea(.keyboard, edges: .bottom) // Позволяем клавиатуре самой двигать контент (стандартное поведение)
+        .ignoresSafeArea(.all) // Игнорируем все safe areas, включая низ
         .photosPicker(isPresented: $showMediaPicker, selection: $selectedMediaItem, matching: .any(of: [.images, .videos]))
         .fullScreenCover(isPresented: $showProfile) {
             UserProfileView(isOnline: isOnline, lastSeenMinutes: lastSeenMinutes)
@@ -749,7 +749,7 @@ struct ChatView: View {
             .padding(.horizontal, 10)
             .padding(.top, 8)
             .padding(.bottom, showCustomKeyboard ? 0 : (isTextFieldFocused ? 8 : 34))
-            .background(Color(white: 0.05))
+            .background(Color(white: 0.05).ignoresSafeArea())
         }
     }
     

@@ -21,14 +21,19 @@ struct ChatListView: View {
         // Настройка внешнего вида системного таббара согласно гайду (Liquid Glass)
         let appearance = UITabBarAppearance()
         appearance.configureWithDefaultBackground()
+        
+        // Используем темный блюр как основу
         appearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
         appearance.backgroundColor = UIColor.black.withAlphaComponent(0.4)
         
         // Цвет обводки сверху таббара
         appearance.shadowColor = UIColor.white.withAlphaComponent(0.12)
         
+        // Применяем ко всем состояниям
         UITabBar.appearance().standardAppearance = appearance
-        UITabBar.appearance().scrollEdgeAppearance = appearance
+        if #available(iOS 15.0, *) {
+            UITabBar.appearance().scrollEdgeAppearance = appearance
+        }
     }
     
     enum Tab: String, CaseIterable {
@@ -49,7 +54,13 @@ struct ChatListView: View {
 
     let chats = [
         Chat(name: "HelloWorld", lastMessage: "Спасибо за принятие приглашения на бета-тест", time: "10:00", unreadCount: 1, isVerified: true, isMe: false),
-        Chat(name: "Артем", lastMessage: "Завтра в силе?", time: "09:45", isMe: true, isRead: true)
+        Chat(name: "Артем", lastMessage: "Завтра в силе?", time: "09:45", isMe: true, isRead: true),
+        Chat(name: "Мария", lastMessage: "Скинула файл, глянь как будет время", time: "09:12", isMe: false),
+        Chat(name: "Дизайн-чат", lastMessage: "Нужно поправить отступы в профиле", time: "Вчера", isMe: false, isPhoto: true),
+        Chat(name: "Александр", lastMessage: "Понял, сделаю", time: "Вчера", isMe: true, isRead: false),
+        Chat(name: "Support", lastMessage: "Ваш тикет был закрыт", time: "Пн", isVerified: true, isMe: false),
+        Chat(name: "Мама", lastMessage: "Ты поел?", time: "Пн", isMe: false),
+        Chat(name: "Дмитрий", lastMessage: "Отправил видео с тестами", time: "12.01", isMe: false, isVideo: true)
     ]
 
     var body: some View {
@@ -198,16 +209,13 @@ struct ChatListView: View {
                                                     ChatRow(chat: chat)
                                                 }
                                                 .buttonStyle(PlainButtonStyle())
-                                                .onAppear {
-                                                    // Гарантируем видимость таббара при возврате в список
-                                                    UITabBar.setTabBarVisible(true, animated: true)
-                                                }
                                                 
                                                 Divider()
                                                     .background(Color.white.opacity(0.1))
                                                     .padding(.leading, 76)
                                             }
                                         }
+                                        .padding(.bottom, 90) // Отступ, чтобы список не перекрывался таб-баром
                                     }
                                 }
                             }
