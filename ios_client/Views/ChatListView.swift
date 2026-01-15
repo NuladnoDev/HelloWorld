@@ -197,6 +197,10 @@ struct ChatListView: View {
                                                     ChatRow(chat: chat)
                                                 }
                                                 .buttonStyle(PlainButtonStyle())
+                                                .onAppear {
+                                                    // Гарантируем видимость таббара при возврате в список
+                                                    UITabBar.setTabBarVisible(true, animated: true)
+                                                }
                                                 
                                                 Divider()
                                                     .background(Color.white.opacity(0.1))

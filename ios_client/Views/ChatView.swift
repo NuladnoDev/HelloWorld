@@ -439,6 +439,10 @@ struct ChatView: View {
         }
         .onAppear {
             UINavigationController.enableSwipeBack()
+            UITabBar.setTabBarVisible(false, animated: true)
+        }
+        .onDisappear {
+            UITabBar.setTabBarVisible(true, animated: true)
         }
     }
     
@@ -548,6 +552,42 @@ struct ChatView: View {
             .padding(.top, 22) // Уменьшено в 2 раза (было 44)
             .padding(.bottom, 10)
             .background(Color.black.opacity(0.3))
+    }
+}
+
+// Расширение для управления видимостью TabBar
+extension UITabBar {
+    static func setTabBarVisible(_ visible: Bool, animated: Bool) {
+        let scenes = UIApplication.shared.connectedScenes
+        let windowScene = scenes.first as? UIWindowScene
+        let window = windowScene?.windows.first
+        
+        guard let tabBarController = window?.rootViewController?.findTabBarController() else { return }
+        
+        let frame = tabBarController.tabBar.frame
+        let height = frame.size.height
+        let offsetY = (visible ? 0 : height)
+        
+        let duration = (animated ? 0.3 : 0.0)
+        
+        UIView.animate(withDuration: duration) {
+            tabBarController.tabBar.frame.origin.y = UIScreen.main.bounds.height - (visible ? height : 0)
+            tabBarController.tabBar.alpha = visible ? 1 : 0
+        }
+    }
+}
+
+extension UIViewController {
+    func findTabBarController() -> UITabBarController? {
+        if let tabBarController = self as? UITabBarController {
+            return tabBarController
+        }
+        for child in children {
+            if let tabBarController = child.findTabBarController() {
+                return tabBarController
+            }
+        }
+        return nil
     }
 }
 
