@@ -329,7 +329,11 @@ struct ChatView: View {
                 Circle().fill(Color.gray.opacity(0.3)).frame(width: 36, height: 36)
                     .overlay(Image(systemName: "person.fill").font(.system(size: 18)).foregroundColor(.white.opacity(0.8)))
             }.buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 4, paddingVertical: 4))
-        }.padding(.horizontal, 8).padding(.vertical, 10).background(Color.black.opacity(0.3))
+        }
+        .padding(.horizontal, 8)
+        .padding(.top, 44) // Увеличенный отступ сверху
+        .padding(.bottom, 10)
+        .background(Color.black.opacity(0.3))
     }
 }
 
