@@ -565,7 +565,7 @@ struct UserProfileView: View {
                             }
                             
                             Divider().background(Color.white.opacity(0.1)).padding(.leading, 16)
-                            InfoRow(title: "день рождения", value: "31 дек 1875 (150 лет)")
+                            InfoRow(title: "день рождения", value: calculateBirthday(day: 21, month: 1, year: 1995))
                             Divider().background(Color.white.opacity(0.1)).padding(.leading, 16)
                             InfoRow(title: "о себе", value: "Official HelloWorld bot for beta testing.")
                             
@@ -604,6 +604,24 @@ struct UserProfileView: View {
         .onAppear {
             UITabBar.setTabBarVisible(false, animated: false)
         }
+    }
+    
+    private func calculateBirthday(day: Int, month: Int, year: Int) -> String {
+        let calendar = Calendar.current
+        let now = Date()
+        let birthDateComponents = DateComponents(year: year, month: month, day: day)
+        
+        guard let birthDate = calendar.date(from: birthDateComponents) else { return "" }
+        
+        let ageComponents = calendar.dateComponents([.year], from: birthDate, to: now)
+        let age = ageComponents.year ?? 0
+        
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ru_RU")
+        formatter.dateFormat = "d MMM yyyy"
+        
+        let dateString = formatter.string(from: birthDate)
+        return "\(dateString) (\(age) лет)"
     }
 }
 
@@ -719,7 +737,8 @@ struct ChatView: View {
         }
         .navigationBarHidden(true)
         .toolbar(.hidden, for: .tabBar)
-        .ignoresSafeArea(.all, edges: .top) // Игнорируем только верх
+        .ignoresSafeArea(.all, edges: .top)
+        .ignoresSafeArea(.container, edges: .bottom) // Добавлено для устранения пустого пространства снизу
         // Убираем ручное управление клавиатурой, даем SwiftUI делать это автоматически
         .photosPicker(isPresented: $showMediaPicker, selection: $selectedMediaItem, matching: .any(of: [.images, .videos]))
         .fullScreenCover(isPresented: $showProfile) {
@@ -810,7 +829,7 @@ struct ChatView: View {
             }
             .padding(.horizontal, 10)
             .padding(.top, 8)
-            .padding(.bottom, showCustomKeyboard ? 0 : 8)
+            .padding(.bottom, (isTextFieldFocused || showCustomKeyboard) ? 8 : 34) // 34 - стандартный отступ для safeArea на iPhone с FaceID
             .background(Color.clear)
         }
     }
