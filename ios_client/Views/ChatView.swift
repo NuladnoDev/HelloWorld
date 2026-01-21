@@ -728,12 +728,6 @@ struct ChatView: View {
                             .transition(.move(edge: .bottom))
                     }
                 }
-                .background(
-                    ZStack {
-                        Color.black.opacity(0.8)
-                        BlurView(style: .systemThinMaterialDark)
-                    }
-                )
             }
             
             if let msg = selectedViewerMessage {
@@ -837,7 +831,7 @@ struct ChatView: View {
             }
             .padding(.horizontal, 10)
             .padding(.top, 8)
-            .padding(.bottom, 8)
+            .padding(.bottom, (isTextFieldFocused || showCustomKeyboard) ? 8 : 2)
             .background(Color.clear)
         }
     }
