@@ -687,7 +687,7 @@ struct ChatView: View {
                 ScrollViewReader { proxy in
                     ScrollView(showsIndicators: false) {
                         VStack(spacing: 12) {
-                            Spacer(minLength: 40) // Увеличил отступ сверху до первого сообщения
+                            Spacer(minLength: 40)
                             ForEach(messages) { msg in
                                 MessageBubble(message: msg) {
                                     if msg.isPhoto || msg.isVideo {
@@ -701,7 +701,8 @@ struct ChatView: View {
                         .padding(.bottom, 20)
                         .contentShape(Rectangle())
                         .onTapGesture {
-                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                            isTextFieldFocused = false
+                            showCustomKeyboard = false
                         }
                     }
                     .onChange(of: messages.count) { _ in
@@ -717,15 +718,23 @@ struct ChatView: View {
                         }
                     }
                 }
-                
-                inputBar
-                
-                if showCustomKeyboard {
-                    CustomKeyboard(text: $messageText, isPresented: $showCustomKeyboard)
-                        .zIndex(1)
-                }
             }
-            .ignoresSafeArea(.keyboard, edges: .bottom)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                VStack(spacing: 0) {
+                    inputBar
+                    
+                    if showCustomKeyboard {
+                        CustomKeyboard(text: $messageText, isPresented: $showCustomKeyboard)
+                            .transition(.move(edge: .bottom))
+                    }
+                }
+                .background(
+                    ZStack {
+                        Color.black.opacity(0.8)
+                        BlurView(style: .systemThinMaterialDark)
+                    }
+                )
+            }
             
             if let msg = selectedViewerMessage {
                 MediaViewer(message: msg, isPresented: Binding(
@@ -738,7 +747,6 @@ struct ChatView: View {
         .navigationBarHidden(true)
         .toolbar(.hidden, for: .tabBar)
         .ignoresSafeArea(.all, edges: .top)
-        .ignoresSafeArea(.container, edges: .bottom) // Добавлено для устранения пустого пространства снизу
         // Убираем ручное управление клавиатурой, даем SwiftUI делать это автоматически
         .photosPicker(isPresented: $showMediaPicker, selection: $selectedMediaItem, matching: .any(of: [.images, .videos]))
         .fullScreenCover(isPresented: $showProfile) {
@@ -829,7 +837,7 @@ struct ChatView: View {
             }
             .padding(.horizontal, 10)
             .padding(.top, 8)
-            .padding(.bottom, (isTextFieldFocused || showCustomKeyboard) ? 8 : 34) // 34 - стандартный отступ для safeArea на iPhone с FaceID
+            .padding(.bottom, 8)
             .background(Color.clear)
         }
     }
