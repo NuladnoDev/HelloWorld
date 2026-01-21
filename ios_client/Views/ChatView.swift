@@ -49,13 +49,14 @@ struct MediaViewer: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .scaleEffect(scale)
-                        .offset(offset)
+                        .offset(y: offset.height) // Только вертикальное смещение
                 }
             }
             .gesture(
                 DragGesture()
                     .onChanged { value in
-                        offset = value.translation
+                        // Ограничиваем таскание только по вертикали
+                        offset.height = value.translation.height
                     }
                     .onEnded { value in
                         if abs(offset.height) > 150 {
@@ -85,7 +86,7 @@ struct MediaViewer: View {
                         
                         Spacer()
                         
-                        Text("137 из 137")
+                        Text("1 из 1")
                             .font(.system(size: 17, weight: .semibold))
                             .foregroundColor(.white)
                         
@@ -284,7 +285,7 @@ struct CustomKeyboard: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Верхняя панель категорий (как на скрине)
+            // Верхняя панель категорий
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 20) {
                     Image(systemName: "plus")
@@ -297,7 +298,6 @@ struct CustomKeyboard: View {
                         .font(.system(size: 18))
                         .foregroundColor(.white.opacity(0.6))
                     
-                    // Заглушки для стикеров
                     ForEach(0..<8) { _ in
                         Circle()
                             .fill(Color.gray.opacity(0.3))
@@ -307,7 +307,7 @@ struct CustomKeyboard: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
             }
-            .background(Color.black.opacity(0.4))
+            .background(Color.clear)
             
             // Сетка контента
             if selectedTab == 2 {
@@ -375,12 +375,26 @@ struct CustomKeyboard: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
-            .background(Color.black.opacity(0.4))
+            .background(Color.clear)
         }
         .frame(height: 300)
-        .background(Color(white: 0.1))
+        .background(
+            ZStack {
+                Color.black.opacity(0.7)
+                BlurView(style: .systemThinMaterialDark)
+            }
+        )
         .transition(.move(edge: .bottom))
     }
+}
+
+// Вспомогательный BlurView для SwiftUI
+struct BlurView: UIViewRepresentable {
+    var style: UIBlurEffect.Style
+    func makeUIView(context: Context) -> UIVisualEffectView {
+        UIVisualEffectView(effect: UIBlurEffect(style: style))
+    }
+    func updateUIView(_ uiView: UIVisualEffectView, context: Context) {}
 }
 
 @available(iOS 16.0, *)
@@ -447,6 +461,8 @@ struct UserProfileView: View {
     @Environment(\.presentationMode) var presentationMode
     let isOnline: Bool
     let lastSeenMinutes: Int
+    let userName: String
+    let userHandle: String
     
     private var statusText: String {
         "был(а) вчера в 20:39"
@@ -456,7 +472,6 @@ struct UserProfileView: View {
         ZStack {
             Color.black.edgesIgnoringSafeArea(.all)
             
-            // Фоновые звезды (как на скрине)
             GeometryReader { geo in
                 ZStack {
                     ForEach(0..<20) { _ in
@@ -472,7 +487,6 @@ struct UserProfileView: View {
             }
             
             VStack(spacing: 0) {
-                // Хедер с кнопкой назад
                 HStack {
                     Button(action: { presentationMode.wrappedValue.dismiss() }) {
                         Image(systemName: "chevron.left")
@@ -484,21 +498,19 @@ struct UserProfileView: View {
                     Spacer()
                 }
                 .padding(.horizontal, 16)
-                .padding(.top, 50) // Добавил отступ сверху, чтобы не было слишком высоко
+                .padding(.top, 50)
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
-                        // Аватарка и имя
                         VStack(spacing: 12) {
                             ZStack {
                                 Circle()
-                                    .fill(Color.black)
+                                    .fill(LinearGradient(colors: [.blue, .cyan], startPoint: .topLeading, endPoint: .bottomTrailing))
                                     .frame(width: 120, height: 120)
                                     .overlay(
-                                        Image(systemName: "star.fill")
-                                            .font(.system(size: 60))
-                                            .foregroundColor(.blue)
-                                            .shadow(color: .blue.opacity(0.5), radius: 10)
+                                        Text(String(userName.prefix(1)))
+                                            .font(.system(size: 48, weight: .bold))
+                                            .foregroundColor(.white)
                                     )
                                     .background(
                                         Circle()
@@ -507,14 +519,9 @@ struct UserProfileView: View {
                             }
                             
                             VStack(spacing: 4) {
-                                HStack(spacing: 6) {
-                                    Text("ancor")
-                                        .font(.system(size: 28, weight: .bold))
-                                        .foregroundColor(.white)
-                                    Image(systemName: "star.fill") // Синяя звезда как на скрине
-                                        .font(.system(size: 20))
-                                        .foregroundColor(.blue)
-                                }
+                                Text(userName)
+                                    .font(.system(size: 28, weight: .bold))
+                                    .foregroundColor(.white)
                                 
                                 HStack(spacing: 4) {
                                     Image(systemName: "shield.fill")
@@ -528,7 +535,6 @@ struct UserProfileView: View {
                         }
                         .padding(.top, 10)
                         
-                        // Кнопки действий
                         HStack(spacing: 10) {
                             ActionButton(icon: "phone.fill", label: "звонок")
                             ActionButton(icon: "video.fill", label: "видео")
@@ -538,7 +544,6 @@ struct UserProfileView: View {
                         }
                         .padding(.horizontal, 16)
                         
-                        // Музыкальный бар (как на скрине)
                         HStack {
                             Image(systemName: "music.note")
                             Text("9 - Drake")
@@ -550,10 +555,9 @@ struct UserProfileView: View {
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
                         
-                        // Инфо блок
                         VStack(alignment: .leading, spacing: 0) {
                             HStack {
-                                InfoRow(title: "имя пользователя", value: "@ancorrrr", isBlue: true)
+                                InfoRow(title: "имя пользователя", value: userHandle, isBlue: true)
                                 Spacer()
                                 Image(systemName: "qrcode")
                                     .foregroundColor(.blue)
@@ -568,7 +572,7 @@ struct UserProfileView: View {
                             Divider().background(Color.white.opacity(0.1)).padding(.leading, 16)
                             
                             Button(action: {}) {
-                                Text("Добавить в контакты")
+                                Text("Отправить подарок")
                                     .foregroundColor(.blue)
                                     .padding(.vertical, 14)
                                     .padding(.horizontal, 16)
@@ -587,7 +591,6 @@ struct UserProfileView: View {
                         .cornerRadius(20)
                         .padding(.horizontal, 16)
                         
-                        // Кастомный бар категорий
                         CategoryBar()
                             .padding(.horizontal, 16)
                             .padding(.bottom, 30)
@@ -701,8 +704,10 @@ struct ChatView: View {
                 
                 if showCustomKeyboard {
                     CustomKeyboard(text: $messageText, isPresented: $showCustomKeyboard)
+                        .zIndex(1)
                 }
             }
+            .ignoresSafeArea(.keyboard, edges: .bottom)
             
             if let msg = selectedViewerMessage {
                 MediaViewer(message: msg, isPresented: Binding(
@@ -718,7 +723,7 @@ struct ChatView: View {
         // Убираем ручное управление клавиатурой, даем SwiftUI делать это автоматически
         .photosPicker(isPresented: $showMediaPicker, selection: $selectedMediaItem, matching: .any(of: [.images, .videos]))
         .fullScreenCover(isPresented: $showProfile) {
-            UserProfileView(isOnline: isOnline, lastSeenMinutes: lastSeenMinutes)
+            UserProfileView(isOnline: isOnline, lastSeenMinutes: lastSeenMinutes, userName: "HelloWorld", userHandle: "@helloworld_bot")
         }
         .onChange(of: selectedMediaItem) { newItem in
             Task {
@@ -805,7 +810,7 @@ struct ChatView: View {
             }
             .padding(.horizontal, 10)
             .padding(.top, 8)
-            .padding(.bottom, showCustomKeyboard ? 0 : (isTextFieldFocused ? 8 : 10))
+            .padding(.bottom, showCustomKeyboard ? 0 : 8)
             .background(Color.clear)
         }
     }
@@ -967,13 +972,14 @@ struct MessageBubble: View {
                             if let image = message.image {
                                 Image(uiImage: image)
                                     .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(maxWidth: UIScreen.main.bounds.width * 0.75, maxHeight: 400)
-                                    .clipShape(RoundedRectangle(cornerRadius: 18))
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 200, height: 140)
+                                    .clipped()
+                                    .cornerRadius(18)
                             } else {
                                 RoundedRectangle(cornerRadius: 18)
                                     .fill(Color(white: 0.15))
-                                    .frame(width: UIScreen.main.bounds.width * 0.7, height: 250)
+                                    .frame(width: 200, height: 140)
                                     .overlay(Image(systemName: message.isVideo ? "play.fill" : "photo").font(.system(size: 40)).foregroundColor(.white.opacity(0.3)))
                             }
                             

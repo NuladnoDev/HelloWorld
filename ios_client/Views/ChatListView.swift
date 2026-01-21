@@ -48,14 +48,7 @@ struct ChatListView: View {
     }
 
     let chats = [
-        Chat(name: "HelloWorld", lastMessage: "Спасибо за принятие приглашения на бета-тест", time: "10:00", unreadCount: 1, isVerified: true, isMe: false),
-        Chat(name: "Артем", lastMessage: "Завтра в силе?", time: "09:45", isMe: true, isRead: true),
-        Chat(name: "Мария", lastMessage: "Скинула файл, глянь как будет время", time: "09:12", isMe: false),
-        Chat(name: "Дизайн-чат", lastMessage: "Нужно поправить отступы в профиле", time: "Вчера", isMe: false, isPhoto: true),
-        Chat(name: "Александр", lastMessage: "Понял, сделаю", time: "Вчера", isMe: true, isRead: false),
-        Chat(name: "Support", lastMessage: "Ваш тикет был закрыт", time: "Пн", isVerified: true, isMe: false),
-        Chat(name: "Мама", lastMessage: "Ты поел?", time: "Пн", isMe: false),
-        Chat(name: "Дмитрий", lastMessage: "Отправил видео с тестами", time: "12.01", isMe: false, isVideo: true)
+        Chat(name: "HelloWorld", lastMessage: "Спасибо за принятие приглашения на бета-тест", time: "10:00", unreadCount: 1, isVerified: true, isMe: false)
     ]
 
     var body: some View {
@@ -265,10 +258,9 @@ struct ChatListView: View {
             .preferredColorScheme(.dark)
             .simultaneousGesture(
                 LongPressGesture(minimumDuration: 0.5).onEnded { _ in
-                    if selectedTab == .calls {
-                        withAnimation(.spring()) {
-                            showHideCallsMenu = true
-                        }
+                    // Теперь меню можно вызвать с любой вкладки, но управлять оно будет вкладкой Звонки
+                    withAnimation(.spring()) {
+                        showHideCallsMenu = true
                     }
                 }
             )
