@@ -12,6 +12,11 @@ struct ChatListView: View {
     @State private var isCallsVisible = true
     @State private var showHideCallsMenu = false
     
+    // Состояния для меню настроек
+    @State private var showSettingsMenu = false
+    @State private var accounts = ["problem", "guest_user"]
+    @State private var currentAccountIndex = 0
+    
     // Состояния для анимации правой группы кнопок
     @State private var isPlusPressed = false
     @State private var isPencilPressed = false
@@ -260,14 +265,60 @@ struct ChatListView: View {
             }
             .accentColor(.blue)
             .preferredColorScheme(.dark)
-            .simultaneousGesture(
-                LongPressGesture(minimumDuration: 0.5).onEnded { _ in
-                    // Теперь меню можно вызвать с любой вкладки, но управлять оно будет вкладкой Звонки
-                    withAnimation(.spring()) {
-                        showHideCallsMenu = true
+            
+            // Слой для отлова жестов на таббаре
+            GeometryReader { proxy in
+                let tabCount = isCallsVisible ? 4 : 3
+                let tabWidth = proxy.size.width / CGFloat(tabCount)
+                let tabBarHeight: CGFloat = 49 + proxy.safeAreaInsets.bottom
+                
+                HStack(spacing: 0) {
+                    // Posts
+                    Color.clear
+                        .frame(width: tabWidth)
+                        .contentShape(Rectangle())
+                        .onTapGesture { selectedTab = .posts }
+                    
+                    // Chats
+                    Color.clear
+                        .frame(width: tabWidth)
+                        .contentShape(Rectangle())
+                        .onTapGesture { selectedTab = .chats }
+                    
+                    // Calls
+                    if isCallsVisible {
+                        Color.clear
+                            .frame(width: tabWidth)
+                            .contentShape(Rectangle())
+                            .onTapGesture { selectedTab = .calls }
+                            .gesture(
+                                LongPressGesture(minimumDuration: 0.5)
+                                    .onEnded { _ in
+                                        withAnimation(.spring()) {
+                                            showHideCallsMenu = true
+                                        }
+                                    }
+                            )
                     }
+                    
+                    // Settings
+                    Color.clear
+                        .frame(width: tabWidth)
+                        .contentShape(Rectangle())
+                        .onTapGesture { selectedTab = .settings }
+                        .gesture(
+                            LongPressGesture(minimumDuration: 0.5)
+                                .onEnded { _ in
+                                    withAnimation(.spring()) {
+                                        showSettingsMenu = true
+                                    }
+                                }
+                        )
                 }
-            )
+                .frame(height: tabBarHeight)
+                .position(x: proxy.size.width / 2, y: proxy.size.height - tabBarHeight / 2)
+            }
+            .ignoresSafeArea()
             
             // Меню скрытия вкладки (как в ТГ)
             if showHideCallsMenu {
@@ -325,6 +376,99 @@ struct ChatListView: View {
                         .background(Color(white: 0.15)) // Чуть светлее фон меню
                         .cornerRadius(14) // Вернул скругление 14 для меню (оно меньше чем группы)
                         .padding(.bottom, 110)
+                    }
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+                .edgesIgnoringSafeArea(.all)
+                .zIndex(10)
+            }
+            
+            // Меню аккаунтов (при зажатии настроек)
+            if showSettingsMenu {
+                ZStack {
+                    Color.black.opacity(0.4)
+                        .edgesIgnoringSafeArea(.all)
+                        .onTapGesture {
+                            withAnimation { showSettingsMenu = false }
+                        }
+                    
+                    VStack(spacing: 0) {
+                        Spacer()
+                        
+                        VStack(spacing: 0) {
+                            // Список аккаунтов
+                            ForEach(0..<accounts.count, id: \.self) { index in
+                                Button(action: {
+                                    withAnimation {
+                                        currentAccountIndex = index
+                                        showSettingsMenu = false
+                                        // Здесь должна быть логика переключения аккаунта
+                                    }
+                                }) {
+                                    HStack {
+                                        if currentAccountIndex == index {
+                                            Image(systemName: "checkmark")
+                                                .font(.system(size: 14))
+                                                .foregroundColor(.blue)
+                                                .frame(width: 20)
+                                        } else {
+                                            Spacer().frame(width: 20)
+                                        }
+                                        
+                                        Text(accounts[index])
+                                            .font(.system(size: 16))
+                                        
+                                        Spacer()
+                                        
+                                        // Аватарка (заглушка)
+                                        Circle()
+                                            .fill(index == 0 ? Color.blue : Color.gray)
+                                            .frame(width: 24, height: 24)
+                                            .overlay(
+                                                Text(String(accounts[index].prefix(1).uppercased()))
+                                                    .font(.system(size: 12, weight: .bold))
+                                                    .foregroundColor(.white)
+                                            )
+                                    }
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 12)
+                                }
+                                
+                                Divider()
+                                    .background(Color.white.opacity(0.12))
+                            }
+                            
+                            // Кнопка добавления аккаунта
+                            Button(action: {
+                                withAnimation {
+                                    showSettingsMenu = false
+                                    // Логика перехода к логину
+                                    isAuthenticated = false
+                                }
+                            }) {
+                                HStack {
+                                    Spacer().frame(width: 20) // Отступ как у чекмарка
+                                    
+                                    Text("Добавить аккаунт")
+                                        .font(.system(size: 16))
+                                    
+                                    Spacer()
+                                    
+                                    Image(systemName: "plus")
+                                        .font(.system(size: 18))
+                                }
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
+                            }
+                        }
+                        .frame(width: 280)
+                        .background(Color(white: 0.15))
+                        .cornerRadius(14)
+                        .padding(.bottom, 110)
+                        .frame(maxWidth: .infinity, alignment: .trailing) // Сдвиг вправо к иконке настроек
+                        .padding(.trailing, 16)
                     }
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
