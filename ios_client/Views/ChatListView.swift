@@ -74,109 +74,109 @@ struct ChatListView: View {
                         Color.black.edgesIgnoringSafeArea(.all)
                         
                         VStack(spacing: 0) {
+                            // Верхняя панель (Хедер + Поиск)
+                            VStack(spacing: 0) {
+                                if !isSearchActive {
+                                    // Кастомный заголовок (как в ТГ)
+                                    ZStack {
+                                        Text("Чаты")
+                                            .font(.system(size: 18, weight: .bold))
+                                            .foregroundColor(.white)
+                                        
+                                        HStack {
+                                            Button(action: {}) {
+                                                Text("Изм.")
+                                                    .font(.system(size: 16, weight: .medium))
+                                            }
+                                            .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 16, paddingVertical: 8))
+                                            
+                                            Spacer()
+                                            
+                                            HStack(spacing: 15) {
+                                                Button(action: {}) {
+                                                    Image(systemName: "plus.circle")
+                                                        .font(.system(size: 22))
+                                                        .foregroundColor(isPlusPressed ? .blue : .white)
+                                                }
+                                                .buttonStyle(PressDetectorStyle(isPressed: $isPlusPressed))
+                                                
+                                                Button(action: {}) {
+                                                    Image(systemName: "square.and.pencil")
+                                                        .font(.system(size: 22))
+                                                        .foregroundColor(isPencilPressed ? .blue : .white)
+                                                }
+                                                .buttonStyle(PressDetectorStyle(isPressed: $isPencilPressed))
+                                            }
+                                            .padding(.horizontal, 14)
+                                            .padding(.vertical, 8)
+                                            .background(
+                                                ZStack {
+                                                    Capsule()
+                                                        .fill(Color.white.opacity(0.05))
+                                                    Capsule()
+                                                        .fill(.ultraThinMaterial)
+                                                }
+                                                .overlay(
+                                                    Capsule()
+                                                        .stroke(Color.white.opacity(0.12), lineWidth: 0.5)
+                                                )
+                                            )
+                                        }
+                                    }
+                                    .padding(.horizontal)
+                                    .padding(.top, 25)
+                                    .padding(.bottom, 8)
+                                }
+
+                                // Поиск
+                                HStack(spacing: 10) {
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 28)
+                                            .fill(Color.white.opacity(0.05))
+                                            .overlay(
+                                                ZStack {
+                                                    RoundedRectangle(cornerRadius: 28)
+                                                        .fill(.ultraThinMaterial)
+                                                    RoundedRectangle(cornerRadius: 28)
+                                                        .stroke(Color.white.opacity(0.12), lineWidth: 0.5)
+                                                }
+                                            )
+                                            .frame(height: 41)
+                                        
+                                        HStack {
+                                            Image(systemName: "magnifyingglass")
+                                                .foregroundColor(.gray)
+                                                .padding(.leading, 15)
+                                            
+                                            TextField("Поиск", text: $searchText, onEditingChanged: { editing in
+                                                withAnimation(.spring()) {
+                                                    isSearchActive = editing
+                                                }
+                                            })
+                                            .foregroundColor(.white)
+                                            .font(.system(size: 17))
+                                        }
+                                    }
+                                    
+                                    if isSearchActive {
+                                        Button("Отмена") {
+                                            withAnimation(.spring()) {
+                                                isSearchActive = false
+                                                searchText = ""
+                                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                            }
+                                        }
+                                        .foregroundColor(.blue)
+                                    }
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.bottom, 12)
+                            }
+                            .background(Color(hex: "0C0C0C"))
+                            
                             // Список
                             ScrollView {
                                 VStack(spacing: 0) {
-                                    // Верхняя панель (Хедер + Поиск) теперь внутри ScrollView
-                                    VStack(spacing: 0) {
-                                        if !isSearchActive {
-                                            // Кастомный заголовок (как в ТГ)
-                                            ZStack {
-                                                Text("Чаты")
-                                                    .font(.system(size: 18, weight: .bold))
-                                                    .foregroundColor(.white)
-                                                
-                                                HStack {
-                                                    Button(action: {}) {
-                                                        Text("Изм.")
-                                                            .font(.system(size: 16, weight: .medium))
-                                                    }
-                                                    .buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 16, paddingVertical: 8))
-                                                    
-                                                    Spacer()
-                                                    
-                                                    HStack(spacing: 15) {
-                                                        Button(action: {}) {
-                                                            Image(systemName: "plus.circle")
-                                                                .font(.system(size: 22))
-                                                                .foregroundColor(isPlusPressed ? .blue : .white)
-                                                        }
-                                                        .buttonStyle(PressDetectorStyle(isPressed: $isPlusPressed))
-                                                        
-                                                        Button(action: {}) {
-                                                            Image(systemName: "square.and.pencil")
-                                                                .font(.system(size: 22))
-                                                                .foregroundColor(isPencilPressed ? .blue : .white)
-                                                        }
-                                                        .buttonStyle(PressDetectorStyle(isPressed: $isPencilPressed))
-                                                    }
-                                                    .padding(.horizontal, 14)
-                                                    .padding(.vertical, 8)
-                                                    .background(
-                                                        ZStack {
-                                                            Capsule()
-                                                                .fill(Color.white.opacity(0.05))
-                                                            Capsule()
-                                                                .fill(.ultraThinMaterial)
-                                                        }
-                                                        .overlay(
-                                                            Capsule()
-                                                                .stroke(Color.white.opacity(0.12), lineWidth: 0.5)
-                                                        )
-                                                    )
-                                                }
-                                            }
-                                            .padding(.horizontal)
-                                            .padding(.top, 40) // Отступ сверху для прокрутки
-                                            .padding(.bottom, 8)
-                                        }
-
-                                        // Поиск
-                                        HStack(spacing: 10) {
-                                            ZStack {
-                                                RoundedRectangle(cornerRadius: 28)
-                                                    .fill(Color.white.opacity(0.05))
-                                                    .overlay(
-                                                        ZStack {
-                                                            RoundedRectangle(cornerRadius: 28)
-                                                                .fill(.ultraThinMaterial)
-                                                            RoundedRectangle(cornerRadius: 28)
-                                                                .stroke(Color.white.opacity(0.12), lineWidth: 0.5)
-                                                        }
-                                                    )
-                                                    .frame(height: 41)
-                                                
-                                                HStack {
-                                                    Image(systemName: "magnifyingglass")
-                                                        .foregroundColor(.gray)
-                                                        .padding(.leading, 15)
-                                                    
-                                                    TextField("Поиск", text: $searchText, onEditingChanged: { editing in
-                                                        withAnimation(.spring()) {
-                                                            isSearchActive = editing
-                                                        }
-                                                    })
-                                                    .foregroundColor(.white)
-                                                    .font(.system(size: 17))
-                                                }
-                                            }
-                                            
-                                            if isSearchActive {
-                                                Button("Отмена") {
-                                                    withAnimation(.spring()) {
-                                                        isSearchActive = false
-                                                        searchText = ""
-                                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                                    }
-                                                }
-                                                .foregroundColor(.blue)
-                                            }
-                                        }
-                                        .padding(.horizontal, 16)
-                                        .padding(.bottom, 12)
-                                    }
-                                    .background(Color.clear)
-                                    
                                     if isSearchActive {
                                         SearchNavigationBar(selectedCategory: $searchCategory)
                                             .padding(.vertical, 10)
