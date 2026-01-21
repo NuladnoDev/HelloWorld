@@ -715,6 +715,7 @@ struct ChatView: View {
         .navigationBarHidden(true)
         .toolbar(.hidden, for: .tabBar)
         .ignoresSafeArea(.all, edges: .top) // Игнорируем только верх
+        // Убираем ручное управление клавиатурой, даем SwiftUI делать это автоматически
         .photosPicker(isPresented: $showMediaPicker, selection: $selectedMediaItem, matching: .any(of: [.images, .videos]))
         .fullScreenCover(isPresented: $showProfile) {
             UserProfileView(isOnline: isOnline, lastSeenMinutes: lastSeenMinutes)
@@ -805,7 +806,7 @@ struct ChatView: View {
             .padding(.horizontal, 10)
             .padding(.top, 8)
             .padding(.bottom, showCustomKeyboard ? 0 : (isTextFieldFocused ? 8 : 10))
-            .background(Color(white: 0.05).ignoresSafeArea())
+            .background(Color.clear)
         }
     }
     
@@ -853,7 +854,7 @@ struct ChatView: View {
             }.buttonStyle(LiquidGlassButtonStyle(paddingHorizontal: 4, paddingVertical: 4))
         }
         .padding(.horizontal, 8)
-            .padding(.top, 44) // Вернул нормальный отступ сверху (было 22)
+            .padding(.top, 54) // Опустил чуть ниже (было 44)
             .padding(.bottom, 10)
             .background(Color.black)
     }
